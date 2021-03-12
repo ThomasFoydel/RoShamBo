@@ -14,5 +14,5 @@ for (let finger of [
   Finger.Ring,
   Finger.Pinky,
 ]) {
-  rockGesture.addCurl(finger, FingerCurl.FullCurl, 0.75);
+  rockGesture.addCurl(finger, FingerCurl.FullCurl, 0.8);
 }
