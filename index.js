@@ -1,13 +1,16 @@
-const path = require('path');
 const express = require('express');
-const cors = require('cors');
 const mongoose = require('mongoose');
-const app = express();
+const cors = require('cors');
+const path = require('path');
+const apiRoutes = require('./routes/Api');
 require('dotenv').config();
+
+const port = process.env.PORT || 8000;
+const app = express();
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-const port = process.env.PORT || 8000;
+app.use('/api', apiRoutes);
 
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static('client/build'));
