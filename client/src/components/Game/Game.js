@@ -13,14 +13,6 @@ function Game() {
 
   const [currentGesture, setCurrentGesture] = useState(null);
 
-  const runHandpose = async () => {
-    const net = await handpose.load();
-    //  Loop and detect hands
-    setInterval(() => {
-      detect(net);
-    }, 10);
-  };
-
   const detect = async (net) => {
     if (
       typeof webcamRef.current !== 'undefined' &&
@@ -64,8 +56,15 @@ function Game() {
   };
 
   useEffect(() => {
+    const runHandpose = async () => {
+      const net = await handpose.load();
+      //  Loop and detect hands
+      setInterval(() => {
+        detect(net);
+      }, 10);
+    };
     runHandpose();
-  }, [runHandpose]);
+  }, []);
 
   return (
     <div className='Game'>
