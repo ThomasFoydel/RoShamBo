@@ -1,24 +1,16 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const socketio = require('socket.io');
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
 const apiRoutes = require('./routes/Api');
 require('dotenv').config();
-
 const app = express();
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use('/api', apiRoutes);
-
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'));
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
-  });
-}
 
 let users = {};
 
@@ -30,6 +22,8 @@ mongoose
   .then(() => {
     const expressServer = app.listen(process.env.PORT || 8000);
     const io = socketio(expressServer);
+
+    app.use('/api', apiRoutes);
 
     app.post('/api/message', (req, res) => {
       let { userId, message, sender } = req.body;
@@ -47,6 +41,13 @@ mongoose
         })
         .catch((err) => res.send({ err: 'message error' }));
     });
+
+    if (process.env.NODE_ENV === 'production') {
+      app.use(express.static('client/build'));
+      app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+      });
+    }
 
     io.on('connection', (socket) => {
       /* set up initial connection for chat and notifications */

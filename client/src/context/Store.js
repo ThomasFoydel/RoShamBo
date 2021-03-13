@@ -20,8 +20,8 @@ export function reducer(state, action) {
           profilePic: user.profilePic,
         },
         auth: { token },
-        settings: user.settings,
         messages: user.messages,
+        authModal: false,
       };
     case 'LOGOUT':
       localStorage.removeItem('roshambo-token');
@@ -34,6 +34,8 @@ export function reducer(state, action) {
         },
         user: { name: '', displayEmail: '' },
       };
+    case 'TOGGLE_AUTH_MODAL':
+      return { ...state, authModal: !state.authModal };
     case 'CHANGE_PIC':
       let newPic = kind === 'coverPic' ? coverPic : profilePic;
       return {
@@ -58,6 +60,7 @@ export default function Store(props) {
   const stateHook = React.useReducer(reducer, {
     isLoggedIn: false,
     auth: { token: null },
+    authModal: false,
     user: { name: '', displayEmail: '', id: null },
     messages: {},
   });

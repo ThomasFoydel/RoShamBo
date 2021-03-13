@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   AppBar,
   Toolbar,
@@ -20,6 +20,7 @@ import { Menu as MenuIcon } from '@material-ui/icons';
 import useScrollTrigger from '@material-ui/core/useScrollTrigger';
 import { Link } from 'react-router-dom';
 import logo from 'imgs/roshambo.svg';
+import { CTX } from 'context/Store';
 
 function ElevationScroll({ children }) {
   const trigger = useScrollTrigger({
@@ -44,7 +45,6 @@ const useStyles = makeStyles((theme) => ({
   },
   logo: {
     height: '8em',
-
     [theme.breakpoints.down('md')]: {
       height: '7em',
     },
@@ -103,7 +103,7 @@ const useStyles = makeStyles((theme) => ({
     color: 'white',
     opacity: 0.7,
   },
-  drawerLoginLink: {
+  drawerAuthLink: {
     backgroundColor: theme.palette.common.magenta,
   },
   drawerItemSelected: {
@@ -113,6 +113,12 @@ const useStyles = makeStyles((theme) => ({
   },
   appbar: {
     zIndex: theme.zIndex.modal + 1,
+  },
+  logout: {
+    opacity: '0.5',
+    '&:hover': {
+      opacity: '1',
+    },
   },
 }));
 
@@ -157,6 +163,8 @@ const routes = [
 export default function Header() {
   const classes = useStyles();
   const theme = useTheme();
+  const [appState, updateState] = useContext(CTX);
+  const { isLoggedIn } = appState;
   const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
   const matches = useMediaQuery(theme.breakpoints.down('md'));
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -167,6 +175,10 @@ export default function Header() {
 
   const handleChange = (e, newValue) => {
     setValue(newValue);
+  };
+
+  const toggleModal = () => {
+    updateState({ type: 'TOGGLE_AUTH_MODAL' });
   };
 
   useEffect(() => {
@@ -221,9 +233,29 @@ export default function Header() {
           />
         ))}
       </Tabs>
-      <Button variant='contained' color='secondary' className={classes.button}>
-        Sign In
-      </Button>
+      {isLoggedIn ? (
+        <Button
+          variant='contained'
+          color='primary'
+          onClick={toggleModal}
+          className={`${classes.button} ${classes.logout}`}
+          onClick={() => {
+            updateState({ type: 'LOGOUT' });
+          }}
+        >
+          Log out
+        </Button>
+      ) : (
+        <Button
+          variant='contained'
+          color='secondary'
+          onClick={toggleModal}
+          className={classes.button}
+        >
+          Sign In
+        </Button>
+      )}
+
       <Menu
         id='simple-menu'
         anchorEl={anchorEl}
@@ -286,23 +318,47 @@ export default function Header() {
               </ListItemText>
             </ListItem>
           ))}
-          <ListItem
-            onClick={() => {
-              setValue(5);
-              setOpenDrawer(false);
-            }}
-            divider
-            button
-            classes={{
-              root: classes.drawerLoginLink,
-              selected: classes.drawerItemSelected,
-            }}
-            selected={value === 5}
-          >
-            <ListItemText className={classes.drawerItem} disableTypography>
-              Sign In
-            </ListItemText>
-          </ListItem>
+          {isLoggedIn ? (
+            <ListItem
+              divider
+              button
+              classes={{
+                root: classes.drawerAuthLink,
+              }}
+            >
+              <ListItemText
+                onClick={() => {
+                  updateState({ type: 'LOGOUT' });
+                }}
+                className={classes.drawerItem}
+                disableTypography
+              >
+                Log out
+              </ListItemText>
+            </ListItem>
+          ) : (
+            <ListItem
+              onClick={() => {
+                setValue(5);
+                setOpenDrawer(false);
+              }}
+              divider
+              button
+              classes={{
+                root: classes.drawerAuthLink,
+                selected: classes.drawerItemSelected,
+              }}
+              selected={value === 5}
+            >
+              <ListItemText
+                onClick={toggleModal}
+                className={classes.drawerItem}
+                disableTypography
+              >
+                Sign In
+              </ListItemText>
+            </ListItem>
+          )}
         </List>
       </SwipeableDrawer>
       <IconButton

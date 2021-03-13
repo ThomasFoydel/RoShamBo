@@ -8,11 +8,13 @@ import NavBar from 'components/NavBar/NavBar';
 import Game from 'components/Game/Game';
 import { CTX } from 'context/Store';
 import './global.css';
+import Auth from 'components/Auth/Auth';
 
 const App = () => {
   const [appState, updateState] = useContext(CTX);
   let {
     auth: { token },
+    authModal,
   } = appState;
   let socketRef = useRef(null);
 
@@ -87,6 +89,7 @@ const App = () => {
         <Switch>
           <Route path='/game' exact component={Game} />
         </Switch>
+        <Auth />
       </Router>
     </ThemeProvider>
   );

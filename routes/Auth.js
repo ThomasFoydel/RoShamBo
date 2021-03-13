@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.post('/register', async (req, res) => {
   let { email, name, password, confirmpassword } = req.body || {};
-
   let allFieldsExist = email && name && password && confirmpassword;
   if (!allFieldsExist) {
     return res.status(400).send({ err: 'All fields required' });
@@ -32,7 +31,7 @@ router.post('/register', async (req, res) => {
     return res.status(400).send({ err: 'Valid email required' });
   }
 
-  const existingUser = await API.user.findByEmail({ email });
+  const existingUser = await API.user.findByEmail(email);
   if (existingUser) {
     return res
       .status(400)
@@ -60,11 +59,11 @@ router.post('/register', async (req, res) => {
 
       res.status(201).send({ user: userInfo, token });
     })
-    .catch(() =>
+    .catch(() => {
       res
         .status(500)
-        .send({ err: 'Database is down, we are working to fix this' })
-    );
+        .send({ err: 'Database is down, we are working to fix this' });
+    });
 });
 
 router.post('/login', async (req, res) => {
@@ -73,7 +72,7 @@ router.post('/login', async (req, res) => {
   }
 
   API.user
-    .findByEmail({ email: req.body.email })
+    .findByEmail(req.body.email)
     .then(async (user) => {
       if (!user) {
         return res.status(400).send({ err: 'Incorrect auth info' });

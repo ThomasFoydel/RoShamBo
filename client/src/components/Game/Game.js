@@ -39,7 +39,6 @@ function Game() {
         ]);
         const gesture = await GE.estimate(hand[0].landmarks, 4);
         if (gesture.gestures !== undefined && gesture.gestures.length > 0) {
-          // console.log(gesture.gestures);
           const confidence = gesture.gestures.map(
             (prediction) => prediction.confidence
           );
