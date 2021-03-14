@@ -199,7 +199,7 @@ export default function Header() {
     setOpenMenu(true);
   };
 
-  const handleClose = (e) => {
+  const handleClose = () => {
     setAnchorEl(null);
     setOpenMenu(false);
   };
@@ -233,11 +233,10 @@ export default function Header() {
           />
         ))}
       </Tabs>
-      {isLoggedIn ? (
+      {isLoggedIn && (
         <Button
           variant='contained'
           color='primary'
-          onClick={toggleModal}
           className={`${classes.button} ${classes.logout}`}
           onClick={() => {
             updateState({ type: 'LOGOUT' });
@@ -245,7 +244,8 @@ export default function Header() {
         >
           Log out
         </Button>
-      ) : (
+      )}
+      {!isLoggedIn && (
         <Button
           variant='contained'
           color='secondary'
@@ -255,7 +255,6 @@ export default function Header() {
           Sign In
         </Button>
       )}
-
       <Menu
         id='simple-menu'
         anchorEl={anchorEl}

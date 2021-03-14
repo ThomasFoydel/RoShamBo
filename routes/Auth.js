@@ -4,6 +4,40 @@ const jwt = require('jsonwebtoken');
 const API = require('../controller/API');
 const router = express.Router();
 
+router.get('/', async (req, res) => {
+  let { tokenUser } = req;
+  if (tokenUser) {
+    let { userId } = tokenUser;
+    API.user
+      .findById({ _id: userId })
+      .then(async (foundUser) => {
+        const {
+          name,
+          email,
+          _id,
+          coverPic,
+          profilePic,
+          displayEmail,
+        } = foundUser;
+
+        return res.send({
+          name,
+          email,
+          id: _id,
+          coverPic,
+          profilePic,
+          displayEmail,
+        });
+      })
+      .catch((err) => {
+        console.log('err: ', err);
+        res.send({ err: 'database error' });
+      });
+  } else {
+    return res.send({ err: 'no token' });
+  }
+});
+
 router.post('/register', async (req, res) => {
   let { email, name, password, confirmpassword } = req.body || {};
   let allFieldsExist = email && name && password && confirmpassword;

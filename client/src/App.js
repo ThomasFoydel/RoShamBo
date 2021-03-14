@@ -14,20 +14,20 @@ const App = () => {
   const [appState, updateState] = useContext(CTX);
   let {
     auth: { token },
-    authModal,
   } = appState;
   let socketRef = useRef(null);
 
   useEffect(() => {
     let subscribed = true;
     let rsbToken = localStorage.getItem('roshambo-token');
-
+    console.log({ rsbToken });
     let checkAuth = async () => {
       axios
         .get('/api/auth/', {
           headers: { 'x-auth-token': rsbToken },
         })
         .then(({ data }) => {
+          console.log({ data });
           if (subscribed) {
             if (data.err && process.env.NODE_ENV === 'production')
               return updateState({ type: 'LOGOUT' });
@@ -38,7 +38,8 @@ const App = () => {
               });
           }
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log({ err });
           if (process.env.NODE_ENV === 'production')
             updateState({ type: 'LOGOUT' });
         });

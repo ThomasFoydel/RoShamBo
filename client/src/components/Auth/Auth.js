@@ -1,50 +1,49 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { Modal, makeStyles } from '@material-ui/core';
+
 import { CTX } from 'context/Store';
 import Register from './Register';
 import Login from './Login';
 
 const useStyles = makeStyles((theme) => ({
-  paper: {
+  modalBody: {
     position: 'absolute',
     width: 400,
     backgroundColor: theme.palette.background.paper,
-    border: '2px solid #000',
+    border: `2px solid ${theme.palette.common.blue}`,
     boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
+    top: '50%',
+    left: '50%',
+    transform: `translate(-50%, -50%)`,
+  },
+  modal: {
+    zIndex: '9000 !important',
   },
 }));
+
+const initialState = {
+  register: {
+    email: '',
+    name: '',
+    password: '',
+    confirmpassword: '',
+  },
+  login: {
+    email: '',
+    password: '',
+  },
+};
 
 const Auth = () => {
   const [appState, updateState] = useContext(CTX);
   const classes = useStyles();
-  let {
-    auth: { token },
-    authModal,
-  } = appState;
-  const [authPage, setAuthPage] = useState('register');
-  const [formState, setFormState] = useState({
-    register: {
-      email: '',
-      name: '',
-      password: '',
-      confirmpassword: '',
-    },
-    login: {
-      email: '',
-      password: '',
-    },
-  });
+  let { authModal } = appState;
+  const [authPage, setAuthPage] = useState('login');
+  const [formState, setFormState] = useState(initialState);
 
   const toggleModal = () => {
     updateState({ type: 'TOGGLE_AUTH_MODAL' });
-  };
-
-  const modalStyle = {
-    top: '50%',
-    left: '50%',
-    transform: `translate(-50%, -50%)`,
   };
 
   const handleAuth = ({ currentTarget: { id } }) => {
@@ -53,6 +52,7 @@ const Auth = () => {
       .then(({ data }) => {
         const { token, user } = data;
         updateState({ type: 'LOGIN', payload: { token, user } });
+        setFormState(initialState);
       })
       .catch(
         ({
@@ -66,7 +66,7 @@ const Auth = () => {
   };
 
   const ModalBody = (
-    <div style={modalStyle} className={classes.paper}>
+    <div className={classes.modalBody}>
       {authPage === 'register' ? (
         <Register
           props={{
@@ -90,12 +90,7 @@ const Auth = () => {
   );
 
   return (
-    <Modal
-      open={authModal}
-      onClose={toggleModal}
-      aria-labelledby='simple-modal-title'
-      aria-describedby='simple-modal-description'
-    >
+    <Modal className={classes.modal} open={authModal} onClose={toggleModal}>
       {ModalBody}
     </Modal>
   );

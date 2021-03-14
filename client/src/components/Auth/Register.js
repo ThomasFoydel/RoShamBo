@@ -1,21 +1,29 @@
 import React from 'react';
 import {
-  FormControl,
-  Input,
-  FormHelperText,
-  InputLabel,
+  Typography,
+  Grid,
+  Paper,
+  Avatar,
+  TextField,
+  FormControlLabel,
+  Checkbox,
   Button,
+  makeStyles,
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Link } from 'react-router-dom';
+import LockIcon from '@material-ui/icons/Lock';
 
 const useStyles = makeStyles((theme) => ({
   register: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '24rem',
+    padding: '2rem 4rem',
   },
+  avatar: {
+    backgroundColor: theme.palette.common.blue,
+  },
+  button: {
+    margin: '8px 0',
+  },
+  header: { fontFamily: 'OpenDyslexic' },
 }));
 
 const Register = ({
@@ -38,59 +46,77 @@ const Register = ({
   };
 
   return (
-    <div className={classes.register}>
-      <h2>Register</h2>
-      <FormControl>
-        <InputLabel htmlFor='email'>Email address</InputLabel>
-        <Input
-          id='email'
-          value={email}
-          aria-describedby='my-helper-text'
-          onChange={handleChange}
-          onKeyPress={handleKeyDown}
-        />
-        <FormHelperText id='my-helper-text'>
-          We'll never share your email.
-        </FormHelperText>
-      </FormControl>
-      <FormControl>
-        <InputLabel htmlFor='name'>User Name</InputLabel>
-        <Input
-          id='name'
-          value={name}
-          onChange={handleChange}
-          onKeyPress={handleKeyDown}
-        />
-      </FormControl>
+    <Paper elevation={10} className={classes.register}>
+      <Grid align='center'>
+        <Avatar className={classes.avatar}>
+          <LockIcon />
+        </Avatar>
+        <h2 className={classes.header}>Register</h2>
+      </Grid>
 
-      <FormControl>
-        <InputLabel htmlFor='password'>Password</InputLabel>
-        <Input
-          id='password'
-          value={password}
-          type='password'
-          onChange={handleChange}
-          onKeyPress={handleKeyDown}
-        />
-      </FormControl>
+      <TextField
+        label='Email'
+        placeholder='Enter email'
+        fullWidth
+        id='email'
+        required
+        value={email}
+        onChange={handleChange}
+        onKeyPress={handleKeyDown}
+      />
+      <TextField
+        label='Name'
+        placeholder='Enter name'
+        fullWidth
+        id='name'
+        required
+        value={name}
+        onChange={handleChange}
+        onKeyPress={handleKeyDown}
+      />
+      <TextField
+        label='Confirm password'
+        placeholder='Enter password'
+        id='confirmpassword'
+        type='password'
+        fullWidth
+        required
+        value={confirmpassword}
+        onChange={handleChange}
+        onKeyPress={handleKeyDown}
+      />
+      <TextField
+        label='Password'
+        placeholder='Enter password'
+        id='password'
+        type='password'
+        fullWidth
+        required
+        value={password}
+        onChange={handleChange}
+        onKeyPress={handleKeyDown}
+      />
+      <FormControlLabel
+        control={<Checkbox name='checkedB' color='primary' />}
+        label='Remember me'
+      />
+      <Button
+        className={classes.button}
+        onClick={handleAuth}
+        type='submit'
+        color='secondary'
+        variant='contained'
+        fullWidth
+        id='register'
+      >
+        Sign up
+      </Button>
 
-      <FormControl>
-        <InputLabel htmlFor='confirmpassword'>Confirm Password</InputLabel>
-        <Input
-          id='confirmpassword'
-          value={confirmpassword}
-          type='password'
-          onChange={handleChange}
-          onKeyPress={handleKeyDown}
-        />
-      </FormControl>
-      <Button id='register' onClick={handleAuth}>
-        Submit
-      </Button>
-      <Button onClick={() => setAuthPage('login')}>
-        I already have an account
-      </Button>
-    </div>
+      <Typography>
+        Already have an account?
+        <Link onClick={() => setAuthPage('login')}>Sign In</Link>
+      </Typography>
+    </Paper>
   );
 };
 

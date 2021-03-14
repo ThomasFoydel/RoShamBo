@@ -1,14 +1,29 @@
 import React from 'react';
-import { FormControl, Input, InputLabel, Button } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-
+import {
+  Typography,
+  Grid,
+  Paper,
+  Avatar,
+  TextField,
+  FormControlLabel,
+  Checkbox,
+  Button,
+  makeStyles,
+} from '@material-ui/core';
+import LockIcon from '@material-ui/icons/Lock';
+import { Link } from 'react-router-dom';
 const useStyles = makeStyles((theme) => ({
   login: {
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '24rem',
+    padding: '2rem 4rem',
+  },
+  avatar: {
+    backgroundColor: theme.palette.common.blue,
+  },
+  button: {
+    margin: '8px 0',
+  },
+  header: {
+    fontFamily: 'OpenDyslexic',
   },
 }));
 
@@ -32,32 +47,58 @@ const Login = ({
   };
 
   return (
-    <div className={classes.login}>
-      <h2>Login</h2>
-      <FormControl>
-        <InputLabel htmlFor='email'>Email address</InputLabel>
-        <Input
-          id='email'
-          value={email}
-          onChange={handleChange}
-          onKeyPress={handleKeyDown}
-        />
-      </FormControl>
-      <FormControl>
-        <InputLabel htmlFor='password'>Password</InputLabel>
-        <Input
-          id='password'
-          value={password}
-          onChange={handleChange}
-          type='password'
-          onKeyPress={handleKeyDown}
-        />
-      </FormControl>
-      <Button id='login' onClick={handleAuth}>
+    <Paper elevation={10} className={classes.login}>
+      <Grid align='center'>
+        <Avatar className={classes.avatar}>
+          <LockIcon />
+        </Avatar>
+        <h2 className={classes.header}>Sign In</h2>
+      </Grid>
+
+      <TextField
+        label='Email'
+        placeholder='Enter email'
+        fullWidth
+        id='email'
+        required
+        value={email}
+        onChange={handleChange}
+        onKeyPress={handleKeyDown}
+      />
+      <TextField
+        label='Password'
+        placeholder='Enter password'
+        id='password'
+        type='password'
+        fullWidth
+        required
+        value={password}
+        onChange={handleChange}
+        onKeyPress={handleKeyDown}
+      />
+      <FormControlLabel
+        control={<Checkbox name='checkedB' color='primary' />}
+        label='Remember me'
+      />
+      <Button
+        className={classes.button}
+        onClick={handleAuth}
+        type='submit'
+        color='primary'
+        variant='contained'
+        fullWidth
+        id='login'
+      >
         Sign in
       </Button>
-      <Button onClick={() => setAuthPage('register')}>Sign up</Button>
-    </div>
+      <Typography>
+        <Link>Forgot password?</Link>
+      </Typography>
+      <Typography>
+        Need an account?{' '}
+        <Link onClick={() => setAuthPage('register')}>Sign Up</Link>
+      </Typography>
+    </Paper>
   );
 };
 

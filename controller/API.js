@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Message = require('../models/Message');
 const Friendship = require('../models/Friendship');
+
 const API = {
   user: {
     create: (user) => User.create(user),
