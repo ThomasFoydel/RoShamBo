@@ -2,9 +2,9 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const API = require('../controller/API');
+const auth = require('../middleware/auth');
 const router = express.Router();
-
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
   let { tokenUser } = req;
   if (tokenUser) {
     let { userId } = tokenUser;
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
           displayEmail,
         } = foundUser;
 
-        return res.send({
+        return res.status(200).send({
           name,
           email,
           id: _id,
@@ -31,10 +31,10 @@ router.get('/', async (req, res) => {
       })
       .catch((err) => {
         console.log('err: ', err);
-        res.send({ err: 'database error' });
+        res.status(500).send({ err: 'database error' });
       });
   } else {
-    return res.send({ err: 'no token' });
+    return res.status(401).send({ err: 'no token' });
   }
 });
 

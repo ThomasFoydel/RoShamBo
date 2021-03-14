@@ -144,27 +144,14 @@ const menuOptions = [
   },
 ];
 
-const routes = [
-  { name: 'Home', link: '/', activeIndex: 0 },
-  {
-    name: 'Battle',
-    link: '/battle',
-    activeIndex: 1,
-    ariaOwns: (anchorEl) => (anchorEl ? 'simple-menu' : undefined),
-    ariaPopup: (anchorEl) => (anchorEl ? true : undefined),
-    mouseOver: (event, handleClick) => handleClick(event),
-  },
-
-  { name: 'Profile', link: '/profile', activeIndex: 2 },
-  { name: 'Messages', link: '/messages', activeIndex: 3 },
-  { name: 'Forum', link: '/forum', activeIndex: 4 },
-];
-
 export default function Header() {
   const classes = useStyles();
   const theme = useTheme();
   const [appState, updateState] = useContext(CTX);
-  const { isLoggedIn } = appState;
+  const {
+    isLoggedIn,
+    user: { id },
+  } = appState;
   const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
   const matches = useMediaQuery(theme.breakpoints.down('md'));
   const [openDrawer, setOpenDrawer] = useState(false);
@@ -172,6 +159,22 @@ export default function Header() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [openMenu, setOpenMenu] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const routes = [
+    { name: 'Home', link: '/', activeIndex: 0 },
+    {
+      name: 'Battle',
+      link: '/battle',
+      activeIndex: 1,
+      ariaOwns: (anchorEl) => (anchorEl ? 'simple-menu' : undefined),
+      ariaPopup: (anchorEl) => (anchorEl ? true : undefined),
+      mouseOver: (event, handleClick) => handleClick(event),
+    },
+
+    { name: 'Profile', link: `/profile/${id}`, activeIndex: 2 },
+    { name: 'Messages', link: '/messages', activeIndex: 3 },
+    { name: 'Forum', link: '/forum', activeIndex: 4 },
+  ];
 
   const handleChange = (e, newValue) => {
     setValue(newValue);
@@ -192,7 +195,7 @@ export default function Header() {
         }
       }
     });
-  }, [value, selectedIndex]);
+  }, [value, selectedIndex, routes]);
 
   const handleClick = (e) => {
     setAnchorEl(e.currentTarget);

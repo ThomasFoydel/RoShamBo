@@ -9,6 +9,7 @@ import Game from 'components/Game/Game';
 import { CTX } from 'context/Store';
 import './global.css';
 import Auth from 'components/Auth/Auth';
+import Profile from 'pages/Profile/Profile';
 
 const App = () => {
   const [appState, updateState] = useContext(CTX);
@@ -20,14 +21,13 @@ const App = () => {
   useEffect(() => {
     let subscribed = true;
     let rsbToken = localStorage.getItem('roshambo-token');
-    console.log({ rsbToken });
+
     let checkAuth = async () => {
       axios
         .get('/api/auth/', {
           headers: { 'x-auth-token': rsbToken },
         })
         .then(({ data }) => {
-          console.log({ data });
           if (subscribed) {
             if (data.err && process.env.NODE_ENV === 'production')
               return updateState({ type: 'LOGOUT' });
@@ -39,7 +39,6 @@ const App = () => {
           }
         })
         .catch((err) => {
-          console.log({ err });
           if (process.env.NODE_ENV === 'production')
             updateState({ type: 'LOGOUT' });
         });
@@ -89,6 +88,7 @@ const App = () => {
         <NavBar />
         <Switch>
           <Route path='/game' exact component={Game} />
+          <Route path='/profile/:id' exact component={Profile} />
         </Switch>
         <Auth />
       </Router>
