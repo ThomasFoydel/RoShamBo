@@ -1,8 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const API = require('../controller/API');
-const router = express.Router();
 const auth = require('../middleware/auth');
+const router = express.Router();
 
 router.get('/:profileId', auth, async (req, res) => {
   const { profileId } = req.params;
@@ -13,7 +13,6 @@ router.get('/:profileId', auth, async (req, res) => {
   } catch (err) {
     return res.status(404).send({ err: 'Invalid ID' });
   }
-
   API.friendship
     .findByUsers(userId, profileObjId)
     .then((existingFriendShip) => {
@@ -22,7 +21,6 @@ router.get('/:profileId', auth, async (req, res) => {
         .findById(profileObjId)
         .then((user) => res.status(201).send({ user, isFriend }))
         .catch((err) => {
-          console.log('get user error: ', err);
           return res.sendStatus(500);
         });
     });

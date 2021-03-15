@@ -10,7 +10,10 @@ import { CTX } from 'context/Store';
 import './global.css';
 import Auth from 'components/Auth/Auth';
 import Profile from 'pages/Profile/Profile';
-
+import Battle from 'pages/Battle/Battle';
+import ComputerBattle from 'pages/Battle/ComputerBattle';
+import FriendBattle from 'pages/Battle/FriendBattle';
+import RandomBattle from 'pages/Battle/RandomBattle';
 const App = () => {
   const [appState, updateState] = useContext(CTX);
   let {
@@ -21,7 +24,6 @@ const App = () => {
   useEffect(() => {
     let subscribed = true;
     let rsbToken = localStorage.getItem('roshambo-token');
-
     let checkAuth = async () => {
       axios
         .get('/api/auth/', {
@@ -38,7 +40,7 @@ const App = () => {
               });
           }
         })
-        .catch((err) => {
+        .catch(() => {
           if (process.env.NODE_ENV === 'production')
             updateState({ type: 'LOGOUT' });
         });
@@ -89,6 +91,10 @@ const App = () => {
         <Switch>
           <Route path='/game' exact component={Game} />
           <Route path='/profile/:id' exact component={Profile} />
+          <Route path='/battle' exact component={Battle} />
+          <Route path='/battle/computer' component={ComputerBattle} />
+          <Route path='/battle/friends' component={FriendBattle} />
+          <Route path='/battle/random' component={RandomBattle} />
         </Switch>
         <Auth />
       </Router>

@@ -6,7 +6,6 @@ export { CTX };
 export function reducer(state, action) {
   let { payload } = action;
   let { user, token, profilePic, coverPic, kind, message } = payload || {};
-  console.log({ user });
   switch (action.type) {
     case 'LOGIN':
       localStorage.setItem('roshambo-token', token);

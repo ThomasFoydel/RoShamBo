@@ -51,7 +51,6 @@ const Auth = () => {
       .post(`/api/auth/${id}`, formState[id])
       .then(({ data }) => {
         const { token, user } = data;
-        console.log('THIS THA USAAA!!!! ', user);
         updateState({ type: 'LOGIN', payload: { token, user } });
         setFormState(initialState);
       })

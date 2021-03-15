@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const API = require('../controller/API');
 const auth = require('../middleware/auth');
 const router = express.Router();
+
 router.get('/', auth, async (req, res) => {
   let { tokenUser } = req;
   if (tokenUser) {
@@ -11,14 +12,7 @@ router.get('/', auth, async (req, res) => {
     API.user
       .findById({ _id: userId })
       .then(async (foundUser) => {
-        const {
-          name,
-          email,
-          _id,
-          coverPic,
-          profilePic,
-          displayEmail,
-        } = foundUser;
+        const { name, email, _id, coverPic, profilePic } = foundUser;
 
         return res.status(200).send({
           name,
@@ -26,11 +20,9 @@ router.get('/', auth, async (req, res) => {
           id: _id,
           coverPic,
           profilePic,
-          displayEmail,
         });
       })
-      .catch((err) => {
-        console.log('err: ', err);
+      .catch(() => {
         res.status(500).send({ err: 'database error' });
       });
   } else {

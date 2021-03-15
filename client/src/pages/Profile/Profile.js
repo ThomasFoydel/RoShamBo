@@ -10,6 +10,7 @@ const Profile = ({
 }) => {
   const [appState, updateState] = useContext(CTX);
   const [user, setUser] = useState(null);
+  const [isFriend, setIsFriend] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const isCurrentUser = id === appState.user.id;
@@ -17,9 +18,14 @@ const Profile = ({
     let subscribed = true;
     setLoading(true);
     axios
-      .get(`/api/user/${id}`)
-      .then(({ data }) => {
-        if (subscribed) setUser(data);
+      .get(`/api/user/${id}`, {
+        headers: { 'x-auth-token': appState.auth.token },
+      })
+      .then(({ data: { user, isFriend } }) => {
+        if (subscribed) {
+          setUser(user);
+          setIsFriend(isFriend);
+        }
         setLoading(false);
       })
       .catch(() => {
@@ -27,7 +33,8 @@ const Profile = ({
         setLoading(false);
       });
     return () => (subscribed = false);
-  }, []);
+  }, [appState.auth.token]);
+
   const requestFriend = () => {
     axios
       .post('/api/user/friendrequest', id, {
