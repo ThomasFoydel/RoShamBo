@@ -20,6 +20,8 @@ const API = {
   friendship: {
     create: ({ sender, receiver }) => Friendship.create({ sender, receiver }),
     findById: (id) => Friendship.findById(id),
+    findByUsers: (user1, user2) =>
+      Friendship.find({ participants: { $in: [user1, user2] } }),
   },
 };
 

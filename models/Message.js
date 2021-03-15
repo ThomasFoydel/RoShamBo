@@ -10,6 +10,11 @@ const messageSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
     },
+    participants: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'User',
+      required: true,
+    },
     content: {
       type: String,
       validate: {
@@ -21,8 +26,9 @@ const messageSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-messageSchema.virtual('participants').get(function () {
-  return [this.sender, this.receiver];
+messageSchema.pre('save', function (next) {
+  this.participants = [this.sender, this.receiver];
+  next();
 });
 
 module.exports = mongoose.model('Message', messageSchema);

@@ -17,12 +17,18 @@ const friendshipSchema = mongoose.Schema(
       default: 'pending',
       required: true,
     },
+    participants: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'User',
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
-friendshipSchema.virtual('participants').get(function () {
-  return [this.sender, this.receiver];
+friendshipSchema.pre('save', function (next) {
+  this.participants = [this.sender, this.receiver];
+  next();
 });
 
 module.exports = mongoose.model('Friendship', friendshipSchema);
