@@ -7,16 +7,13 @@ import {
 
 export const rockGesture = new GestureDescription('rock');
 
-for (let finger of [
-  Finger.Thumb,
-  Finger.Index,
-  Finger.Middle,
-  Finger.Ring,
-  Finger.Pinky,
-]) {
-  rockGesture.addCurl(finger, FingerCurl.FullCurl, 0.8);
-}
-
 for (let finger of [Finger.Index, Finger.Middle, Finger.Ring, Finger.Pinky]) {
-  rockGesture.addDirection(finger, FingerDirection.VerticalDown, 0.25);
+  rockGesture.addCurl(finger, FingerCurl.FullCurl, 0.7);
+  rockGesture.addCurl(finger, FingerCurl.NoCurl, -1.2);
 }
+rockGesture.addDirection(Finger.Middle, FingerDirection.HorizontalLeft, -1);
+rockGesture.addDirection(Finger.Middle, FingerDirection.HorizontalRight, -1);
+rockGesture.addDirection(Finger.Middle, FingerDirection.VerticalUp, 1);
+rockGesture.addDirection(Finger.Middle, FingerDirection.VerticalDown, 1);
+rockGesture.addCurl(Finger.Thumb, FingerCurl.FullCurl, 1);
+rockGesture.addCurl(Finger.Thumb, FingerCurl.HalfCurl, 1);

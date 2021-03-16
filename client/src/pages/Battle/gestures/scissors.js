@@ -1,7 +1,10 @@
-// import * as fp from 'fingerpose';
+import { Finger, FingerCurl, GestureDescription } from 'fingerpose';
 
-import { Gestures } from 'fingerpose';
+export const scissorsGesture = new GestureDescription('scissors');
 
-const scissorsGesture = Gestures.VictoryGesture;
-scissorsGesture.name = 'scissors';
-export { scissorsGesture };
+scissorsGesture.addCurl(Finger.Pinky, FingerCurl.FullCurl, 1.0);
+scissorsGesture.addCurl(Finger.Index, FingerCurl.NoCurl, 1.0);
+scissorsGesture.addCurl(Finger.Index, FingerCurl.FullCurl, -1.0);
+scissorsGesture.addCurl(Finger.Middle, FingerCurl.NoCurl, 1.0);
+scissorsGesture.addCurl(Finger.Middle, FingerCurl.HalfCurl, 1.0);
+scissorsGesture.addCurl(Finger.Middle, FingerCurl.FullCurl, -1.0);

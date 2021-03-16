@@ -8,11 +8,13 @@ import robot from 'imgs/robot.svg';
 import * as fp from 'fingerpose';
 import { Grid, makeStyles } from '@material-ui/core';
 import weaponImgs from 'imgs/weapons';
-
+import fightFx from 'audio/fight.mp3';
 const weapons = {
-  rock: { beats: ['scissors'] },
-  paper: { beats: ['rock'] },
-  scissors: { beats: ['paper'] },
+  rock: { beats: ['scissors', 'bird'] },
+  paper: { beats: ['rock', 'tree'] },
+  scissors: { beats: ['paper', 'bird'] },
+  bird: { beats: ['tree', 'paper'] },
+  tree: { beats: ['rock', 'scissors'] },
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -38,7 +40,9 @@ const useStyles = makeStyles((theme) => ({
     left: '50%',
     transform: 'translateX(-50%) translateY(-50%)',
     top: '50%',
-    fontSize: '4rem',
+    fontFamily: 'OpenDyslexic',
+    fontSize: '8rem',
+    fontWeight: 'bold',
     color: 'white',
     zIndex: '8000',
   },
@@ -78,6 +82,8 @@ function ComputerBattle() {
   const [computerSelection, setComputerSelection] = useState(null);
   const [userSelection, setUserSelection] = useState(null);
   const [message, setMessage] = useState('');
+  const [thinking, setThinking] = useState(false);
+  const [fightSound, setFightSound] = useState(new Audio(fightFx));
 
   const detect = async (net) => {
     if (
@@ -100,6 +106,8 @@ function ComputerBattle() {
           gestures.scissors,
           gestures.rock,
           gestures.paper,
+          gestures.bird,
+          gestures.tree,
         ]);
         const gesture = await GE.estimate(hand[0].landmarks, 4);
 
@@ -121,7 +129,8 @@ function ComputerBattle() {
   };
 
   const startGameLoop = () => {
-    setTimer(5);
+    if (music.paused) music.play();
+    setTimer(2);
     setGameRunning(true);
   };
 
@@ -135,15 +144,22 @@ function ComputerBattle() {
         setTimer(null);
 
         const runHandpose = async () => {
+          setThinking(true);
+          if (!music.paused) music.pause();
+          fightSound.currentTime = 0;
+          fightSound.play();
           const net = await handpose.load();
           const userChoice = await detect(net);
+          setThinking(false);
+          fightSound.pause();
+          music.play();
           if (!userChoice) {
             setMessage('I couldnt see what you were throwing!');
             return setGameRunning(false);
           }
 
           const userWeapon = weapons[userChoice];
-          const randomIndex = Math.floor(Math.random() * 3);
+          const randomIndex = Math.floor(Math.random() * 5);
           const weaponOptions = Object.keys(weapons);
           const computerChoice = weaponOptions[randomIndex];
           const computerWeapon = weapons[computerChoice];
@@ -172,18 +188,11 @@ function ComputerBattle() {
 
   useEffect(() => {
     const battleSong = new Audio(battleTheme);
+    battleSong.loop = true;
     setMusic(battleSong);
+
     return () => battleSong.pause();
   }, []);
-
-  useEffect(() => {
-    if (muted && !music.paused) {
-      music.pause();
-    } else if (music && music.paused) {
-      music.play();
-      music.loop = true;
-    }
-  });
 
   return (
     <div className='computerbattle'>
@@ -233,6 +242,7 @@ function ComputerBattle() {
           </div>
         </Grid>
       </Grid>
+      {/* <p>thinking is {thinking ? 'true' : 'false'}</p> */}
       <p style={{ width: '100%', textAlign: 'center' }}>{message}</p>
     </div>
   );
