@@ -9,8 +9,8 @@ export const treeGesture = new GestureDescription('tree');
 
 treeGesture.addCurl(Finger.Thumb, FingerCurl.FullCurl, -1);
 treeGesture.addCurl(Finger.Thumb, FingerCurl.HalfCurl, -1);
-treeGesture.addCurl(Finger.Thumb, FingerCurl.NoCurl, 1);
-treeGesture.addCurl(Finger.Thumb, FingerDirection.VerticalDown, 1);
+treeGesture.addCurl(Finger.Thumb, FingerCurl.NoCurl, 0.9);
+treeGesture.addCurl(Finger.Thumb, FingerDirection.VerticalDown, 0.9);
 
 treeGesture.addDirection(Finger.Thumb, FingerDirection.HorizontalLeft, -2);
 treeGesture.addDirection(Finger.Thumb, FingerDirection.HorizontalRight, -2);

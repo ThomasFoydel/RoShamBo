@@ -3,7 +3,7 @@ import * as tf from '@tensorflow/tfjs'; // eslint-disable-line
 import * as handpose from '@tensorflow-models/handpose';
 import Webcam from 'react-webcam';
 import gestures from './gestures';
-import battleTheme from 'audio/battle.mp3';
+import battleTheme from 'audio/battle2.mp3';
 import robot from 'imgs/robot.svg';
 import * as fp from 'fingerpose';
 import { Grid, makeStyles } from '@material-ui/core';
@@ -20,12 +20,19 @@ const weapons = {
 const useStyles = makeStyles((theme) => ({
   gameGrid: {
     backgroundColor: 'black',
+    padding: '2rem',
   },
   userVideoSection: {
     maxWidth: '100%',
     position: 'relative',
+    maxHeight: '24rem',
+    minHeight: '24rem',
+    overflow: 'hidden',
   },
   webcam: {
+    maxHeight: '20rem',
+    minHeight: '20rem',
+    overflow: 'hidden',
     marginLeft: 'auto',
     textAlign: 'center',
     zindex: 9,
@@ -60,13 +67,40 @@ const useStyles = makeStyles((theme) => ({
     padding: '1rem',
   },
   gameDialog: {
+    display: 'flex',
+    flexDirection: 'column',
     textAlign: 'center',
-    backgroundColor: 'red',
+    backgroundColor: theme.palette.common.magenta,
     padding: '1rem',
-    minHeight: '100%',
+    minHeight: '22rem',
+    // maxHeight: '22rem',
+    fontFamily: 'OpenDyslexic',
+  },
+  iconContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: '20rem',
+    maxheight: '20rem',
+    overflow: 'hidden',
   },
   weaponIcon: {
-    maxWidth: '100%',
+    overflow: 'hidden',
+    minHeight: '9rem',
+    maxHeight: '9rem',
+    background: 'purple',
+    padding: '1em',
+    borderRadius: '1rem',
+    marginTop: '.5rem',
+  },
+  dialogTop: {
+    maxHeight: '5rem',
+    minHeight: '5rem',
+    lineHeight: '1.2rem',
+    overflow: 'hidden',
+  },
+  userWeapon: {
+    transform: 'scaleX(-1)',
+    background: theme.palette.common.blue,
   },
 }));
 function ComputerBattle() {
@@ -79,9 +113,9 @@ function ComputerBattle() {
   const [currentGesture, setCurrentGesture] = useState(null);
   const [timer, setTimer] = useState(null);
 
-  const [computerSelection, setComputerSelection] = useState(null);
-  const [userSelection, setUserSelection] = useState(null);
-  const [message, setMessage] = useState('');
+  const [computerSelection, setComputerSelection] = useState('blank');
+  const [userSelection, setUserSelection] = useState('blank');
+  const [message, setMessage] = useState('click the button to start');
   const [thinking, setThinking] = useState(false);
   const [fightSound, setFightSound] = useState(new Audio(fightFx));
 
@@ -110,7 +144,7 @@ function ComputerBattle() {
           gestures.tree,
         ]);
         const gesture = await GE.estimate(hand[0].landmarks, 4);
-
+        console.log(gesture.gestures);
         if (gesture.gestures !== undefined && gesture.gestures.length > 0) {
           const confidence = gesture.gestures.map(
             (prediction) => prediction.confidence
@@ -130,6 +164,8 @@ function ComputerBattle() {
 
   const startGameLoop = () => {
     if (music.paused) music.play();
+    setComputerSelection('blank');
+    setUserSelection('blank');
     setTimer(2);
     setGameRunning(true);
   };
@@ -155,6 +191,8 @@ function ComputerBattle() {
           music.play();
           if (!userChoice) {
             setMessage('I couldnt see what you were throwing!');
+            setUserSelection('blank');
+            setComputerSelection('blank');
             return setGameRunning(false);
           }
 
@@ -164,22 +202,32 @@ function ComputerBattle() {
           const computerChoice = weaponOptions[randomIndex];
           const computerWeapon = weapons[computerChoice];
           setUserSelection(userChoice);
-          setComputerSelection(computerChoice);
+
+          const changeMessage = (msg1, msg2) => {
+            setMessage(msg1);
+            setTimeout(() => {
+              setComputerSelection(computerChoice);
+              setMessage(msg1 + msg2);
+              setGameRunning(false);
+            }, 1800);
+          };
 
           if (computerWeapon.beats.includes(userChoice)) {
-            setMessage(
-              `You threw ${userChoice}, robot threw ${computerChoice}, YOU LOSE!!`
+            changeMessage(
+              `You threw ${userChoice}, `,
+              `robot threw ${computerChoice}, YOU LOSE!!`
             );
           } else if (userWeapon.beats.includes(computerChoice)) {
-            setMessage(
-              `You threw ${userChoice}, robot threw ${computerChoice}, YOU WIN!!`
+            changeMessage(
+              `You threw ${userChoice}, `,
+              `robot threw ${computerChoice}, YOU WIN!!`
             );
           } else {
-            setMessage(
-              `You threw ${userChoice}, robot threw ${computerChoice}, TIE!!`
+            changeMessage(
+              `You threw ${userChoice}, `,
+              `robot threw ${computerChoice}, TIE!!`
             );
           }
-          setGameRunning(false);
         };
         runHandpose();
       }
@@ -209,30 +257,29 @@ function ComputerBattle() {
         </Grid>
         <Grid item md={2} lg={2}>
           <div className={classes.gameDialog}>
-            {!gameRunning ? (
-              <>
-                <p>You dare to challenge me, human?</p>
-                <button onClick={startGameLoop}>Begin</button>
-              </>
-            ) : (
-              <p>choose your weapon</p>
-            )}
-
-            {computerSelection && (
+            <section className={classes.dialogTop}>
+              {!gameRunning ? (
+                <>
+                  <p>You dare to challenge me, human?</p>
+                  <button onClick={startGameLoop}>Begin</button>
+                </>
+              ) : (
+                <p>choose your weapon</p>
+              )}
+            </section>
+            <div className={classes.iconContainer}>
               <img
                 src={weaponImgs[computerSelection]}
                 className={classes.weaponIcon}
                 alt='your weapon'
               />
-            )}
 
-            {userSelection && (
               <img
                 src={weaponImgs[userSelection]}
-                className={classes.weaponIcon}
+                className={`${classes.weaponIcon} ${classes.userWeapon}`}
                 alt='your weapon'
               />
-            )}
+            </div>
           </div>
         </Grid>
         <Grid item md={5} lg={5}>
@@ -242,8 +289,20 @@ function ComputerBattle() {
           </div>
         </Grid>
       </Grid>
-      {/* <p>thinking is {thinking ? 'true' : 'false'}</p> */}
-      <p style={{ width: '100%', textAlign: 'center' }}>{message}</p>
+
+      <p
+        style={{
+          width: '100%',
+          textAlign: 'center',
+          color: 'white',
+          transform: 'translateY(-2.4rem)',
+          fontFamily: 'OpenDyslexic',
+          fontSize: '1.8rem',
+          height: '2rem',
+        }}
+      >
+        {message}
+      </p>
     </div>
   );
 }
