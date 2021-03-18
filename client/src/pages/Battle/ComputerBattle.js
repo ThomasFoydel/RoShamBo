@@ -3,12 +3,14 @@ import * as tf from '@tensorflow/tfjs'; // eslint-disable-line
 import * as handpose from '@tensorflow-models/handpose';
 import Webcam from 'react-webcam';
 import gestures from './gestures';
-import battleTheme from 'audio/battle2.mp3';
 import robot from 'imgs/robot.svg';
 import * as fp from 'fingerpose';
 import { Grid, makeStyles } from '@material-ui/core';
 import weaponImgs from 'imgs/weapons';
-import fightFx from 'audio/fight.mp3';
+import battleTheme from 'audio/themes/battle2.mp3';
+import weaponAudio from 'audio/weapons';
+import fxAudio from 'audio/fx';
+
 const weapons = {
   rock: { beats: ['scissors', 'bird'] },
   paper: { beats: ['rock', 'tree'] },
@@ -73,7 +75,6 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.common.magenta,
     padding: '1rem',
     minHeight: '22rem',
-    // maxHeight: '22rem',
     fontFamily: 'OpenDyslexic',
   },
   iconContainer: {
@@ -117,8 +118,9 @@ function ComputerBattle() {
   const [userSelection, setUserSelection] = useState('blank');
   const [message, setMessage] = useState('click the button to start');
   const [thinking, setThinking] = useState(false);
-  const [fightSound, setFightSound] = useState(new Audio(fightFx));
 
+  const [weaponSounds, setWeaponSounds] = useState({});
+  const [soundFx, setSoundFx] = useState({});
   const detect = async (net) => {
     if (
       typeof webcamRef.current !== 'undefined' &&
@@ -173,21 +175,25 @@ function ComputerBattle() {
   useEffect(() => {
     if (timer !== null) {
       if (timer > 0) {
+        soundFx.count.currentTime = 0;
+        soundFx.count.play();
         setTimeout(() => {
           setTimer((c) => c - 1);
         }, 1000);
       } else {
+        soundFx.shoot.currentTime = 0;
+        soundFx.shoot.play();
         setTimer(null);
 
         const runHandpose = async () => {
           setThinking(true);
           if (!music.paused) music.pause();
-          fightSound.currentTime = 0;
-          fightSound.play();
+          soundFx.fight.currentTime = 0;
+          soundFx.fight.play();
           const net = await handpose.load();
           const userChoice = await detect(net);
           setThinking(false);
-          fightSound.pause();
+          soundFx.fight.pause();
           music.play();
           if (!userChoice) {
             setMessage('I couldnt see what you were throwing!');
@@ -202,11 +208,15 @@ function ComputerBattle() {
           const computerChoice = weaponOptions[randomIndex];
           const computerWeapon = weapons[computerChoice];
           setUserSelection(userChoice);
+          weaponSounds[userChoice].currentTime = 0;
+          weaponSounds[userChoice].play();
 
           const changeMessage = (msg1, msg2) => {
             setMessage(msg1);
             setTimeout(() => {
               setComputerSelection(computerChoice);
+              weaponSounds[computerChoice].currentTime = 0;
+              weaponSounds[computerChoice].play();
               setMessage(msg1 + msg2);
               setGameRunning(false);
             }, 1800);
@@ -236,8 +246,23 @@ function ComputerBattle() {
 
   useEffect(() => {
     const battleSong = new Audio(battleTheme);
+    battleSong.volume = 0.7;
     battleSong.loop = true;
     setMusic(battleSong);
+
+    const rock = new Audio(weaponAudio.rock);
+    const paper = new Audio(weaponAudio.paper);
+    const scissors = new Audio(weaponAudio.scissors);
+    const tree = new Audio(weaponAudio.tree);
+    const bird = new Audio(weaponAudio.bird);
+
+    setWeaponSounds({ rock, paper, scissors, tree, bird });
+
+    const count = new Audio(fxAudio.count);
+    const shoot = new Audio(fxAudio.shoot);
+    const fight = new Audio(fxAudio.fight);
+    fight.volume = 0.6;
+    setSoundFx({ count, shoot, fight });
 
     return () => battleSong.pause();
   }, []);
