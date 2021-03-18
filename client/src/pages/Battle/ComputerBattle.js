@@ -7,15 +7,16 @@ import robot from 'imgs/robot.svg';
 import * as fp from 'fingerpose';
 import { Grid, makeStyles } from '@material-ui/core';
 import weaponImgs from 'imgs/weapons';
-import battleTheme from 'audio/themes/battle2.mp3';
+
 import weaponAudio from 'audio/weapons';
-import fxAudio from 'audio/fx';
+import soundFx from 'audio/fx';
+import themeAudio from 'audio/themes';
 
 const weapons = {
   rock: { beats: ['scissors', 'bird'] },
-  paper: { beats: ['rock', 'tree'] },
-  scissors: { beats: ['paper', 'bird'] },
-  bird: { beats: ['tree', 'paper'] },
+  paper: { beats: ['tree', 'rock'] },
+  scissors: { beats: ['bird', 'paper'] },
+  bird: { beats: ['paper', 'tree'] },
   tree: { beats: ['rock', 'scissors'] },
 };
 
@@ -27,14 +28,16 @@ const useStyles = makeStyles((theme) => ({
   userVideoSection: {
     maxWidth: '100%',
     position: 'relative',
-    maxHeight: '24rem',
+    // maxHeight: '24rem',
     minHeight: '24rem',
-    overflow: 'hidden',
+    background: theme.palette.common.blue,
+    padding: '1rem',
+    // overflow: 'hidden',
   },
   webcam: {
     maxHeight: '20rem',
     minHeight: '20rem',
-    overflow: 'hidden',
+    // overflow: 'hidden',
     marginLeft: 'auto',
     textAlign: 'center',
     zindex: 9,
@@ -103,15 +106,27 @@ const useStyles = makeStyles((theme) => ({
     transform: 'scaleX(-1)',
     background: theme.palette.common.blue,
   },
+  healthbarContainer: {
+    width: '24rem',
+    background: 'red',
+    height: '4rem',
+    marginLeft: '50%',
+    transform: 'translateX(-50%)',
+  },
+  healthbar: {
+    background: 'green',
+    height: '4rem',
+    transition: 'all 0.3s ease',
+  },
 }));
 function ComputerBattle() {
   const classes = useStyles();
   const webcamRef = useRef(null);
-  const [music, setMusic] = useState(null);
+  // const [music, setMusic] = useState(null);
   const [muted, setMuted] = useState(false);
   const [gameRunning, setGameRunning] = useState(false);
 
-  const [currentGesture, setCurrentGesture] = useState(null);
+  // const [currentGesture, setCurrentGesture] = useState(null);
   const [timer, setTimer] = useState(null);
 
   const [computerSelection, setComputerSelection] = useState('blank');
@@ -119,8 +134,15 @@ function ComputerBattle() {
   const [message, setMessage] = useState('click the button to start');
   const [thinking, setThinking] = useState(false);
 
-  const [weaponSounds, setWeaponSounds] = useState({});
-  const [soundFx, setSoundFx] = useState({});
+  const music = themeAudio.battle;
+  // const [weaponSounds, setWeaponSounds] = useState(weaponAudio);
+  // const [soundFx, setSoundFx] = useState(fxAudio);
+
+  const [userHealth, setUserHealth] = useState(100);
+  const [computerHealth, setComputerHealth] = useState(100);
+  const [winner, setWinner] = useState(null);
+  const [boutNumber, setBoutNumber] = useState(0);
+
   const detect = async (net) => {
     if (
       typeof webcamRef.current !== 'undefined' &&
@@ -154,21 +176,27 @@ function ComputerBattle() {
           const maxConfidence = confidence.indexOf(
             Math.max.apply(null, confidence)
           );
-          setCurrentGesture(gesture.gestures[maxConfidence].name);
+
           return gesture.gestures[maxConfidence].name;
         }
       } else {
-        setCurrentGesture(null);
         return null;
       }
     }
   };
 
   const startGameLoop = () => {
+    setUserHealth(100);
+    setComputerHealth(100);
+    setWinner(null);
+    startBout();
+  };
+
+  const startBout = () => {
     if (music.paused) music.play();
     setComputerSelection('blank');
     setUserSelection('blank');
-    setTimer(2);
+    setTimer(3);
     setGameRunning(true);
   };
 
@@ -187,19 +215,20 @@ function ComputerBattle() {
 
         const runHandpose = async () => {
           setThinking(true);
-          if (!music.paused) music.pause();
           soundFx.fight.currentTime = 0;
           soundFx.fight.play();
           const net = await handpose.load();
           const userChoice = await detect(net);
           setThinking(false);
           soundFx.fight.pause();
-          music.play();
           if (!userChoice) {
             setMessage('I couldnt see what you were throwing!');
             setUserSelection('blank');
             setComputerSelection('blank');
-            return setGameRunning(false);
+            setTimeout(() => {
+              setBoutNumber((b) => b + 1);
+            }, 1800);
+            return;
           }
 
           const userWeapon = weapons[userChoice];
@@ -208,35 +237,52 @@ function ComputerBattle() {
           const computerChoice = weaponOptions[randomIndex];
           const computerWeapon = weapons[computerChoice];
           setUserSelection(userChoice);
-          weaponSounds[userChoice].currentTime = 0;
-          weaponSounds[userChoice].play();
+          weaponAudio[userChoice].currentTime = 0;
+          weaponAudio[userChoice].play();
 
-          const changeMessage = (msg1, msg2) => {
-            setMessage(msg1);
+          const boutResult = (userChoice, computerChoice, winner) => {
+            setMessage(`You threw ${userChoice}`);
+            let resultMessage = '';
+
             setTimeout(() => {
+              if (winner === 'user') {
+                const damage =
+                  userWeapon.beats.indexOf(computerChoice) === 0 ? 30 : 20;
+                resultMessage = `ROBOT TOOK ${damage} DAMAGE!!`;
+                setComputerHealth((h) => (h - damage > 0 ? h - damage : 0));
+                if (computerHealth - damage <= 0) {
+                  setWinner('user');
+                }
+              } else if (winner === 'computer') {
+                const damage =
+                  computerWeapon.beats.indexOf(userChoice) === 0 ? 30 : 20;
+                resultMessage = `YOU TOOK ${damage} DAMAGE!!`;
+                setUserHealth((h) => (h - damage > 0 ? h - damage : 0));
+                if (userHealth - damage <= 0) {
+                  setWinner('computer');
+                }
+              } else {
+                resultMessage = 'NO DAMAGE!!';
+              }
+
+              setMessage(
+                `You threw ${userChoice}, robot threw ${computerChoice}, ${resultMessage}!!`
+              );
               setComputerSelection(computerChoice);
-              weaponSounds[computerChoice].currentTime = 0;
-              weaponSounds[computerChoice].play();
-              setMessage(msg1 + msg2);
-              setGameRunning(false);
-            }, 1800);
+              weaponAudio[computerChoice].currentTime = 0;
+              weaponAudio[computerChoice].play();
+              setTimeout(() => {
+                setBoutNumber((b) => b + 1);
+              }, 1800);
+            }, 1600);
           };
 
           if (computerWeapon.beats.includes(userChoice)) {
-            changeMessage(
-              `You threw ${userChoice}, `,
-              `robot threw ${computerChoice}, YOU LOSE!!`
-            );
+            boutResult(userChoice, computerChoice, 'computer');
           } else if (userWeapon.beats.includes(computerChoice)) {
-            changeMessage(
-              `You threw ${userChoice}, `,
-              `robot threw ${computerChoice}, YOU WIN!!`
-            );
+            boutResult(userChoice, computerChoice, 'user');
           } else {
-            changeMessage(
-              `You threw ${userChoice}, `,
-              `robot threw ${computerChoice}, TIE!!`
-            );
+            boutResult(userChoice, computerChoice, null);
           }
         };
         runHandpose();
@@ -245,27 +291,36 @@ function ComputerBattle() {
   }, [timer]);
 
   useEffect(() => {
-    const battleSong = new Audio(battleTheme);
-    battleSong.volume = 0.7;
-    battleSong.loop = true;
-    setMusic(battleSong);
+    music.currentTime = 0;
+    for (const e in soundFx) soundFx[e].volume = 1;
+    for (const e in weaponAudio) weaponAudio[e].volume = 1;
 
-    const rock = new Audio(weaponAudio.rock);
-    const paper = new Audio(weaponAudio.paper);
-    const scissors = new Audio(weaponAudio.scissors);
-    const tree = new Audio(weaponAudio.tree);
-    const bird = new Audio(weaponAudio.bird);
-
-    setWeaponSounds({ rock, paper, scissors, tree, bird });
-
-    const count = new Audio(fxAudio.count);
-    const shoot = new Audio(fxAudio.shoot);
-    const fight = new Audio(fxAudio.fight);
-    fight.volume = 0.6;
-    setSoundFx({ count, shoot, fight });
-
-    return () => battleSong.pause();
+    return () => {
+      music.pause();
+      for (const e in soundFx) soundFx[e].volume = 0;
+      for (const e in weaponAudio) weaponAudio[e].volume = 0;
+    };
   }, []);
+
+  useEffect(() => {
+    if (boutNumber > 0) {
+      if (winner) {
+        music.pause();
+        music.currentTime = 0;
+        const userWon = winner === 'user';
+        // // todo: add points to user's profile if they won
+        const sound = soundFx[userWon ? 'win' : 'lose'];
+        setMessage(userWon ? 'YOU WON!!' : 'YOU LOST!!');
+        sound.currentTime = 0;
+        sound.play();
+        setTimeout(() => {
+          setGameRunning(false);
+        }, 3000);
+      } else {
+        startBout();
+      }
+    }
+  }, [boutNumber]);
 
   return (
     <div className='computerbattle'>
@@ -278,6 +333,12 @@ function ComputerBattle() {
         <Grid item md={5} lg={5} style={{ background: 'black' }}>
           <div className={classes.robotSection}>
             <img src={robot} alt='robot opponent' className={classes.robot} />
+            <div className={classes.healthbarContainer}>
+              <div
+                className={classes.healthbar}
+                style={{ width: `${computerHealth}%` }}
+              ></div>
+            </div>
           </div>
         </Grid>
         <Grid item md={2} lg={2}>
@@ -311,6 +372,12 @@ function ComputerBattle() {
           <div className={classes.userVideoSection}>
             <Webcam className={classes.webcam} ref={webcamRef} />
             <p className={classes.countDown}>{timer}</p>
+            <div className={classes.healthbarContainer}>
+              <div
+                className={classes.healthbar}
+                style={{ width: `${userHealth}%` }}
+              ></div>
+            </div>
           </div>
         </Grid>
       </Grid>
@@ -328,6 +395,8 @@ function ComputerBattle() {
       >
         {message}
       </p>
+
+      <p>winner: {winner}</p>
     </div>
   );
 }
