@@ -23,29 +23,49 @@ const weapons = {
 const useStyles = makeStyles((theme) => ({
   gameGrid: {
     backgroundColor: 'black',
-    padding: '2rem',
+    padding: '3rem',
+    [theme.breakpoints.down('sm')]: {
+      padding: '0',
+    },
+    overflow: 'hidden',
   },
-  userVideoSection: {
+  userSection: {
+    padding: '2rem 0',
     maxWidth: '100%',
+    width: '90%',
     position: 'relative',
-    // maxHeight: '24rem',
-    minHeight: '24rem',
+    marginLeft: '50%',
+    transform: 'translateX(-50%)',
     background: theme.palette.common.blue,
-    padding: '1rem',
-    // overflow: 'hidden',
+    minHeight: '27rem',
+    [theme.breakpoints.down('sm')]: {
+      minHeight: '0',
+      minHeight: '16rem',
+      padding: '1rem 0',
+    },
+    [theme.breakpoints.down('xs')]: {
+      width: '95%',
+    },
+  },
+  webcamSection: {
+    maxWidth: '100%',
+    overflow: 'hidden',
   },
   webcam: {
     maxHeight: '20rem',
-    minHeight: '20rem',
-    // overflow: 'hidden',
+    minHeight: '0',
+    minHeight: '0',
+    maxHeight: '16rem',
     marginLeft: 'auto',
     textAlign: 'center',
     zindex: 9,
-    width: '90%',
+    maxWidth: '100%',
     objectFit: 'contain',
-    background: 'black',
     marginLeft: '50%',
     transform: 'translateX(-50%)',
+    [theme.breakpoints.down('sm')]: {
+      maxHeight: '11rem',
+    },
   },
   countDown: {
     position: 'absolute',
@@ -59,33 +79,56 @@ const useStyles = makeStyles((theme) => ({
     zIndex: '8000',
   },
   robot: {
-    maxHeight: '100%',
-    maxWidth: '100%',
+    width: '100%',
   },
-  robotSection: {
+  robotImg: {
     marginLeft: '50%',
     transform: 'translateX(-50%)',
-    minHeight: '0',
-    minWidth: '0',
+    width: '70%',
+    maxHeight: '16rem',
+  },
+  robotSection: {
+    height: '27rem',
+    marginLeft: 'auto',
+    marginRight: 'auto',
     width: '90%',
     background: 'purple',
-    padding: '1rem',
+    padding: '2rem 0',
+
+    [theme.breakpoints.down('sm')]: {
+      width: '95%',
+      height: '22.5rem',
+      padding: '1rem 0',
+    },
   },
   gameDialog: {
+    borderRadius: '1.2rem',
     display: 'flex',
     flexDirection: 'column',
     textAlign: 'center',
     backgroundColor: theme.palette.common.magenta,
     padding: '1rem',
-    minHeight: '22rem',
+
     fontFamily: 'OpenDyslexic',
+    [theme.breakpoints.down('sm')]: {
+      borderRadius: '0',
+      width: '90%',
+      marginLeft: '50%',
+      transform: 'translateX(-50%)',
+      padding: '2rem',
+      minHeight: '16rem',
+    },
+    [theme.breakpoints.down('xs')]: {
+      width: '95%',
+    },
   },
   iconContainer: {
     display: 'flex',
     flexDirection: 'column',
-    minHeight: '20rem',
-    maxheight: '20rem',
-    overflow: 'hidden',
+    height: '100%',
+    [theme.breakpoints.down('sm')]: {
+      flexDirection: 'row',
+    },
   },
   weaponIcon: {
     overflow: 'hidden',
@@ -95,38 +138,68 @@ const useStyles = makeStyles((theme) => ({
     padding: '1em',
     borderRadius: '1rem',
     marginTop: '.5rem',
+    [theme.breakpoints.down('sm')]: {
+      minHeight: '7rem',
+      maxHeight: '7rem',
+      width: '70%',
+      marginLeft: 'auto',
+      marginRight: 'auto',
+    },
   },
   dialogTop: {
-    maxHeight: '5rem',
-    minHeight: '5rem',
+    height: '5rem',
     lineHeight: '1.2rem',
-    overflow: 'hidden',
+
+    [theme.breakpoints.down('sm')]: {
+      height: '4rem',
+    },
   },
   userWeapon: {
     transform: 'scaleX(-1)',
     background: theme.palette.common.blue,
   },
   healthbarContainer: {
-    width: '24rem',
-    background: 'red',
-    height: '4rem',
+    width: '90%',
+    background: '#db3030',
     marginLeft: '50%',
     transform: 'translateX(-50%)',
   },
   healthbar: {
-    background: 'green',
+    background: '#1a9c17',
     height: '4rem',
+    transition: 'all 0.5s ease',
+    [theme.breakpoints.down('sm')]: {
+      height: '2rem',
+    },
+  },
+  messageSection: {
+    width: '100%',
+    textAlign: 'center',
+    color: 'white',
+    fontFamily: 'OpenDyslexic',
+    fontSize: '1.8rem',
+    background: 'black',
+    height: '12rem',
+  },
+  startBtn: {
+    padding: '.3rem 1.2rem',
+    background: theme.palette.primary.dark,
+    color: 'white',
+    border: 'none',
+    borderRadius: '.5rem',
+    cursor: 'pointer',
     transition: 'all 0.3s ease',
+    '&:hover': {
+      color: theme.palette.primary.dark,
+      background: 'white',
+    },
   },
 }));
 function ComputerBattle() {
   const classes = useStyles();
   const webcamRef = useRef(null);
-  // const [music, setMusic] = useState(null);
   const [muted, setMuted] = useState(false);
   const [gameRunning, setGameRunning] = useState(false);
-
-  // const [currentGesture, setCurrentGesture] = useState(null);
   const [timer, setTimer] = useState(null);
 
   const [computerSelection, setComputerSelection] = useState('blank');
@@ -135,8 +208,6 @@ function ComputerBattle() {
   const [thinking, setThinking] = useState(false);
 
   const music = themeAudio.battle;
-  // const [weaponSounds, setWeaponSounds] = useState(weaponAudio);
-  // const [soundFx, setSoundFx] = useState(fxAudio);
 
   const [userHealth, setUserHealth] = useState(100);
   const [computerHealth, setComputerHealth] = useState(100);
@@ -330,24 +401,37 @@ function ComputerBattle() {
         direction='row'
         className={classes.gameGrid}
       >
-        <Grid item md={5} lg={5} style={{ background: 'black' }}>
-          <div className={classes.robotSection}>
-            <img src={robot} alt='robot opponent' className={classes.robot} />
-            <div className={classes.healthbarContainer}>
+        <Grid item xs={12} sm={12} md={5} lg={5}>
+          <Grid
+            container
+            className={classes.robotSection}
+            direction='column'
+            justify='space-between'
+          >
+            <Grid item className={classes.robot}>
+              <img
+                src={robot}
+                alt='robot opponent'
+                className={classes.robotImg}
+              />
+            </Grid>
+            <Grid item className={classes.healthbarContainer}>
               <div
                 className={classes.healthbar}
                 style={{ width: `${computerHealth}%` }}
               ></div>
-            </div>
-          </div>
+            </Grid>
+          </Grid>
         </Grid>
-        <Grid item md={2} lg={2}>
+        <Grid item xs={12} md={2} sm={6} lg={2}>
           <div className={classes.gameDialog}>
             <section className={classes.dialogTop}>
               {!gameRunning ? (
                 <>
                   <p>You dare to challenge me, human?</p>
-                  <button onClick={startGameLoop}>Begin</button>
+                  <button className={classes.startBtn} onClick={startGameLoop}>
+                    Begin
+                  </button>
                 </>
               ) : (
                 <p>choose your weapon</p>
@@ -368,35 +452,28 @@ function ComputerBattle() {
             </div>
           </div>
         </Grid>
-        <Grid item md={5} lg={5}>
-          <div className={classes.userVideoSection}>
-            <Webcam className={classes.webcam} ref={webcamRef} />
-            <p className={classes.countDown}>{timer}</p>
-            <div className={classes.healthbarContainer}>
+        <Grid item xs={12} sm={6} md={5} lg={5}>
+          <Grid
+            container
+            className={classes.userSection}
+            direction='column'
+            justify='space-between'
+          >
+            <Grid item className={classes.webcamSection}>
+              <Webcam className={classes.webcam} ref={webcamRef} />
+              <p className={classes.countDown}>{timer}</p>
+            </Grid>
+            <Grid item className={classes.healthbarContainer}>
               <div
                 className={classes.healthbar}
                 style={{ width: `${userHealth}%` }}
               ></div>
-            </div>
-          </div>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
 
-      <p
-        style={{
-          width: '100%',
-          textAlign: 'center',
-          color: 'white',
-          transform: 'translateY(-2.4rem)',
-          fontFamily: 'OpenDyslexic',
-          fontSize: '1.8rem',
-          height: '2rem',
-        }}
-      >
-        {message}
-      </p>
-
-      <p>winner: {winner}</p>
+      <p className={classes.messageSection}>{message}</p>
     </div>
   );
 }
