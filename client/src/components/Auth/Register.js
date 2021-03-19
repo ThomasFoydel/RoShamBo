@@ -104,7 +104,7 @@ const Register = ({
         className={classes.button}
         onClick={handleAuth}
         type='submit'
-        color='secondary'
+        color='primary'
         variant='contained'
         fullWidth
         id='register'

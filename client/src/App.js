@@ -14,6 +14,8 @@ import Battle from 'pages/Battle/Battle';
 import ComputerBattle from 'pages/Battle/ComputerBattle';
 import FriendBattle from 'pages/Battle/FriendBattle';
 import RandomBattle from 'pages/Battle/RandomBattle';
+import Forum from 'pages/Forum/Forum';
+
 const App = () => {
   const [appState, updateState] = useContext(CTX);
   let {
@@ -95,6 +97,7 @@ const App = () => {
           <Route path='/battle/computer' component={ComputerBattle} />
           <Route path='/battle/friends' component={FriendBattle} />
           <Route path='/battle/random' component={RandomBattle} />
+          <Route path='/forum' exact component={Forum} />
         </Switch>
         <Auth />
       </Router>

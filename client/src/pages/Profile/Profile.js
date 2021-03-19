@@ -9,6 +9,7 @@ const Profile = ({
   },
 }) => {
   const [appState, updateState] = useContext(CTX);
+
   const [user, setUser] = useState(null);
   const [isFriend, setIsFriend] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,7 +39,7 @@ const Profile = ({
   const requestFriend = () => {
     axios
       .post('/api/user/friendrequest', id, {
-        headers: { 'X-auth-token': appState.user.id },
+        headers: { 'x-auth-token': appState.auth.token },
       })
       .then((result) => {
         console.log(result);

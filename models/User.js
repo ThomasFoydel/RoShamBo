@@ -42,6 +42,7 @@ const userSchema = mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password required'],
+    select: false,
   },
   friends: {
     type: [mongoose.Schema.Types.ObjectId],
