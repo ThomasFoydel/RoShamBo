@@ -39,7 +39,6 @@ const useStyles = makeStyles((theme) => ({
     background: theme.palette.common.blue,
     minHeight: '27rem',
     [theme.breakpoints.down('sm')]: {
-      minHeight: '0',
       minHeight: '16rem',
       padding: '1rem 0',
     },
@@ -52,11 +51,8 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
   },
   webcam: {
-    maxHeight: '20rem',
-    minHeight: '0',
     minHeight: '0',
     maxHeight: '16rem',
-    marginLeft: 'auto',
     textAlign: 'center',
     zindex: 9,
     maxWidth: '100%',
@@ -182,13 +178,15 @@ const useStyles = makeStyles((theme) => ({
     height: '12rem',
   },
   startBtn: {
-    padding: '.3rem 1.2rem',
+    padding: '.1rem 1.2rem',
+    letterSpacing: '.1rem',
     background: theme.palette.primary.dark,
     color: 'white',
     border: 'none',
     borderRadius: '.5rem',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
+    fontFamily: 'OpenDyslexic',
     '&:hover': {
       color: theme.palette.primary.dark,
       background: 'white',
@@ -379,13 +377,14 @@ function ComputerBattle() {
         music.pause();
         music.currentTime = 0;
         const userWon = winner === 'user';
-        // // todo: add points to user's profile if they won
+        // // todo: add points to user's profile if  they won
         const sound = soundFx[userWon ? 'win' : 'lose'];
         setMessage(userWon ? 'YOU WON!!' : 'YOU LOST!!');
         sound.currentTime = 0;
         sound.play();
         setTimeout(() => {
           setGameRunning(false);
+          setMessage('Play again?');
         }, 3000);
       } else {
         startBout();
