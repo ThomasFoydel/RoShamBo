@@ -15,11 +15,12 @@ const Profile = ({
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const isCurrentUser = id === appState.user.id;
+
   useEffect(() => {
     let subscribed = true;
     setLoading(true);
     axios
-      .get(`/api/user/${id}`, {
+      .get(`/api/user/profile/${id}`, {
         headers: { 'x-auth-token': appState.auth.token },
       })
       .then(({ data: { user, isFriend } }) => {
@@ -38,9 +39,13 @@ const Profile = ({
 
   const requestFriend = () => {
     axios
-      .post('/api/user/friendrequest', id, {
-        headers: { 'x-auth-token': appState.auth.token },
-      })
+      .post(
+        '/api/user/friendrequest/',
+        { id },
+        {
+          headers: { 'x-auth-token': appState.auth.token },
+        }
+      )
       .then((result) => {
         console.log(result);
       })
@@ -56,7 +61,7 @@ const Profile = ({
           {isCurrentUser && <Link to='/editprofile'>edit profile</Link>}
           <span>{user.name}</span>
           <span>{user.email}</span>
-          {!isCurrentUser && (
+          {!isCurrentUser && !isFriend && (
             <button onClick={requestFriend}>request friendship</button>
           )}
         </div>

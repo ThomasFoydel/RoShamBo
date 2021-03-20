@@ -19,10 +19,19 @@ const API = {
       }),
   },
   friendship: {
-    create: ({ sender, receiver }) => Friendship.create({ sender, receiver }),
+    create: (sender, receiver) => Friendship.create({ sender, receiver }),
     findById: (id) => Friendship.findById(id),
+    findByReceiver: (id) => Friendship.find({ receiver: id }),
     findByUsers: (user1, user2) =>
       Friendship.find({ participants: { $in: [user1, user2] } }),
+    findPending: (id) =>
+      Friendship.find({
+        $and: [{ status: 'pending' }, { receiver: id }],
+      }).populate('sender'),
+    accept: (id) =>
+      Friendship.findOneAndUpdate({ _id: id }, { status: 'accepted' }),
+    reject: (id) =>
+      Friendship.findOneAndUpdate({ _id: id }, { status: 'rejected' }),
   },
   post: {
     find: () => Post.find({}).populate('author'),

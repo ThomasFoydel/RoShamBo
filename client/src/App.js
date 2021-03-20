@@ -15,10 +15,13 @@ import ComputerBattle from 'pages/Battle/ComputerBattle';
 import FriendBattle from 'pages/Battle/FriendBattle';
 import RandomBattle from 'pages/Battle/RandomBattle';
 import Forum from 'pages/Forum/Forum';
+import Landing from 'pages/Landing/Landing';
+import Home from 'pages/Home/Home';
 
 const App = () => {
   const [appState, updateState] = useContext(CTX);
   let {
+    isLoggedIn,
     auth: { token },
   } = appState;
   let socketRef = useRef(null);
@@ -91,6 +94,7 @@ const App = () => {
       <Router>
         <NavBar />
         <Switch>
+          <Route path='/' exact component={isLoggedIn ? Home : Landing} />
           <Route path='/game' exact component={Game} />
           <Route path='/profile/:id' exact component={Profile} />
           <Route path='/battle' exact component={Battle} />
