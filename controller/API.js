@@ -29,9 +29,17 @@ const API = {
         $and: [{ status: 'pending' }, { receiver: id }],
       }).populate('sender'),
     accept: (id) =>
-      Friendship.findOneAndUpdate({ _id: id }, { status: 'accepted' }),
+      Friendship.findOneAndUpdate(
+        { _id: id },
+        { status: 'accepted' },
+        { new: true }
+      ),
     reject: (id) =>
-      Friendship.findOneAndUpdate({ _id: id }, { status: 'rejected' }),
+      Friendship.findOneAndUpdate(
+        { _id: id },
+        { status: 'rejected' },
+        { new: true }
+      ),
   },
   post: {
     find: () => Post.find({}).populate('author'),

@@ -22,10 +22,7 @@ const Forum = () => {
   useEffect(() => {
     axios
       .get('/api/forum', { headers: { 'x-auth-token': token } })
-      .then(({ data }) => {
-        console.log({ data });
-        setPosts(data);
-      })
+      .then(({ data }) => setPosts(data))
       .catch((err) => {
         console.log({ err });
       });

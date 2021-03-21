@@ -25,7 +25,6 @@ router.post('/friendrequest', auth, async (req, res) => {
           res.status(201).send(newFriendRequest);
         })
         .catch((err) => {
-          console.log('errrorr: ', err);
           res.sendStatus(500);
         });
     });
@@ -37,7 +36,6 @@ router.get('/friendrequests', auth, async (req, res) => {
     .findPending(userId)
     .then((friendRequests) => res.send(friendRequests))
     .catch((err) => {
-      console.log({ err });
       return res
         .status(500)
         .send({ err: 'Database is down, we are working to fix this' });
@@ -47,19 +45,19 @@ router.get('/friendrequests', auth, async (req, res) => {
 router.post('/accept-fr', auth, async (req, res) => {
   const { userId } = req.tokenUser;
   const { id } = req.body;
+
   API.friendship
     .findById(id)
     .then((friendrequest) => {
-      if (friendrequest.receiver === userId)
+      if (friendrequest.receiver.toString() === userId)
         API.friendship.accept(id).then(async () => {
-          const remainingFriendRequests = await API.findPending(userId);
+          const remainingFriendRequests = await API.friendship.findPending(
+            userId
+          );
           res.status(201).send(remainingFriendRequests);
         });
     })
-    .catch((err) => {
-      console.log({ err });
-      return res.sendStatus(400);
-    });
+    .catch(() => res.sendStatus(400));
 });
 
 router.post('/reject-fr', auth, async (req, res) => {
@@ -70,15 +68,13 @@ router.post('/reject-fr', auth, async (req, res) => {
     .then((friendrequest) => {
       if (friendrequest.receiver === userId)
         API.friendship.reject(id).then(async () => {
-          const remainingFriendRequests = await API.findPending(userId);
+          const remainingFriendRequests = await API.friendship.findPending(
+            userId
+          );
           res.status(201).send(remainingFriendRequests);
         });
     })
-    .catch((err) => {
-      console.log({ err });
-      console.log({ err });
-      return res.sendStatus(400);
-    });
+    .catch(() => res.sendStatus(400));
 });
 
 router.get('/profile/:profileId', auth, async (req, res) => {

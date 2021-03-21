@@ -211,6 +211,7 @@ function ComputerBattle() {
   const [computerHealth, setComputerHealth] = useState(100);
   const [winner, setWinner] = useState(null);
   const [boutNumber, setBoutNumber] = useState(0);
+  const [handPoseNet, setHandPoseNet] = useState(null);
 
   const detect = async (net) => {
     if (
@@ -278,18 +279,17 @@ function ComputerBattle() {
           setTimer((c) => c - 1);
         }, 1000);
       } else {
+        setTimer(null);
         soundFx.shoot.currentTime = 0;
         soundFx.shoot.play();
-        setTimer(null);
+        soundFx.fight.currentTime = 0;
+        soundFx.fight.play();
+        setThinking(true);
 
         const runHandpose = async () => {
-          setThinking(true);
-          soundFx.fight.currentTime = 0;
-          soundFx.fight.play();
-          const net = await handpose.load();
-          const userChoice = await detect(net);
+          const userChoice = await detect(handPoseNet);
           setThinking(false);
-          soundFx.fight.pause();
+          if (!soundFx.fight.paused) setTimeout(() => soundFx.fight.pause(), 0);
           if (!userChoice) {
             setMessage('I couldnt see what you were throwing!');
             setUserSelection('blank');
@@ -354,12 +354,18 @@ function ComputerBattle() {
             boutResult(userChoice, computerChoice, null);
           }
         };
-        runHandpose();
+        setTimeout(() => runHandpose(), 500);
       }
     }
   }, [timer]);
 
   useEffect(() => {
+    async function loadHandPose() {
+      const net = await handpose.load();
+      setHandPoseNet(net);
+      detect(net);
+    }
+    loadHandPose();
     music.currentTime = 0;
     for (const e in soundFx) soundFx[e].volume = 1;
     for (const e in weaponAudio) weaponAudio[e].volume = 1;
@@ -428,9 +434,14 @@ function ComputerBattle() {
               {!gameRunning ? (
                 <>
                   <p>You dare to challenge me, human?</p>
-                  <button className={classes.startBtn} onClick={startGameLoop}>
-                    Begin
-                  </button>
+                  {handPoseNet && (
+                    <button
+                      className={classes.startBtn}
+                      onClick={startGameLoop}
+                    >
+                      Begin
+                    </button>
+                  )}
                 </>
               ) : (
                 <p>choose your weapon</p>
