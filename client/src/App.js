@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import io from 'socket.io-client';
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
 import axios from 'axios';
@@ -12,6 +12,7 @@ import Auth from 'components/Auth/Auth';
 import Profile from 'pages/Profile/Profile';
 import Battle from 'pages/Battle/Battle';
 import ComputerBattle from 'pages/Battle/ComputerBattle';
+import BattleFriends from 'pages/Battle/BattleFriends';
 import FriendBattle from 'pages/Battle/FriendBattle';
 import RandomBattle from 'pages/Battle/RandomBattle';
 import Forum from 'pages/Forum/Forum';
@@ -20,6 +21,7 @@ import Home from 'pages/Home/Home';
 
 const App = () => {
   const [appState, updateState] = useContext(CTX);
+  const [socketLoaded, setSocketLoaded] = useState(false);
   let {
     isLoggedIn,
     auth: { token },
@@ -73,6 +75,8 @@ const App = () => {
         transports: ['websocket', 'polling', 'flashsocket'],
       });
 
+      setSocketLoaded(true);
+
       if (subscribed) {
         socketRef.current.on('chat-message', (message) =>
           updateState({ type: 'NEW_MESSAGE', payload: { message } })
@@ -99,8 +103,15 @@ const App = () => {
           <Route path='/profile/:id' exact component={Profile} />
           <Route path='/battle' exact component={Battle} />
           <Route path='/battle/computer' component={ComputerBattle} />
-          <Route path='/battle/friends' component={FriendBattle} />
           <Route path='/battle/random' component={RandomBattle} />
+          <Route path='/battle/friends' component={BattleFriends} />
+          <Route
+            path='/friendbattle/:friendshipId'
+            component={({ match }) =>
+              socketLoaded &&
+              token && <FriendBattle props={{ match, socketRef }} />
+            }
+          />
           <Route path='/forum' exact component={Forum} />
         </Switch>
         <Auth />
@@ -108,4 +119,5 @@ const App = () => {
     </ThemeProvider>
   );
 };
+
 export default App;

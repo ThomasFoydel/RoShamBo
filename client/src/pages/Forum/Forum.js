@@ -31,7 +31,7 @@ const Forum = () => {
   return (
     <div>
       {posts.map((post) => (
-        <Post props={{ post }} />
+        <Post key={post._id} props={{ post }} />
       ))}
       <PostForm props={{ setPosts }} />
     </div>

@@ -18,7 +18,7 @@ router.post('/friendrequest', auth, async (req, res) => {
   API.friendship
     .findByUsers(senderId, receiverId)
     .then((existingFriendship) => {
-      if (existingFriendship[0]) return res.sendStatus(400);
+      if (existingFriendship) return res.sendStatus(400);
       API.friendship
         .create(senderId, receiverId)
         .then((newFriendRequest) => {
@@ -77,6 +77,15 @@ router.post('/reject-fr', auth, async (req, res) => {
     .catch(() => res.sendStatus(400));
 });
 
+router.get('/friendlist', auth, async ({ tokenUser: { userId } }, res) => {
+  API.friendship
+    .findFriendlist(userId)
+    .then((result) => {
+      res.status(200).send(result);
+    })
+    .catch(() => res.sendStatus(500));
+});
+
 router.get('/profile/:profileId', auth, async (req, res) => {
   const { profileId } = req.params;
   const { userId } = req.tokenUser;
@@ -86,16 +95,19 @@ router.get('/profile/:profileId', auth, async (req, res) => {
   } catch (err) {
     return res.status(404).send({ err: 'Invalid ID' });
   }
+
   API.friendship
     .findByUsers(userId, profileObjId)
     .then((existingFriendShip) => {
       const isFriend = !!existingFriendShip;
+
       API.user
         .findById(profileObjId)
         .then((user) => res.status(201).send({ user, isFriend }))
-        .catch((err) => {
+        .catch(() => {
           return res.sendStatus(500);
         });
     });
 });
+
 module.exports = router;

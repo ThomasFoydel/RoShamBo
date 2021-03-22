@@ -53,6 +53,7 @@ const Profile = ({
         setErr('Something went wrong, friend request not created');
       });
   };
+
   return (
     <>
       {loading && <div>loading</div>}

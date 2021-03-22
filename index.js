@@ -39,7 +39,7 @@ mongoose
           if (receiver) io.to(receiver.socketId).emit('chat-message', result);
           res.send(result);
         })
-        .catch((err) => res.send({ err: 'message error' }));
+        .catch(() => res.send({ err: 'message error' }));
     });
 
     if (process.env.NODE_ENV === 'production') {
@@ -73,16 +73,22 @@ mongoose
 
       socket.on('join-room', ({ roomId, mySocketId, peerId }) => {
         socket.join(roomId);
+
         socket
           .to(roomId)
-          .broadcast.emit('user-connected', { mySocketId, userId: peerId });
+          .emit('user-connected', { mySocketId, userId: peerId });
 
         socket.on('message', (message) => {
           io.to(roomId).emit('create-message', message);
         });
 
         socket.on('disconnect-room', (id) => {
-          socket.to(roomId).broadcast.emit('user-disconnected', id);
+          socket.to(roomId).emit('user-disconnected', id);
+        });
+
+        socket.on('disconnect', (id) => {
+          socket.to(roomId).emit('user-disconnected', socket.userId);
+          delete users[socket.userId];
         });
       });
 

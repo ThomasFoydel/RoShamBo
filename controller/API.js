@@ -23,7 +23,16 @@ const API = {
     findById: (id) => Friendship.findById(id),
     findByReceiver: (id) => Friendship.find({ receiver: id }),
     findByUsers: (user1, user2) =>
-      Friendship.find({ participants: { $in: [user1, user2] } }),
+      Friendship.findOne({
+        $and: [
+          { participants: { $in: [user2] } },
+          { participants: { $in: [user1] } },
+        ],
+      }),
+    findFriendlist: (id) =>
+      Friendship.find({
+        $and: [{ status: 'accepted' }, { participants: { $in: [id] } }],
+      }).populate('sender receiver'),
     findPending: (id) =>
       Friendship.find({
         $and: [{ status: 'pending' }, { receiver: id }],

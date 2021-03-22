@@ -12,6 +12,7 @@ import {
 } from '@material-ui/core';
 import LockIcon from '@material-ui/icons/Lock';
 import { Link } from 'react-router-dom';
+
 const useStyles = makeStyles((theme) => ({
   login: {
     padding: '2rem 4rem',
@@ -92,7 +93,7 @@ const Login = ({
         Sign in
       </Button>
       <Typography>
-        <Link>Forgot password?</Link>
+        <Link to='/forgot-pw'>Forgot password?</Link>
       </Typography>
       <Typography>
         Need an account?{' '}

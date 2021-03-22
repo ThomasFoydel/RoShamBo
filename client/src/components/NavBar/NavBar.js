@@ -152,6 +152,7 @@ export default function Header() {
     isLoggedIn,
     user: { id },
   } = appState;
+
   const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
   const matches = useMediaQuery(theme.breakpoints.down('md'));
   const [openDrawer, setOpenDrawer] = useState(false);
