@@ -1,10 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import * as tf from '@tensorflow/tfjs'; // eslint-disable-line
 import * as handpose from '@tensorflow-models/handpose';
-import Webcam from 'react-webcam';
-import gestures from './gestures';
-import robot from 'imgs/robot.svg';
 import * as fp from 'fingerpose';
+import gestures from './gestures';
+import Webcam from 'react-webcam';
+import robot from 'imgs/robot.svg';
 import { Grid, makeStyles } from '@material-ui/core';
 import weaponImgs from 'imgs/weapons';
 

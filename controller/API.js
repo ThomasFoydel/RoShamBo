@@ -18,6 +18,11 @@ const API = {
         participants: { $in: [userId] },
       }),
   },
+  post: {
+    find: () => Post.find({}).populate('author'),
+    create: ({ author, title, content }) =>
+      Post.create({ author, title, content }),
+  },
   friendship: {
     create: (sender, receiver) => Friendship.create({ sender, receiver }),
     findById: (id) => Friendship.findById(id),
@@ -49,11 +54,57 @@ const API = {
         { status: 'rejected' },
         { new: true }
       ),
-  },
-  post: {
-    find: () => Post.find({}).populate('author'),
-    create: ({ author, title, content }) =>
-      Post.create({ author, title, content }),
+
+    game: {
+      getState: (id) => Friendship.findById(id).select('gameState'),
+      initState: (id, user1, user2) =>
+        Friendship.findByIdAndUpdate(
+          id,
+          {
+            $set: {
+              gameState: {
+                [user1]: 100,
+                [user2]: 100,
+                round: 0,
+                choices: [],
+              },
+            },
+          },
+          { new: true }
+        ),
+      // throwChoice: (id, userId, userChoice) =>
+      //   Friendship.findByIdAndUpdate(
+      //     id,
+      //     {
+      //       $push: {
+      //         'gameState.choices': {
+      //           [userId]: userChoice,
+      //         },
+      //       },
+      //     },
+      //     { new: true }
+      //   ),
+      throwChoice: (id, userId, userChoice, round) =>
+        Friendship.findByIdAndUpdate(
+          id,
+          {
+            $set: {
+              [`gameState.choices.${round}.${userId}`]: userChoice,
+            },
+          },
+          { new: true }
+        ),
+      roundOutcome: (id, loser, health, round) =>
+        Friendship.findByIdAndUpdate(
+          id,
+          {
+            $set: { [`gameState.${loser}`]: health, round: round + 1 },
+          },
+          { new: true }
+        ),
+
+      // clearChoiceState: (id) => Friendship.findByIdAndUpdate(id, {$set: {"gameState.waitingChoice":{} } })
+    },
   },
 };
 

@@ -22,6 +22,9 @@ const friendshipSchema = mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    gameState: {
+      type: Object,
+    },
   },
   { timestamps: true }
 );

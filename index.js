@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
 const apiRoutes = require('./routes/Api');
+const API = require('./controller/API');
 require('dotenv').config();
 const app = express();
 
@@ -13,6 +14,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 let users = {};
+
+const weapons = {
+  rock: { beats: ['scissors', 'bird'] },
+  paper: { beats: ['tree', 'rock'] },
+  scissors: { beats: ['bird', 'paper'] },
+  bird: { beats: ['paper', 'tree'] },
+  tree: { beats: ['rock', 'scissors'] },
+};
 
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -77,6 +86,93 @@ mongoose
         socket
           .to(roomId)
           .emit('user-connected', { mySocketId, userId: peerId });
+
+        var roomCount = io.sockets.adapter.rooms.get(roomId).size;
+        if (roomCount === 2) {
+          io.to(roomId).emit('game-begin');
+        } else {
+          console.log('should init state');
+          API.friendship.findById(roomId).then(({ participants }) => {
+            API.friendship.game
+              .initState(roomId, participants[0], participants[1])
+              .then((r) => console.log({ r }));
+          });
+        }
+        socket.on('user-choice', ({ roomId, userId, userChoice }) => {
+          API.friendship.game
+            .getState(roomId)
+            .then(({ gameState: { round } }) => {
+              API.friendship.game
+                .throwChoice(roomId, userId, userChoice, round)
+                .then(({ gameState }) => {
+                  console.log(
+                    'CHOICE THROW RESULT, updated state: ',
+                    gameState.choices[0]
+                  );
+
+                  const roundChoices = gameState.choices[gameState.round];
+                  const userIds = Object.keys(roundChoices);
+                  if (userIds.length === 2) {
+                    const [user1, user2] = userIds;
+                    const user1Choice = roundChoices[user1];
+                    const user2Choice = roundChoices[user2];
+                    const user1Weapon = weapons[user1Choice];
+                    const user2Weapon = weapons[user2Choice];
+
+                    function outcome(winner, loser, damage) {
+                      console.log('outcome: ', { winner, loser, damage });
+                      console.log('outcome gameState: ', gameState);
+                      if (gameState[loser] - damage <= 0) {
+                        // fight is over, declare winner
+                        console.log('winner: ', winner);
+                      } else {
+                        // deal damage and increase round by one
+                        API.friendship.game
+                          .roundOutcome(
+                            roomId,
+                            loser,
+                            gameState[loser] - damage,
+                            gameState.round
+                          )
+                          .then((newState) => {
+                            console.log('NEW STATE: ', newState);
+                            io.to(roomId).emit('round-outcome', {
+                              winner,
+                              loser,
+                              newState,
+                              [user1]: user1Choice,
+                              [user2]: user2Choice,
+                            });
+                            //send back newState to both users
+                          })
+                          .catch((err) => {
+                            console.log(
+                              'API.friendship.game.roundOutcome ERROR: ',
+                              err
+                            );
+                            // send back error
+                          });
+                      }
+                    }
+
+                    if (user1Weapon.beats.includes(user2Choice)) {
+                      // user1 wins this round
+                      outcome(user1, user2, 20);
+                    } else if (user2Weapon.beats.includes(user1Choice)) {
+                      // user2 wins this round
+                      outcome(user2, user1, 20);
+                    } else {
+                      // tie
+                      console.log(
+                        'tie, but lets pretend user1 wins for testing:  '
+                      );
+                      outcome(user1, user2, 20);
+                      // io.to(roomId).emit('round-outcome', { tie: true });
+                    }
+                  }
+                });
+            });
+        });
 
         socket.on('message', (message) => {
           io.to(roomId).emit('create-message', message);

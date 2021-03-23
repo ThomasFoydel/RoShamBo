@@ -1,34 +1,129 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import axios from 'axios';
 import Peer from 'peerjs';
-import { CTX } from 'context/Store';
-import { makeStyles } from '@material-ui/core';
+import * as handpose from '@tensorflow-models/handpose';
+import * as tf from '@tensorflow/tfjs'; // eslint-disable-line
+import * as fp from 'fingerpose';
+import gestures from './gestures';
 import Webcam from 'react-webcam';
+import { makeStyles } from '@material-ui/core';
 import { Stop, PlayArrow, Mic, MicOff } from '@material-ui/icons';
+import { CTX } from 'context/Store';
 const useStyles = makeStyles(() => ({}));
 
 const FriendBattle = ({ props: { socketRef, match } }) => {
   const [appState] = useContext(CTX);
+  const [display, setDisplayFriend] = useState(true);
   const classes = useStyles();
   const socket = socketRef.current;
   let {
-    user: { name },
+    user: { name, id },
     auth: { token },
   } = appState;
   const { friendshipId } = match.params;
-  const [myVideoStream, setMyVideoStream] = useState(null);
-  const peerRef = useRef();
+  const myCamRef = useRef();
+  const [myStream, setMyStream] = useState(null);
 
-  const [videoStream, setVideoStream] = useState({});
+  const peerVideoRef = useRef();
+  const [peerStream, setPeerStream] = useState({});
 
   const [icons, setIcons] = useState({ video: false, audio: false });
   const [chatInput, setChatInput] = useState('');
   const [messages, setMessages] = useState([]);
-
-  const webcamRef = useRef();
+  const [count, setCount] = useState(null);
+  const [userChoice, setUserChoice] = useState(null);
   const scrollRef = useRef();
-
   const myPeer = useRef();
+  const [handPoseNet, setHandPoseNet] = useState(null);
+
+  useEffect(() => {
+    async function loadHandPose() {
+      const net = await handpose.load();
+      setHandPoseNet(net);
+      //   detect(net);
+    }
+    loadHandPose();
+  }, []);
+
+  //   const detectHand = () => {
+  //           const video = myCamRef.current.video;
+  //           const videoWidth = myCamRef.current.video.videoWidth;
+  //           const videoHeight = myCamRef.current.video.videoHeight;
+  //           myCamRef.current.video.width = videoWidth;
+  //           myCamRef.current.video.height = videoHeight;
+  //             const hand = await net.estimateHands(video);
+  //   }
+
+  const detect = async (net) => {
+    // console.log('detect!');
+    if (
+      typeof myCamRef.current !== 'undefined' &&
+      myCamRef.current !== null &&
+      myCamRef.current.video.readyState === 4
+    ) {
+      const video = myCamRef.current.video;
+      const videoWidth = myCamRef.current.video.videoWidth;
+      const videoHeight = myCamRef.current.video.videoHeight;
+      myCamRef.current.video.width = videoWidth;
+      myCamRef.current.video.height = videoHeight;
+
+      // Detect hand
+      const hand = await net.estimateHands(video);
+      // If there's a hand estimate gesture
+
+      if (hand.length > 0) {
+        const GE = new fp.GestureEstimator([
+          gestures.scissors,
+          gestures.rock,
+          gestures.paper,
+          gestures.bird,
+          gestures.tree,
+        ]);
+        const gesture = await GE.estimate(hand[0].landmarks, 4);
+        if (gesture.gestures !== undefined && gesture.gestures.length > 0) {
+          const confidence = gesture.gestures.map(
+            (prediction) => prediction.confidence
+          );
+          const maxConfidence = confidence.indexOf(
+            Math.max.apply(null, confidence)
+          );
+
+          return gesture.gestures[maxConfidence].name;
+        }
+      } else {
+        return null;
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (count === null) return;
+    if (count > 0) {
+      const getHandPose = async () => {
+        const userChoice = await detect(handPoseNet);
+        if (userChoice) console.log(userChoice);
+        if (userChoice) setUserChoice(userChoice);
+      };
+      getHandPose();
+
+      setTimeout(() => {
+        setCount((c) => c - 1);
+      }, 1000);
+    } else {
+      if (!userChoice) return setCount(40);
+      socket.emit('user-choice', {
+        roomId: friendshipId,
+        userId: id,
+        userChoice,
+      });
+      setCount(null);
+    }
+  }, [count]);
+
+  const getRoundInput = () => {
+    setDisplayFriend(false);
+    setCount(5);
+  };
 
   useEffect(() => {
     return async () => {
@@ -38,26 +133,25 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   }, [token]);
   useEffect(() => {
     return () =>
-      myVideoStream &&
-      myVideoStream.getTracks().forEach((track) => track.stop());
-  }, [myVideoStream]);
+      myStream && myStream.getTracks().forEach((track) => track.stop());
+  }, [myStream]);
 
   const playStop = () => {
-    if (myVideoStream) {
-      let enabled = myVideoStream.getVideoTracks()[0].enabled;
+    if (myStream) {
+      let enabled = myStream.getVideoTracks()[0].enabled;
       setIcons({ ...icons, video: !icons.video });
-      if (enabled) myVideoStream.getVideoTracks()[0].enabled = false;
-      else myVideoStream.getVideoTracks()[0].enabled = true;
+      if (enabled) myStream.getVideoTracks()[0].enabled = false;
+      else myStream.getVideoTracks()[0].enabled = true;
     }
   };
 
   const muteUnmute = () => {
-    if (myVideoStream) {
-      if (myVideoStream.getAudioTracks().length === 0) return;
-      const enabled = myVideoStream.getAudioTracks()[0].enabled;
+    if (myStream) {
+      if (myStream.getAudioTracks().length === 0) return;
+      const enabled = myStream.getAudioTracks()[0].enabled;
       setIcons({ ...icons, audio: !icons.audio });
-      if (enabled) myVideoStream.getAudioTracks()[0].enabled = false;
-      else myVideoStream.getAudioTracks()[0].enabled = true;
+      if (enabled) myStream.getAudioTracks()[0].enabled = false;
+      else myStream.getAudioTracks()[0].enabled = true;
     }
   };
 
@@ -105,12 +199,12 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
           });
         });
 
-        setMyVideoStream(stream);
+        setMyStream(stream);
 
         myPeer.current.on('call', function (call) {
           call.answer(stream, { metadata: socket.id });
           call.on('stream', function (callStream) {
-            setVideoStream(callStream);
+            setPeerStream(callStream);
           });
         });
 
@@ -123,9 +217,18 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
         });
 
         socket.on('user-disconnected', () => {
-          if (peerRef.current) peerRef.current.close();
-          peerRef.current = null;
-          setVideoStream(null);
+          if (peerVideoRef.current) peerVideoRef.current.close();
+          peerVideoRef.current = null;
+          setPeerStream(null);
+        });
+
+        socket.on('game-begin', () => {
+          getRoundInput();
+          console.log('game begin!');
+        });
+
+        socket.on('round-outcome', (outcome) => {
+          console.log('round outcome: ', outcome);
         });
 
         function connectToNewUser(userId, stream, userSocketId) {
@@ -134,16 +237,16 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
           });
           if (call) {
             call.on('stream', (userVideoStream) =>
-              setVideoStream(userVideoStream)
+              setPeerStream(userVideoStream)
             );
             call.on('close', (e) => {
               call.removeAllListeners();
               call.close();
-              peerRef.current.close();
-              peerRef.current.removeAllListeners();
+              peerVideoRef.current.close();
+              peerVideoRef.current.removeAllListeners();
             });
 
-            peerRef.current = call;
+            peerVideoRef.current = call;
           }
         }
       });
@@ -152,9 +255,12 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   return (
     <div className={classes.connect}>
       <div className={classes.videochat}>
-        <Webcam ref={webcamRef} onUserMedia={handleUserMedia} />
+        <Webcam ref={myCamRef} onUserMedia={handleUserMedia} />
 
-        {videoStream && videoStream.active && <Video stream={videoStream} />}
+        {peerStream && peerStream.active && (
+          <Video stream={peerStream} display={display} />
+        )}
+        <div>{userChoice}</div>
 
         <div className={classes.controls}>
           <div className={classes.controlsBlock}>
@@ -194,7 +300,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   );
 };
 
-const Video = ({ stream }) => {
+const Video = ({ stream, display }) => {
   const classes = useStyles();
   const ref = useRef();
   useEffect(() => {
@@ -206,7 +312,11 @@ const Video = ({ stream }) => {
       autoPlay
       ref={ref}
       className={classes.peerVideo}
-      style={{ width: '20rem', height: '20rem' }}
+      style={{
+        width: '20rem',
+        height: '20rem',
+        display: display ? 'inherit' : 'none',
+      }}
     />
   );
 };

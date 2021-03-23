@@ -25,7 +25,6 @@ const BattleFriends = () => {
           props={{ friend: sender._id === id ? receiver : sender, _id }}
         />
       ))}
-      )
     </div>
   );
 };
