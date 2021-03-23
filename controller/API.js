@@ -72,18 +72,7 @@ const API = {
           },
           { new: true }
         ),
-      // throwChoice: (id, userId, userChoice) =>
-      //   Friendship.findByIdAndUpdate(
-      //     id,
-      //     {
-      //       $push: {
-      //         'gameState.choices': {
-      //           [userId]: userChoice,
-      //         },
-      //       },
-      //     },
-      //     { new: true }
-      //   ),
+
       throwChoice: (id, userId, userChoice, round) =>
         Friendship.findByIdAndUpdate(
           id,
@@ -98,11 +87,15 @@ const API = {
         Friendship.findByIdAndUpdate(
           id,
           {
-            $set: { [`gameState.${loser}`]: health, round: round + 1 },
+            $set: {
+              [`gameState.${loser}`]: health,
+              'gameState.round': round + 1,
+            },
           },
           { new: true }
         ),
-
+      roundTie: (id) =>
+        Friendship.findByIdAndUpdate(id, { $inc: { 'gameState.round': 1 } }),
       // clearChoiceState: (id) => Friendship.findByIdAndUpdate(id, {$set: {"gameState.waitingChoice":{} } })
     },
   },

@@ -80,6 +80,10 @@ mongoose
         }
       }
 
+      socket.on('leave-room', (roomId) => {
+        socket.leave(roomId);
+      });
+
       socket.on('join-room', ({ roomId, mySocketId, peerId }) => {
         socket.join(roomId);
 
@@ -91,7 +95,7 @@ mongoose
         if (roomCount === 2) {
           io.to(roomId).emit('game-begin');
         } else {
-          console.log('should init state');
+          console.log('init state');
           API.friendship.findById(roomId).then(({ participants }) => {
             API.friendship.game
               .initState(roomId, participants[0], participants[1])
@@ -109,6 +113,7 @@ mongoose
                     'CHOICE THROW RESULT, updated state: ',
                     gameState.choices[0]
                   );
+                  console.log('ROUND: ', round);
 
                   const roundChoices = gameState.choices[gameState.round];
                   const userIds = Object.keys(roundChoices);
@@ -122,37 +127,35 @@ mongoose
                     function outcome(winner, loser, damage) {
                       console.log('outcome: ', { winner, loser, damage });
                       console.log('outcome gameState: ', gameState);
-                      if (gameState[loser] - damage <= 0) {
-                        // fight is over, declare winner
-                        console.log('winner: ', winner);
-                      } else {
-                        // deal damage and increase round by one
-                        API.friendship.game
-                          .roundOutcome(
-                            roomId,
+                      const gameOver = gameState[loser] - damage <= 0;
+                      console.log('game over? ', gameOver);
+                      // deal damage and increase round by one
+                      API.friendship.game
+                        .roundOutcome(
+                          roomId,
+                          loser,
+                          gameState[loser] - damage,
+                          gameState.round
+                        )
+                        .then((updated) => {
+                          console.log('NEW STATE: ', updated);
+                          io.to(roomId).emit('round-outcome', {
+                            winner,
                             loser,
-                            gameState[loser] - damage,
-                            gameState.round
-                          )
-                          .then((newState) => {
-                            console.log('NEW STATE: ', newState);
-                            io.to(roomId).emit('round-outcome', {
-                              winner,
-                              loser,
-                              newState,
-                              [user1]: user1Choice,
-                              [user2]: user2Choice,
-                            });
-                            //send back newState to both users
-                          })
-                          .catch((err) => {
-                            console.log(
-                              'API.friendship.game.roundOutcome ERROR: ',
-                              err
-                            );
-                            // send back error
+                            newState: updated.gameState,
+                            gameOver,
+                            [user1]: user1Choice,
+                            [user2]: user2Choice,
                           });
-                      }
+                          //send back newState to both users
+                        })
+                        .catch((err) => {
+                          console.log(
+                            'API.friendship.game.roundOutcome ERROR: ',
+                            err
+                          );
+                          // send back error
+                        });
                     }
 
                     if (user1Weapon.beats.includes(user2Choice)) {
@@ -162,12 +165,9 @@ mongoose
                       // user2 wins this round
                       outcome(user2, user1, 20);
                     } else {
-                      // tie
-                      console.log(
-                        'tie, but lets pretend user1 wins for testing:  '
-                      );
-                      outcome(user1, user2, 20);
-                      // io.to(roomId).emit('round-outcome', { tie: true });
+                      API.friendship.game.roundTie(roomId).then(() => {
+                        io.to(roomId).emit('round-outcome', { tie: true });
+                      });
                     }
                   }
                 });

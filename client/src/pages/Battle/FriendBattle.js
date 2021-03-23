@@ -31,31 +31,22 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   const [chatInput, setChatInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [count, setCount] = useState(null);
-  const [userChoice, setUserChoice] = useState(null);
+  const [myChoice, setMyChoice] = useState(null);
   const scrollRef = useRef();
   const myPeer = useRef();
   const [handPoseNet, setHandPoseNet] = useState(null);
 
+  const [myHealth, setMyHealth] = useState(100);
+  const [friendHealth, setFriendHealth] = useState(100);
+  const [friendChoice, setFriendChoice] = useState(null);
+  const [gameRunning, setGameRunning] = useState(false);
+  const [winner, setWinner] = useState(null);
+  const [roundProcessing, setRoundProcessing] = useState(false);
   useEffect(() => {
-    async function loadHandPose() {
-      const net = await handpose.load();
-      setHandPoseNet(net);
-      //   detect(net);
-    }
-    loadHandPose();
+    return () => socket.emit('leave-room', friendshipId);
   }, []);
 
-  //   const detectHand = () => {
-  //           const video = myCamRef.current.video;
-  //           const videoWidth = myCamRef.current.video.videoWidth;
-  //           const videoHeight = myCamRef.current.video.videoHeight;
-  //           myCamRef.current.video.width = videoWidth;
-  //           myCamRef.current.video.height = videoHeight;
-  //             const hand = await net.estimateHands(video);
-  //   }
-
   const detect = async (net) => {
-    // console.log('detect!');
     if (
       typeof myCamRef.current !== 'undefined' &&
       myCamRef.current !== null &&
@@ -68,9 +59,9 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
       myCamRef.current.video.height = videoHeight;
 
       // Detect hand
+      if (!net) return;
       const hand = await net.estimateHands(video);
       // If there's a hand estimate gesture
-
       if (hand.length > 0) {
         const GE = new fp.GestureEstimator([
           gestures.scissors,
@@ -100,9 +91,8 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
     if (count === null) return;
     if (count > 0) {
       const getHandPose = async () => {
-        const userChoice = await detect(handPoseNet);
-        if (userChoice) console.log(userChoice);
-        if (userChoice) setUserChoice(userChoice);
+        const myChoice = await detect(handPoseNet);
+        if (myChoice) setMyChoice(myChoice);
       };
       getHandPose();
 
@@ -110,19 +100,20 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
         setCount((c) => c - 1);
       }, 1000);
     } else {
-      if (!userChoice) return setCount(40);
+      if (!myChoice) return setCount(40);
       socket.emit('user-choice', {
         roomId: friendshipId,
         userId: id,
-        userChoice,
+        userChoice: myChoice,
       });
       setCount(null);
     }
   }, [count]);
 
   const getRoundInput = () => {
+    console.log('get round input');
     setDisplayFriend(false);
-    setCount(5);
+    setCount(10);
   };
 
   useEffect(() => {
@@ -184,15 +175,22 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   }, [messages]);
 
   const handleUserMedia = (stream) => {
+    async function loadHandPose() {
+      const net = await handpose.load();
+      setHandPoseNet(net);
+      //   detect(net);
+    }
+    loadHandPose();
+
     axios
       .get(`/api/battle/connect/${friendshipId}`, {
         headers: { 'x-auth-token': token },
       })
       .then(async ({ data }) => {
         myPeer.current = new Peer();
-        myPeer.current.on('open', (id) => {
+        myPeer.current.on('open', (peerId) => {
           socket.emit('join-room', {
-            peerId: id,
+            peerId: peerId,
             mySocketId: socket.id,
             roomId: data.roomId,
             token: token,
@@ -223,12 +221,51 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
         });
 
         socket.on('game-begin', () => {
-          getRoundInput();
-          console.log('game begin!');
+          if (!gameRunning) {
+            setGameRunning(true);
+            getRoundInput();
+            console.log('game begin!');
+          }
         });
 
         socket.on('round-outcome', (outcome) => {
-          console.log('round outcome: ', outcome);
+          if (!roundProcessing) {
+            setRoundProcessing(true);
+            console.log('round outcome: ', outcome);
+
+            setDisplayFriend(true);
+            if (outcome.tie) {
+              console.log('tie!');
+              setFriendChoice(myChoice);
+            } else {
+              const {
+                winner,
+                loser,
+                newState,
+                gameOver,
+                ...roundChoices
+              } = outcome;
+
+              const { round, choices, ...health } = newState;
+              for (let key in health) {
+                if (key === id) setMyHealth(health[key]);
+                else {
+                  setFriendChoice(roundChoices[key]);
+                  setFriendHealth(health[key]);
+                }
+              }
+            }
+
+            if (outcome.gameOver) {
+              setGameRunning(false);
+              setWinner(winner);
+            } else {
+              setTimeout(() => {
+                setRoundProcessing(false);
+                getRoundInput();
+              }, 10000);
+            }
+          }
         });
 
         function connectToNewUser(userId, stream, userSocketId) {
@@ -260,7 +297,10 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
         {peerStream && peerStream.active && (
           <Video stream={peerStream} display={display} />
         )}
-        <div>{userChoice}</div>
+        <div>myChoice: {myChoice}</div>
+        <div>myHealth: {myHealth}</div>
+        <div>friendHealth: {friendHealth}</div>
+        <div>friendChoice: {friendChoice}</div>
 
         <div className={classes.controls}>
           <div className={classes.controlsBlock}>
