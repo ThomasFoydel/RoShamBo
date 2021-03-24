@@ -43,19 +43,15 @@ const API = {
         $and: [{ status: 'pending' }, { receiver: id }],
       }).populate('sender'),
     accept: (id) =>
-      Friendship.findOneAndUpdate(
-        { _id: id },
-        { status: 'accepted' },
-        { new: true }
-      ),
+      Friendship.findByIdAndUpdate(id, { status: 'accepted' }, { new: true }),
     reject: (id) =>
-      Friendship.findOneAndUpdate(
-        { _id: id },
-        { status: 'rejected' },
-        { new: true }
-      ),
+      Friendship.findByIdAndUpdate(id, { status: 'rejected' }, { new: true }),
 
     game: {
+      start: (id) =>
+        Friendship.findByIdAndUpdate(id, {
+          $set: { 'gameState.gameRunning': true },
+        }),
       getState: (id) => Friendship.findById(id).select('gameState'),
       initState: (id, user1, user2) =>
         Friendship.findByIdAndUpdate(
@@ -63,6 +59,7 @@ const API = {
           {
             $set: {
               gameState: {
+                gameRunning: false,
                 [user1]: 100,
                 [user2]: 100,
                 round: 0,
@@ -83,20 +80,24 @@ const API = {
           },
           { new: true }
         ),
-      roundOutcome: (id, loser, health, round) =>
-        Friendship.findByIdAndUpdate(
+      roundOutcome: (id, loser, health, round, gameOver) => {
+        const update = {
+          [`gameState.${loser}`]: health,
+          'gameState.round': round + 1,
+        };
+        if (gameOver) {
+          update['gameState.gameRunning'] = false;
+        }
+        return Friendship.findByIdAndUpdate(
           id,
           {
-            $set: {
-              [`gameState.${loser}`]: health,
-              'gameState.round': round + 1,
-            },
+            $set: update,
           },
           { new: true }
-        ),
+        );
+      },
       roundTie: (id) =>
         Friendship.findByIdAndUpdate(id, { $inc: { 'gameState.round': 1 } }),
-      // clearChoiceState: (id) => Friendship.findByIdAndUpdate(id, {$set: {"gameState.waitingChoice":{} } })
     },
   },
 };

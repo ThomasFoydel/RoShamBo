@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+let Friendship;
 const friendshipSchema = mongoose.Schema(
   {
     sender: {
@@ -24,6 +24,7 @@ const friendshipSchema = mongoose.Schema(
     },
     gameState: {
       type: Object,
+      default: {},
     },
   },
   { timestamps: true }
@@ -34,4 +35,5 @@ friendshipSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('Friendship', friendshipSchema);
+Friendship = mongoose.model('Friendship', friendshipSchema);
+module.exports = Friendship;
