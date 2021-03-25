@@ -32,4 +32,17 @@ export default createMuiTheme({
       color: 'white',
     },
   },
+
+  healthbarContainer: {
+    width: '90%',
+    background: '#db3030',
+    marginLeft: '50%',
+    transform: 'translateX(-50%)',
+    position: 'relative',
+  },
+  healthbar: {
+    background: '#1a9c17',
+    height: '4rem',
+    transition: 'all 0.5s ease',
+  },
 });

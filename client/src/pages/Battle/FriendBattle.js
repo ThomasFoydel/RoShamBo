@@ -6,11 +6,76 @@ import * as handpose from '@tensorflow-models/handpose';
 import * as fp from 'fingerpose';
 import gestures from './gestures';
 import Webcam from 'react-webcam';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, Grid } from '@material-ui/core';
 import { Stop, PlayArrow, Mic, MicOff } from '@material-ui/icons';
 import { CTX } from 'context/Store';
 
-const useStyles = makeStyles(() => ({ camContainer: { display: 'flex' } }));
+const useStyles = makeStyles((theme) => ({
+  playerContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+  },
+
+  myVideo: { maxHeight: '100%', maxWidth: '100%' },
+  friendVideo: {
+    maxHeight: '100%',
+    maxWidth: '100%',
+  },
+  healthbarContainer: { ...theme.healthbarContainer, width: '100%' },
+  healthbar: {
+    ...theme.healthbar,
+
+    [theme.breakpoints.down('sm')]: {
+      height: '3rem',
+    },
+  },
+  playerName: {
+    textAlign: 'center',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translateX(-50%) translateY(-50%)',
+    fontFamily: 'OpenDyslexic',
+    fontSize: '2rem',
+    letterSpacing: '.2rem',
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  controls: {
+    position: 'absolute',
+    right: 0,
+    bottom: '4rem',
+    [theme.breakpoints.down('sm')]: {
+      bottom: '3rem',
+    },
+  },
+  messenger: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+  },
+  window: {
+    background: 'rgba(255,255,255,0.2)',
+    height: '11rem',
+    overflow: 'scroll',
+  },
+  messages: {},
+  message: {
+    background: 'rgba(0,0,0,0.3)',
+    padding: '.1rem',
+    margin: '.1rem',
+  },
+  dialog: {
+    minWidth: '4rem',
+    minHeight: '4rem',
+    background: 'purple',
+    color: 'white',
+    fontFamily: 'OpenDyslexic',
+    textAlign: 'center',
+    fontSize: '1rem',
+  },
+}));
 
 const FriendBattle = ({ props: { socketRef, match } }) => {
   const [appState] = useContext(CTX);
@@ -45,7 +110,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   useEffect(() => {
     return () => {
       socket.off('user-connected');
-      socket.off('create-message');
+      socket.off('friendbattle-message');
       socket.off('user-disconnected');
       socket.off('game-begin');
       socket.off('round-outcome');
@@ -153,8 +218,12 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   };
 
   const handleSubmit = () => {
-    socket.emit('message', { content: chatInput, name });
-    setChatInput('');
+    socket.emit('friendbattle-message', {
+      content: chatInput,
+      name,
+      roomId: friendshipId,
+    });
+    // setChatInput('');
   };
   const handleChatInput = (e) => {
     let { value } = e.target;
@@ -193,6 +262,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
       })
       .then(async ({ data }) => {
         myPeer.current = new Peer();
+
         myPeer.current.on('open', (peerId) => {
           socket.emit('join-room', {
             peerId: peerId,
@@ -215,7 +285,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
           if (userId) connectToNewUser(userId, stream, mySocketId);
         });
 
-        socket.on('create-message', (message) => {
+        socket.on('friendbattle-message', (message) => {
           setMessages((messages) => [...messages, message]);
         });
 
@@ -320,52 +390,106 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   return (
     <div className={classes.connect}>
       <div className={classes.videochat}>
-        <div className={classes.camContainer}>
-          <Webcam ref={myCamRef} onUserMedia={handleUserMedia} />
+        <Grid container direction='column'>
+          <Grid item>
+            <Grid
+              container
+              alignItems='stretch'
+              direction='row'
+              className={classes.friendCamContainer}
+            >
+              <Grid item xs={12} sm={12} md={5} lg={5}>
+                <div className={classes.playerContainer}>
+                  {/*/// FOR STYLING ONLY PURPOSES. TO BE DELETED:*/}
+                  <Webcam
+                    className={classes.friendVideo}
+                    ref={myCamRef}
+                    // onUserMedia={handleUserMedia}
+                  />
+                  {/* ////// To be put back: */}
+                  {/* {peerStream && peerStream.active && (
+                      <Video stream={peerStream} display={display} />
+                    )} */}
 
-          {peerStream && peerStream.active && (
-            <Video stream={peerStream} display={display} />
-          )}
-        </div>
-        <div>myChoice: {myChoice}</div>
-        <div>myHealth: {myHealth}</div>
-        <div>friendHealth: {friendHealth}</div>
-        <div>friendChoice: {friendChoice}</div>
-        <div>winner: {winner}</div>
-        {winner && <button onClick={playAgain}>play again</button>}
-        <div className={classes.controls}>
-          <div className={classes.controlsBlock}>
-            <button onClick={playStop} className={classes.controlBtn}>
-              {!icons.video ? <Stop /> : <PlayArrow />}
-              <span>{!icons.video ? 'stop' : 'start'}</span>
-            </button>
-            <button className={classes.controlBtn} onClick={muteUnmute}>
-              {!icons.audio ? <Mic /> : <MicOff />}
-              <span> {!icons.audio ? 'Mute' : 'Unmute'}</span>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className={classes.messenger}>
-        <div className={classes.window}>
-          <ul className={classes.messages}>
-            {messages.map((message, i) => (
-              <li key={i}>
-                <strong>{message.name}</strong>: {message.content}
-              </li>
-            ))}
-            <div ref={scrollRef} />
-          </ul>
-        </div>
-        <div className={classes.messageContainer}>
-          <input
-            onKeyPress={handleKeyDown}
-            onChange={handleChatInput}
-            value={chatInput}
-            type='text'
-            placeholder='message...'
-          />
-        </div>
+                  <div item className={classes.healthbarContainer}>
+                    <div
+                      className={classes.healthbar}
+                      style={{ width: `${friendHealth}%` }}
+                    ></div>
+                    <div className={classes.playerName}>cedric</div>
+                  </div>
+                </div>
+              </Grid>
+              <Grid item xs={12} md={2} sm={6} lg={2}>
+                <div className={classes.dialog}>
+                  <h3 className={classes.dialogTitle}>FRIEND BATTLE</h3>
+                  {winner && (
+                    <>
+                      <div>winner: {winner}</div>
+                      <button onClick={playAgain}>play again</button>
+                    </>
+                  )}
+                  <div className={classes.chatSection}>
+                    <div className={classes.messenger}>
+                      <div className={classes.window}>
+                        <ul className={classes.messages}>
+                          {messages.map((message, i) => (
+                            <li key={i} className={classes.message}>
+                              <strong>{message.name}</strong>: {message.content}
+                            </li>
+                          ))}
+                          <div ref={scrollRef} />
+                        </ul>
+                      </div>
+
+                      <input
+                        className={classes.messageInput}
+                        onKeyPress={handleKeyDown}
+                        onChange={handleChatInput}
+                        value={chatInput}
+                        type='text'
+                        placeholder='message...'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Grid>
+
+              <Grid item item item xs={12} sm={6} md={5} lg={5}>
+                <div className={classes.playerContainer}>
+                  <Webcam
+                    className={classes.myVideo}
+                    ref={myCamRef}
+                    onUserMedia={handleUserMedia}
+                  />
+                  <div className={classes.controls}>
+                    <div className={classes.controlsBlock}>
+                      <button onClick={playStop} className={classes.controlBtn}>
+                        {!icons.video ? <Stop /> : <PlayArrow />}
+                        <span>{!icons.video ? 'stop' : 'start'}</span>
+                      </button>
+                      <button
+                        className={classes.controlBtn}
+                        onClick={muteUnmute}
+                      >
+                        {!icons.audio ? <Mic /> : <MicOff />}
+                        <span> {!icons.audio ? 'Mute' : 'Unmute'}</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className={classes.healthbarContainer}>
+                    <div
+                      className={classes.healthbar}
+                      style={{ width: `${myHealth}%` }}
+                    ></div>
+                    <div className={classes.playerName}>cedric</div>
+                  </div>
+                </div>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Grid>
       </div>
     </div>
   );

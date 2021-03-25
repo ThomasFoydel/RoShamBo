@@ -101,6 +101,10 @@ mongoose
         socket.leave(roomId);
       });
 
+      socket.on('friendbattle-message', ({ content, name, roomId }) => {
+        io.to(roomId).emit('friendbattle-message', { content, name });
+      });
+
       socket.on('join-room', ({ roomId, mySocketId, peerId }) => {
         socket.join(roomId);
 
@@ -186,10 +190,6 @@ mongoose
                   }
                 });
             });
-        });
-
-        socket.on('message', (message) => {
-          io.to(roomId).emit('create-message', message);
         });
 
         socket.on('disconnect-room', (id) => {
