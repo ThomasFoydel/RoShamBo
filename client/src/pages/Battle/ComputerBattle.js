@@ -155,8 +155,8 @@ const useStyles = makeStyles((theme) => ({
     background: theme.palette.common.blue,
   },
   healthbarContainer: {
+    ...theme.healthbarContainer,
     width: '90%',
-    background: '#db3030',
     marginLeft: '50%',
     transform: 'translateX(-50%)',
   },

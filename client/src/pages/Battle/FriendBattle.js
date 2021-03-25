@@ -9,20 +9,30 @@ import Webcam from 'react-webcam';
 import { makeStyles, Grid } from '@material-ui/core';
 import { Stop, PlayArrow, Mic, MicOff } from '@material-ui/icons';
 import { CTX } from 'context/Store';
+import weaponImgs from 'imgs/weapons';
 
 const useStyles = makeStyles((theme) => ({
-  playerContainer: {
-    display: 'flex',
-    flexDirection: 'column',
+  playerContainer: {},
+  videoContainer: {
+    background: 'black',
     position: 'relative',
   },
 
-  myVideo: { maxHeight: '100%', maxWidth: '100%' },
   friendVideo: {
-    maxHeight: '100%',
-    maxWidth: '100%',
+    display: 'block',
+    width: '100%',
+    transition: 'all .8s ease',
   },
-  healthbarContainer: { ...theme.healthbarContainer, width: '100%' },
+  myVideo: {
+    width: '100%',
+    display: 'block',
+  },
+
+  healthbarContainer: {
+    width: '100%',
+    background: '#db3030',
+    position: 'relative',
+  },
   healthbar: {
     ...theme.healthbar,
 
@@ -45,10 +55,7 @@ const useStyles = makeStyles((theme) => ({
   controls: {
     position: 'absolute',
     right: 0,
-    bottom: '4rem',
-    [theme.breakpoints.down('sm')]: {
-      bottom: '3rem',
-    },
+    bottom: 0,
   },
   messenger: {
     display: 'flex',
@@ -223,7 +230,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
       name,
       roomId: friendshipId,
     });
-    // setChatInput('');
+    setChatInput('');
   };
   const handleChatInput = (e) => {
     let { value } = e.target;
@@ -399,26 +406,25 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
               className={classes.friendCamContainer}
             >
               <Grid item xs={12} sm={12} md={5} lg={5}>
-                <div className={classes.playerContainer}>
-                  {/*/// FOR STYLING ONLY PURPOSES. TO BE DELETED:*/}
-                  <Webcam
-                    className={classes.friendVideo}
-                    ref={myCamRef}
-                    // onUserMedia={handleUserMedia}
-                  />
-                  {/* ////// To be put back: */}
-                  {/* {peerStream && peerStream.active && (
+                <Grid
+                  container
+                  direction='column'
+                  alignItems='center'
+                  className={classes.playerContainer}
+                >
+                  <Grid item className={classes.videoContainer}>
+                    {peerStream && peerStream.active && (
                       <Video stream={peerStream} display={display} />
-                    )} */}
-
-                  <div item className={classes.healthbarContainer}>
+                    )}
+                  </Grid>
+                  <Grid item className={classes.healthbarContainer}>
                     <div
                       className={classes.healthbar}
                       style={{ width: `${friendHealth}%` }}
                     ></div>
                     <div className={classes.playerName}>cedric</div>
-                  </div>
-                </div>
+                  </Grid>
+                </Grid>
               </Grid>
               <Grid item xs={12} md={2} sm={6} lg={2}>
                 <div className={classes.dialog}>
@@ -456,36 +462,46 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
               </Grid>
 
               <Grid item item item xs={12} sm={6} md={5} lg={5}>
-                <div className={classes.playerContainer}>
-                  <Webcam
-                    className={classes.myVideo}
-                    ref={myCamRef}
-                    onUserMedia={handleUserMedia}
-                  />
-                  <div className={classes.controls}>
-                    <div className={classes.controlsBlock}>
-                      <button onClick={playStop} className={classes.controlBtn}>
-                        {!icons.video ? <Stop /> : <PlayArrow />}
-                        <span>{!icons.video ? 'stop' : 'start'}</span>
-                      </button>
-                      <button
-                        className={classes.controlBtn}
-                        onClick={muteUnmute}
-                      >
-                        {!icons.audio ? <Mic /> : <MicOff />}
-                        <span> {!icons.audio ? 'Mute' : 'Unmute'}</span>
-                      </button>
+                <Grid
+                  container
+                  direction='column'
+                  alignItems='center'
+                  className={classes.playerContainer}
+                >
+                  <Grid item className={classes.videoContainer}>
+                    <Webcam
+                      className={classes.myVideo}
+                      ref={myCamRef}
+                      onUserMedia={handleUserMedia}
+                    />
+                    <div className={classes.controls}>
+                      <div className={classes.controlsBlock}>
+                        <button
+                          onClick={playStop}
+                          className={classes.controlBtn}
+                        >
+                          {!icons.video ? <Stop /> : <PlayArrow />}
+                          <span>{!icons.video ? 'stop' : 'start'}</span>
+                        </button>
+                        <button
+                          className={classes.controlBtn}
+                          onClick={muteUnmute}
+                        >
+                          {!icons.audio ? <Mic /> : <MicOff />}
+                          <span> {!icons.audio ? 'Mute' : 'Unmute'}</span>
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  </Grid>
 
-                  <div className={classes.healthbarContainer}>
+                  <Grid item className={classes.healthbarContainer}>
                     <div
                       className={classes.healthbar}
                       style={{ width: `${myHealth}%` }}
                     ></div>
                     <div className={classes.playerName}>cedric</div>
-                  </div>
-                </div>
+                  </Grid>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>
@@ -506,12 +522,8 @@ const Video = ({ stream, display }) => {
       playsInline
       autoPlay
       ref={ref}
-      className={classes.peerVideo}
-      style={{
-        width: '20rem',
-        height: '20rem',
-        opacity: display ? 1 : 0,
-      }}
+      className={classes.friendVideo}
+      style={{ opacity: display ? 1 : 0 }}
     />
   );
 };
