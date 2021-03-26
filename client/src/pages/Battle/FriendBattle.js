@@ -116,7 +116,7 @@ const useStyles = makeStyles((theme) => ({
     cursor: 'pointer',
     fontFamily: 'OpenDyslexic',
     fontWeight: 'bold',
-    margin: '.1rem',
+    margin: '.2rem .1rem',
   },
   messenger: {
     display: 'flex',
@@ -182,6 +182,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   const [myStream, setMyStream] = useState(null);
   const peerVideoRef = useRef();
   const [peerStream, setPeerStream] = useState(null);
+  const [friendData, setFriendData] = useState({});
 
   const [chatInput, setChatInput] = useState('');
   const [messages, setMessages] = useState([]);
@@ -350,6 +351,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
       })
       .then(async ({ data }) => {
         myPeer.current = new Peer();
+        for (let user of data.users) user._id !== id && setFriendData(user);
 
         myPeer.current.on('open', (peerId) => {
           socket.emit('join-room', {
@@ -517,7 +519,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                     className={classes.healthbar}
                     style={{ width: `${friendHealth}%` }}
                   ></div>
-                  <div className={classes.playerName}>cedric</div>
+                  <div className={classes.playerName}>{friendData.name}</div>
                 </Grid>
               </Grid>
             </Grid>

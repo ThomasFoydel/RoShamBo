@@ -25,7 +25,7 @@ const API = {
   },
   friendship: {
     create: (sender, receiver) => Friendship.create({ sender, receiver }),
-    findById: (id) => Friendship.findById(id),
+    findById: (id) => Friendship.findById(id).populate('sender receiver'),
     findByReceiver: (id) => Friendship.find({ receiver: id }),
     findByUsers: (user1, user2) =>
       Friendship.findOne({

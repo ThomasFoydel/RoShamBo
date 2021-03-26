@@ -8,9 +8,11 @@ router.get('/connect/:friendshipId', auth, async (req, res) => {
   const { userId } = req.tokenUser;
   API.friendship
     .findById(friendshipId)
-    .then((friendship) => {
-      if (friendship.participants.includes(userId)) {
-        return res.status(200).send({ success: true, roomId: friendship._id });
+    .then(({ participants, _id, sender, receiver }) => {
+      if (participants.includes(userId)) {
+        return res
+          .status(200)
+          .send({ success: true, roomId: _id, users: [sender, receiver] });
       } else return res.sendStatus(401);
     })
     .catch(() => {
