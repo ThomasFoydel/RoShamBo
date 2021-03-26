@@ -89,9 +89,7 @@ mongoose
               if (round !== 0) {
                 API.friendship.game
                   .initState(roomId, participants[0], participants[1])
-                  .then((r) => {
-                    io.to(roomId).emit('game-begin');
-                  });
+                  .then(() => io.to(roomId).emit('game-begin'));
               }
             });
         }
@@ -118,78 +116,81 @@ mongoose
             if (foundFriendship.gameState.gameRunning) {
               io.to(socket.id).emit('game-resume', foundFriendship.gameState);
             } else {
-              API.friendship.game.start(roomId).then(() => {
-                io.to(roomId).emit('game-begin');
-              });
+              API.friendship.game
+                .start(roomId)
+                .then(() => io.to(roomId).emit('game-begin'));
             }
           });
         } else {
-          API.friendship.findById(roomId).then(({ participants }) => {
-            API.friendship.game.initState(
-              roomId,
-              participants[0],
-              participants[1]
+          API.friendship
+            .findById(roomId)
+            .then(({ participants }) =>
+              API.friendship.game.initState(
+                roomId,
+                participants[0],
+                participants[1]
+              )
             );
-          });
         }
         socket.on('user-choice', ({ roomId, userId, userChoice }) => {
-          API.friendship.game
-            .getState(roomId)
-            .then(({ gameState: { round } }) => {
-              API.friendship.game
-                .throwChoice(roomId, userId, userChoice, round)
-                .then(({ gameState }) => {
-                  const roundChoices = gameState.choices[gameState.round];
-                  const userIds = Object.keys(roundChoices);
-                  if (userIds.length === 2) {
-                    const [user1, user2] = userIds;
-                    const user1Choice = roundChoices[user1];
-                    const user2Choice = roundChoices[user2];
-                    const user1Weapon = weapons[user1Choice];
-                    const user2Weapon = weapons[user2Choice];
+          API.friendship.game.getState(roomId).then(({ gameState }) => {
+            API.friendship.game
+              .throwChoice(roomId, userId, userChoice, gameState.round)
+              .then(({ gameState }) => {
+                const roundChoices = gameState.choices[gameState.round];
+                const userIds = Object.keys(roundChoices);
+                if (userIds.length === 2) {
+                  const [user1, user2] = userIds;
+                  const user1Choice = roundChoices[user1];
+                  const user2Choice = roundChoices[user2];
+                  const user1Weapon = weapons[user1Choice];
+                  const user2Weapon = weapons[user2Choice];
 
-                    function outcome(winner, loser, damage) {
-                      const gameOver = gameState[loser] - damage <= 0;
+                  function outcome(winner, loser, damage) {
+                    const gameOver = gameState[loser] - damage <= 0;
 
-                      const losersNewHealth =
-                        gameState[loser] - damage > 0
-                          ? gameState[loser] - damage
-                          : 0;
+                    const losersNewHealth =
+                      gameState[loser] - damage > 0
+                        ? gameState[loser] - damage
+                        : 0;
 
-                      API.friendship.game
-                        .roundOutcome(
-                          roomId,
+                    API.friendship.game
+                      .roundOutcome(
+                        roomId,
+                        loser,
+                        losersNewHealth,
+                        Number(gameState.round),
+                        gameOver
+                      )
+                      .then((updated) => {
+                        io.to(roomId).emit('round-outcome', {
+                          winner,
                           loser,
-                          losersNewHealth,
-                          gameState.round,
-                          gameOver
-                        )
-                        .then((updated) => {
-                          io.to(roomId).emit('round-outcome', {
-                            winner,
-                            loser,
-                            newState: updated.gameState,
-                            gameOver,
-                            [user1]: user1Choice,
-                            [user2]: user2Choice,
-                          });
+                          newState: updated.gameState,
+                          gameOver,
+                          [user1]: user1Choice,
+                          [user2]: user2Choice,
                         });
-                    }
-
-                    if (user1Weapon.beats.includes(user2Choice)) {
-                      // user1 wins this round
-                      outcome(user1, user2, 20);
-                    } else if (user2Weapon.beats.includes(user1Choice)) {
-                      // user2 wins this round
-                      outcome(user2, user1, 20);
-                    } else {
-                      API.friendship.game.roundTie(roomId).then(() => {
-                        io.to(roomId).emit('round-outcome', { tie: true });
                       });
-                    }
                   }
-                });
-            });
+
+                  if (user1Weapon.beats.includes(user2Choice)) {
+                    // user1 wins this round
+                    outcome(user1, user2, 20);
+                  } else if (user2Weapon.beats.includes(user1Choice)) {
+                    // user2 wins this round
+                    outcome(user2, user1, 20);
+                  } else {
+                    API.friendship.game.roundTie(roomId).then(() => {
+                      io.to(roomId).emit('round-outcome', {
+                        tie: true,
+                        tieWeapon: user1Choice,
+                      });
+                    });
+                  }
+                }
+              });
+          });
         });
 
         socket.on('disconnect-room', (id) => {

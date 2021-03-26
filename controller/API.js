@@ -69,7 +69,6 @@ const API = {
           },
           { new: true }
         ),
-
       throwChoice: (id, userId, userChoice, round) =>
         Friendship.findByIdAndUpdate(
           id,

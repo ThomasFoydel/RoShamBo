@@ -10,35 +10,82 @@ import { makeStyles, Grid } from '@material-ui/core';
 import { Stop, PlayArrow, Mic, MicOff } from '@material-ui/icons';
 import { CTX } from 'context/Store';
 import weaponImgs from 'imgs/weapons';
+import loadingblue from 'imgs/loadingblue.gif';
 
 const useStyles = makeStyles((theme) => ({
-  playerContainer: {},
-  videoContainer: {
-    background: 'black',
-    position: 'relative',
+  playerContainer: {
+    height: '100%',
+    maxHeight: '100%',
+    minHeight: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    padding: '0 .4rem',
+    background: theme.palette.primary.dark,
+    border: `2px solid ${theme.palette.primary.dark}`,
+    [theme.breakpoints.down('sm')]: {
+      height: 'inherit',
+      border: 'none',
+      padding: '0',
+    },
   },
-
-  friendVideo: {
-    display: 'block',
-    width: '100%',
-    transition: 'all .8s ease',
+  videoContainer: {
+    position: 'relative',
+    display: 'flex',
+    minHeight: '80%',
+    maxHeight: '80%',
+    borderRadius: '3rem 3rem 0 0',
+    overflow: 'hidden',
   },
   myVideo: {
     width: '100%',
     display: 'block',
+    maxWidth: '100%',
+    minHeight: '100%',
+    maxHeight: '100%',
+    objectFit: 'cover',
+  },
+
+  friendVideo: {
+    width: '100%',
+    display: 'block',
+    minWidth: '100%',
+    maxHeight: '100%',
+    minHeight: '100%',
+    objectFit: 'cover',
+
+    transition: 'all .8s ease',
+  },
+  iconLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+  },
+
+  friendChoiceIcon: {
+    width: '70%',
+    minHeight: '0%',
+    minWidth: '70%',
+  },
+  myChoiceIcon: {
+    width: '70%',
+    transform: 'scaleX(-1)',
+    minHeight: '0%',
   },
 
   healthbarContainer: {
+    ...theme.healthbarContainer,
+    borderRadius: '0 0 3rem 3rem',
+    overflow: 'hidden',
     width: '100%',
-    background: '#db3030',
-    position: 'relative',
   },
   healthbar: {
     ...theme.healthbar,
-
-    [theme.breakpoints.down('sm')]: {
-      height: '3rem',
-    },
+    minHeight: '20%',
   },
   playerName: {
     textAlign: 'center',
@@ -51,11 +98,25 @@ const useStyles = makeStyles((theme) => ({
     letterSpacing: '.2rem',
     color: 'white',
     fontWeight: 'bold',
+    whiteSpace: 'nowrap',
   },
   controls: {
     position: 'absolute',
     right: 0,
     bottom: 0,
+    display: 'flex',
+  },
+  controlBtn: {
+    width: '5.7rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    justifyContent: 'space-between',
+    padding: '.1rem .2rem',
+    cursor: 'pointer',
+    fontFamily: 'OpenDyslexic',
+    fontWeight: 'bold',
+    margin: '.1rem',
   },
   messenger: {
     display: 'flex',
@@ -82,11 +143,34 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     fontSize: '1rem',
   },
+  chooseMessage: {
+    color: 'white',
+    position: 'absolute',
+    fontSize: '2.5rem',
+    textAlign: 'center',
+    fontFamily: 'OpenDyslexic',
+    top: '50%',
+    transform: 'translateY(-50%)',
+  },
+  messageInput: {
+    padding: '.5rem .2rem',
+    fontFamily: 'OpenDyslexic',
+  },
+  friendBattle: {
+    background: 'black',
+    paddingBottom: '20rem',
+  },
+  game: {
+    padding: '2rem',
+    [theme.breakpoints.down('sm')]: {
+      padding: 0,
+    },
+  },
 }));
 
 const FriendBattle = ({ props: { socketRef, match } }) => {
   const [appState] = useContext(CTX);
-  const [display, setDisplayFriend] = useState(true);
+  const [displayFriend, setDisplayFriend] = useState(true);
   const classes = useStyles();
   const socket = socketRef.current;
   let {
@@ -97,7 +181,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   const myCamRef = useRef();
   const [myStream, setMyStream] = useState(null);
   const peerVideoRef = useRef();
-  const [peerStream, setPeerStream] = useState({});
+  const [peerStream, setPeerStream] = useState(null);
 
   const [chatInput, setChatInput] = useState('');
   const [messages, setMessages] = useState([]);
@@ -114,6 +198,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   const [inputFlowRunning, setInputFlowRunning] = useState(false);
   const [roundProcessing, setRoundProcessing] = useState(false);
   const [icons, setIcons] = useState({ video: false, audio: false });
+
   useEffect(() => {
     return () => {
       socket.off('user-connected');
@@ -133,11 +218,6 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
       myCamRef.current.video.readyState === 4
     ) {
       const video = myCamRef.current.video;
-      const videoWidth = myCamRef.current.video.videoWidth;
-      const videoHeight = myCamRef.current.video.videoHeight;
-      myCamRef.current.video.width = videoWidth;
-      myCamRef.current.video.height = videoHeight;
-
       // Detect hand
       if (!net) return;
       const hand = await net.estimateHands(video);
@@ -225,6 +305,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   };
 
   const handleSubmit = () => {
+    if (!chatInput) return;
     socket.emit('friendbattle-message', {
       content: chatInput,
       name,
@@ -324,12 +405,17 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
         socket.on('game-begin', () => {
           if (!inputFlowRunning) {
             setWinner(null);
+            setFriendHealth(100);
+            setMyHealth(100);
+            setMyChoice(null);
+            setFriendChoice(null);
             setInputFlowRunning(true);
             getRoundInput();
           }
         });
 
         socket.on('round-outcome', (outcome) => {
+          console.log('outcome: ', outcome);
           if (!roundProcessing) {
             setRoundProcessing(true);
 
@@ -339,12 +425,13 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
               loser,
               newState,
               gameOver,
+              tieWeapon,
               ...roundChoices
             } = outcome;
 
             setDisplayFriend(true);
             if (tie) {
-              setFriendChoice(myChoice);
+              setFriendChoice(tieWeapon);
             } else {
               const { gameRunning, round, choices, ...health } = newState;
               for (let key in health) {
@@ -395,118 +482,124 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   };
 
   return (
-    <div className={classes.connect}>
-      <div className={classes.videochat}>
-        <Grid container direction='column'>
-          <Grid item>
-            <Grid
-              container
-              alignItems='stretch'
-              direction='row'
-              className={classes.friendCamContainer}
-            >
-              <Grid item xs={12} sm={12} md={5} lg={5}>
-                <Grid
-                  container
-                  direction='column'
-                  alignItems='center'
-                  className={classes.playerContainer}
-                >
-                  <Grid item className={classes.videoContainer}>
-                    {peerStream && peerStream.active && (
-                      <Video stream={peerStream} display={display} />
-                    )}
-                  </Grid>
-                  <Grid item className={classes.healthbarContainer}>
-                    <div
-                      className={classes.healthbar}
-                      style={{ width: `${friendHealth}%` }}
-                    ></div>
-                    <div className={classes.playerName}>cedric</div>
-                  </Grid>
+    <div className={classes.friendBattle}>
+      <Grid container className={classes.game} direction='column'>
+        <Grid item>
+          <Grid container alignContent='stretch' direction='row'>
+            <Grid item xs={12} sm={12} md={5} lg={5}>
+              <Grid
+                container
+                direction='column'
+                className={classes.playerContainer}
+              >
+                <Grid item className={classes.videoContainer}>
+                  {peerStream && peerStream.active ? (
+                    <Video stream={peerStream} display={displayFriend} />
+                  ) : (
+                    <img className={classes.friendVideo} src={loadingblue} />
+                  )}
+
+                  <div className={classes.iconLayer}>
+                    <img
+                      src={weaponImgs[friendChoice || 'blank']}
+                      alt='friends choice'
+                      className={classes.friendChoiceIcon}
+                    />
+                  </div>
+                  {!displayFriend && (
+                    <div className={classes.chooseMessage}>
+                      choose your weapon
+                    </div>
+                  )}
+                </Grid>
+                <Grid item className={classes.healthbarContainer}>
+                  <div
+                    className={classes.healthbar}
+                    style={{ width: `${friendHealth}%` }}
+                  ></div>
+                  <div className={classes.playerName}>cedric</div>
                 </Grid>
               </Grid>
-              <Grid item xs={12} md={2} sm={6} lg={2}>
-                <div className={classes.dialog}>
-                  <h3 className={classes.dialogTitle}>FRIEND BATTLE</h3>
-                  {winner && (
-                    <>
-                      <div>winner: {winner}</div>
-                      <button onClick={playAgain}>play again</button>
-                    </>
-                  )}
-                  <div className={classes.chatSection}>
-                    <div className={classes.messenger}>
-                      <div className={classes.window}>
-                        <ul className={classes.messages}>
-                          {messages.map((message, i) => (
-                            <li key={i} className={classes.message}>
-                              <strong>{message.name}</strong>: {message.content}
-                            </li>
-                          ))}
-                          <div ref={scrollRef} />
-                        </ul>
-                      </div>
+            </Grid>
+            <Grid item xs={12} md={2} sm={6} lg={2} className={classes.dialog}>
+              <div>
+                <h3 className={classes.dialogTitle}>FRIEND BATTLE</h3>
+                {winner && (
+                  <>
+                    <div>winner: {winner}</div>
+                    <button onClick={playAgain}>play again</button>
+                  </>
+                )}
 
-                      <input
-                        className={classes.messageInput}
-                        onKeyPress={handleKeyDown}
-                        onChange={handleChatInput}
-                        value={chatInput}
-                        type='text'
-                        placeholder='message...'
-                      />
-                    </div>
+                <div className={classes.messenger}>
+                  <div className={classes.window}>
+                    <ul className={classes.messages}>
+                      {messages.map((message, i) => (
+                        <li key={i} className={classes.message}>
+                          <strong>{message.name}</strong>: {message.content}
+                        </li>
+                      ))}
+                      <div ref={scrollRef} />
+                    </ul>
                   </div>
+
+                  <input
+                    className={classes.messageInput}
+                    onKeyPress={handleKeyDown}
+                    onChange={handleChatInput}
+                    value={chatInput}
+                    type='text'
+                    placeholder='message...'
+                  />
                 </div>
-              </Grid>
+              </div>
+            </Grid>
 
-              <Grid item item item xs={12} sm={6} md={5} lg={5}>
-                <Grid
-                  container
-                  direction='column'
-                  alignItems='center'
-                  className={classes.playerContainer}
-                >
-                  <Grid item className={classes.videoContainer}>
-                    <Webcam
-                      className={classes.myVideo}
-                      ref={myCamRef}
-                      onUserMedia={handleUserMedia}
+            <Grid item xs={12} sm={6} md={5} lg={5}>
+              <Grid
+                container
+                direction='column'
+                className={classes.playerContainer}
+              >
+                <Grid item className={classes.videoContainer}>
+                  <Webcam
+                    className={classes.myVideo}
+                    ref={myCamRef}
+                    onUserMedia={handleUserMedia}
+                  />
+
+                  <div className={classes.iconLayer}>
+                    <img
+                      src={weaponImgs[myChoice || 'blank']}
+                      alt='friends choice'
+                      className={classes.myChoiceIcon}
                     />
-                    <div className={classes.controls}>
-                      <div className={classes.controlsBlock}>
-                        <button
-                          onClick={playStop}
-                          className={classes.controlBtn}
-                        >
-                          {!icons.video ? <Stop /> : <PlayArrow />}
-                          <span>{!icons.video ? 'stop' : 'start'}</span>
-                        </button>
-                        <button
-                          className={classes.controlBtn}
-                          onClick={muteUnmute}
-                        >
-                          {!icons.audio ? <Mic /> : <MicOff />}
-                          <span> {!icons.audio ? 'Mute' : 'Unmute'}</span>
-                        </button>
-                      </div>
-                    </div>
-                  </Grid>
+                  </div>
 
-                  <Grid item className={classes.healthbarContainer}>
-                    <div
-                      className={classes.healthbar}
-                      style={{ width: `${myHealth}%` }}
-                    ></div>
-                    <div className={classes.playerName}>cedric</div>
-                  </Grid>
+                  <div className={classes.controls}>
+                    <button onClick={playStop} className={classes.controlBtn}>
+                      {!icons.video ? <Stop /> : <PlayArrow />}
+                      <span>{!icons.video ? 'stop' : 'start'}</span>
+                    </button>
+                    <button className={classes.controlBtn} onClick={muteUnmute}>
+                      {!icons.audio ? <Mic /> : <MicOff />}
+                      <span> {!icons.audio ? 'Mute' : 'Unmute'}</span>
+                    </button>
+                  </div>
+                </Grid>
+
+                <Grid item className={classes.healthbarContainer}>
+                  <div
+                    className={classes.healthbar}
+                    style={{ width: `${myHealth}%` }}
+                  ></div>
+                  <div className={classes.playerName}>{name}</div>
                 </Grid>
               </Grid>
             </Grid>
           </Grid>
         </Grid>
-      </div>
+      </Grid>
     </div>
   );
 };
@@ -515,8 +608,8 @@ const Video = ({ stream, display }) => {
   const classes = useStyles();
   const ref = useRef();
   useEffect(() => {
-    ref.current.srcObject = stream;
-  }, []);
+    if (stream) ref.current.srcObject = stream;
+  }, [stream]);
   return (
     <video
       playsInline
