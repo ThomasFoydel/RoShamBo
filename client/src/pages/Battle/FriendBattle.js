@@ -12,6 +12,14 @@ import { CTX } from 'context/Store';
 import weaponImgs from 'imgs/weapons';
 import loadingblue from 'imgs/loadingblue.gif';
 
+import weaponAudio from 'audio/weapons';
+import soundFx from 'audio/fx';
+
+const playSound = (s) => {
+  s.currentTime = 0;
+  s.play();
+};
+
 const useStyles = makeStyles((theme) => ({
   playerContainer: {
     height: '100%',
@@ -122,6 +130,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
+    maxWidth: '100%',
   },
   window: {
     background: 'rgba(255,255,255,0.2)',
@@ -132,16 +141,22 @@ const useStyles = makeStyles((theme) => ({
   message: {
     background: 'rgba(0,0,0,0.3)',
     padding: '.1rem',
-    margin: '.1rem',
+    margin: '.2rem .1rem',
+    lineHeight: '1.3rem',
   },
-  dialog: {
-    minWidth: '4rem',
+  dialogSection: {
     minHeight: '4rem',
     background: 'purple',
     color: 'white',
     fontFamily: 'OpenDyslexic',
     textAlign: 'center',
     fontSize: '1rem',
+  },
+  dialog: { justifyContent: 'space-between', height: '100%', maxWidth: '100%' },
+  dialogTitle: {
+    fontSize: '1.2rem',
+    padding: '0 .2rem',
+    maxWidth: '100%',
   },
   chooseMessage: {
     color: 'white',
@@ -150,6 +165,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     fontFamily: 'OpenDyslexic',
     top: '50%',
+    width: '100%',
     transform: 'translateY(-50%)',
   },
   messageInput: {
@@ -160,32 +176,38 @@ const useStyles = makeStyles((theme) => ({
     background: 'black',
     paddingBottom: '20rem',
   },
-  game: {
-    padding: '2rem',
-    [theme.breakpoints.down('sm')]: {
-      padding: 0,
-    },
+  game: {},
+  results: {
+    maxWidth: '100%',
+  },
+  playAgainBtn: {
+    padding: '.1rem .2rem',
+    fontFamily: 'OpenDyslexic',
+    cursor: 'pointer',
   },
 }));
 
 const FriendBattle = ({ props: { socketRef, match } }) => {
-  const [appState] = useContext(CTX);
+  const [
+    {
+      user: { name, id },
+      auth: { token },
+    },
+  ] = useContext(CTX);
+
   const [displayFriend, setDisplayFriend] = useState(true);
   const classes = useStyles();
   const socket = socketRef.current;
-  let {
-    user: { name, id },
-    auth: { token },
-  } = appState;
+
   const { friendshipId } = match.params;
   const myCamRef = useRef();
-  const [myStream, setMyStream] = useState(null);
+  const myStreamRef = useRef();
   const peerVideoRef = useRef();
   const [peerStream, setPeerStream] = useState(null);
   const [friendData, setFriendData] = useState({});
 
   const [chatInput, setChatInput] = useState('');
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(null);
   const scrollRef = useRef();
   const myPeer = useRef();
   const [handPoseNet, setHandPoseNet] = useState(null);
@@ -271,6 +293,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   }, [count]);
 
   const getRoundInput = () => {
+    setFriendChoice(null);
     setDisplayFriend(false);
     setCount(10);
   };
@@ -283,25 +306,26 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   }, [token]);
   useEffect(() => {
     return () =>
-      myStream && myStream.getTracks().forEach((track) => track.stop());
-  }, [myStream]);
+      myStreamRef.current &&
+      myStreamRef.current.getTracks().forEach((track) => track.stop());
+  }, []);
 
   const playStop = () => {
-    if (myStream) {
-      let enabled = myStream.getVideoTracks()[0].enabled;
+    if (myStreamRef.current) {
+      let enabled = myStreamRef.current.getVideoTracks()[0].enabled;
       setIcons({ ...icons, video: !icons.video });
-      if (enabled) myStream.getVideoTracks()[0].enabled = false;
-      else myStream.getVideoTracks()[0].enabled = true;
+      if (enabled) myStreamRef.current.getVideoTracks()[0].enabled = false;
+      else myStreamRef.current.getVideoTracks()[0].enabled = true;
     }
   };
 
-  const muteUnmute = () => {
-    if (myStream) {
-      if (myStream.getAudioTracks().length === 0) return;
-      const enabled = myStream.getAudioTracks()[0].enabled;
+  const toggleMute = () => {
+    if (myStreamRef.current) {
+      if (myStreamRef.current.getAudioTracks().length === 0) return;
+      const enabled = myStreamRef.current.getAudioTracks()[0].enabled;
       setIcons({ ...icons, audio: !icons.audio });
-      if (enabled) myStream.getAudioTracks()[0].enabled = false;
-      else myStream.getAudioTracks()[0].enabled = true;
+      if (enabled) myStreamRef.current.getAudioTracks()[0].enabled = false;
+      else myStreamRef.current.getAudioTracks()[0].enabled = true;
     }
   };
 
@@ -362,7 +386,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
           });
         });
 
-        setMyStream(stream);
+        myStreamRef.current = stream;
 
         myPeer.current.on('call', function (call) {
           call.answer(stream, { metadata: socket.id });
@@ -412,12 +436,13 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
             setMyChoice(null);
             setFriendChoice(null);
             setInputFlowRunning(true);
-            getRoundInput();
+            setTimeout(() => {
+              getRoundInput();
+            }, 2500);
           }
         });
 
         socket.on('round-outcome', (outcome) => {
-          console.log('outcome: ', outcome);
           if (!roundProcessing) {
             setRoundProcessing(true);
 
@@ -433,8 +458,11 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
 
             setDisplayFriend(true);
             if (tie) {
+              playSound(soundFx.tie);
               setFriendChoice(tieWeapon);
             } else {
+              const winningWeapon = weaponAudio[outcome[outcome.winner]];
+              [winningWeapon, soundFx.fightShort].forEach((s) => playSound(s));
               const { gameRunning, round, choices, ...health } = newState;
               for (let key in health) {
                 if (key === id) setMyHealth(health[key]);
@@ -446,8 +474,18 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
             }
 
             if (gameOver) {
-              setInputFlowRunning(false);
-              setWinner(winner);
+              setTimeout(() => {
+                if (winner === id) {
+                  playSound(soundFx.win);
+                } else {
+                  playSound(soundFx.lose);
+                }
+                setWinner(winner);
+
+                setTimeout(() => {
+                  setInputFlowRunning(false);
+                }, 3000);
+              }, 4000);
             } else {
               setTimeout(() => {
                 setRoundProcessing(false);
@@ -523,24 +561,48 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={12} md={2} sm={6} lg={2} className={classes.dialog}>
-              <div>
-                <h3 className={classes.dialogTitle}>FRIEND BATTLE</h3>
-                {winner && (
-                  <>
-                    <div>winner: {winner}</div>
-                    <button onClick={playAgain}>play again</button>
-                  </>
-                )}
+            <Grid
+              item
+              xs={12}
+              md={2}
+              sm={6}
+              lg={2}
+              className={classes.dialogSection}
+            >
+              <Grid
+                container
+                direction='column'
+                justifycontent='space-between'
+                className={classes.dialog}
+              >
+                <Grid item className={classes.dialogTitle}>
+                  <p>FRIEND BATTLE</p>
+                </Grid>
 
-                <div className={classes.messenger}>
+                <Grid item className={classes.results}>
+                  {winner && (
+                    <>
+                      <div>
+                        winner: {winner === id ? name : friendData.name}
+                      </div>
+                      <button
+                        className={classes.playAgainBtn}
+                        onClick={playAgain}
+                      >
+                        play again
+                      </button>
+                    </>
+                  )}
+                </Grid>
+                <Grid item className={classes.messenger}>
                   <div className={classes.window}>
                     <ul className={classes.messages}>
-                      {messages.map((message, i) => (
-                        <li key={i} className={classes.message}>
-                          <strong>{message.name}</strong>: {message.content}
-                        </li>
-                      ))}
+                      {messages &&
+                        messages.map((message, i) => (
+                          <li key={i} className={classes.message}>
+                            <strong>{message.name}</strong>: {message.content}
+                          </li>
+                        ))}
                       <div ref={scrollRef} />
                     </ul>
                   </div>
@@ -553,8 +615,8 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                     type='text'
                     placeholder='message...'
                   />
-                </div>
-              </div>
+                </Grid>
+              </Grid>
             </Grid>
 
             <Grid item xs={12} sm={6} md={5} lg={5}>
@@ -583,7 +645,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                       {!icons.video ? <Stop /> : <PlayArrow />}
                       <span>{!icons.video ? 'stop' : 'start'}</span>
                     </button>
-                    <button className={classes.controlBtn} onClick={muteUnmute}>
+                    <button className={classes.controlBtn} onClick={toggleMute}>
                       {!icons.audio ? <Mic /> : <MicOff />}
                       <span> {!icons.audio ? 'Mute' : 'Unmute'}</span>
                     </button>

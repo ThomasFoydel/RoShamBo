@@ -8,6 +8,7 @@ export function reducer(state, action) {
   let { user, token, profilePic, coverPic, kind, message } = payload || {};
   switch (action.type) {
     case 'LOGIN':
+      console.log('login action: ', action);
       localStorage.setItem('roshambo-token', token);
       return {
         ...state,

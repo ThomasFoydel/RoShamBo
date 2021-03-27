@@ -5,31 +5,6 @@ const API = require('../controller/API');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
-router.get('/', auth, async (req, res) => {
-  let { tokenUser } = req;
-  if (tokenUser) {
-    let { userId } = tokenUser;
-    API.user
-      .findById({ _id: userId })
-      .then(async (foundUser) => {
-        const { name, email, _id, coverPic, profilePic } = foundUser;
-
-        return res.status(200).send({
-          name,
-          email,
-          id: _id,
-          coverPic,
-          profilePic,
-        });
-      })
-      .catch(() => {
-        res.status(500).send({ err: 'database error' });
-      });
-  } else {
-    return res.status(401).send({ err: 'no token' });
-  }
-});
-
 router.post('/register', async (req, res) => {
   let { email, name, password, confirmpassword } = req.body || {};
   let allFieldsExist = email && name && password && confirmpassword;
@@ -134,6 +109,31 @@ router.post('/login', async (req, res) => {
         err: 'Database is down, we are working to fix this',
       })
     );
+});
+
+router.get('/', auth, async (req, res) => {
+  let { tokenUser } = req;
+  if (tokenUser) {
+    let { userId } = tokenUser;
+    API.user
+      .findById({ _id: userId })
+      .then(async (foundUser) => {
+        const { name, email, _id, coverPic, profilePic } = foundUser;
+
+        return res.status(200).send({
+          name,
+          email,
+          id: _id,
+          coverPic,
+          profilePic,
+        });
+      })
+      .catch(() => {
+        res.status(500).send({ err: 'database error' });
+      });
+  } else {
+    return res.status(401).send({ err: 'no token' });
+  }
 });
 
 module.exports = router;
