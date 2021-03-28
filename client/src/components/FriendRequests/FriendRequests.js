@@ -1,11 +1,20 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CTX } from 'context/Store';
-
+import { makeStyles } from '@material-ui/core';
+const useStyles = makeStyles((theme) => ({
+  friendRequests: {
+    ...theme.centerHorizontal,
+    fontFamily: 'OpenDyslexic',
+    qidth: '100%',
+    textAlign: 'center',
+  },
+}));
 const FriendRequests = () => {
-  const [appState, updateState] = useContext(CTX);
+  const [appState] = useContext(CTX);
   const token = appState.auth.token;
   const [friendRequests, setFriendRequests] = useState([]);
+  const classes = useStyles();
   useEffect(() => {
     let subscribed = true;
     axios
@@ -35,8 +44,12 @@ const FriendRequests = () => {
       .catch((err) => console.log({ err }));
   };
   return (
-    <div>
-      <h3>FriendRequests</h3>
+    <div className={classes.friendRequests}>
+      <h3>
+        {friendRequests.length === 0
+          ? 'No Pending Frend Requests'
+          : 'Friend Requests: '}
+      </h3>
       {friendRequests.map((request) => (
         <FriendRequest key={request._id} props={{ request, reject, accept }} />
       ))}

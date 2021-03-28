@@ -19,6 +19,18 @@ import Forum from 'pages/Forum/Forum';
 import Landing from 'pages/Landing/Landing';
 import Home from 'pages/Home/Home';
 
+import { makeStyles } from '@material-ui/core';
+const useStyles = makeStyles(() => ({
+  app: {
+    minHeight: '100vh',
+    background: '#111',
+    color: 'white',
+    fontFamily: 'OpenDyslexic',
+    a: {
+      color: 'red',
+    },
+  },
+}));
 const App = () => {
   const [appState, updateState] = useContext(CTX);
   const [socketLoaded, setSocketLoaded] = useState(false);
@@ -27,6 +39,7 @@ const App = () => {
     auth: { token },
   } = appState;
   let socketRef = useRef(null);
+  const classes = useStyles();
 
   useEffect(() => {
     let subscribed = true;
@@ -96,30 +109,32 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <Router>
-        <NavBar />
-        <Switch>
-          <Route path='/' exact component={isLoggedIn ? Home : Landing} />
-          <Route path='/game' exact component={Game} />
-          <Route path='/profile/:id' exact component={Profile} />
-          <Route path='/battle' exact component={Battle} />
-          <Route path='/battle/computer' component={ComputerBattle} />
-          <Route
-            path='/battle/random'
-            component={() =>
-              socketLoaded && <RandomBattle props={{ socketRef }} />
-            }
-          />
-          <Route path='/battle/friends' component={BattleFriends} />
-          <Route
-            path='/friendbattle/:friendshipId'
-            component={({ match }) =>
-              socketLoaded &&
-              token && <FriendBattle props={{ match, socketRef }} />
-            }
-          />
-          <Route path='/forum' exact component={Forum} />
-        </Switch>
-        <Auth />
+        <div className={classes.app}>
+          <NavBar />
+          <Switch>
+            <Route path='/' exact component={isLoggedIn ? Home : Landing} />
+            <Route path='/game' exact component={Game} />
+            <Route path='/profile/:id' exact component={Profile} />
+            <Route path='/battle' exact component={Battle} />
+            <Route path='/battle/computer' component={ComputerBattle} />
+            <Route
+              path='/battle/random'
+              component={() =>
+                socketLoaded && <RandomBattle props={{ socketRef }} />
+              }
+            />
+            <Route path='/battle/friends' component={BattleFriends} />
+            <Route
+              path='/friendbattle/:friendshipId'
+              component={({ match }) =>
+                socketLoaded &&
+                token && <FriendBattle props={{ match, socketRef }} />
+              }
+            />
+            <Route path='/forum' exact component={Forum} />
+          </Switch>
+          <Auth />
+        </div>
       </Router>
     </ThemeProvider>
   );

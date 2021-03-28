@@ -42,4 +42,8 @@ export default createMuiTheme({
     height: '4rem',
     transition: 'all 0.5s ease',
   },
+  centerHorizontal: {
+    marginLeft: '50%',
+    transform: 'translateX(-50%)',
+  },
 });
