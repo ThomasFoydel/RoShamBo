@@ -6,6 +6,7 @@ const cors = require('cors');
 const path = require('path');
 const apiRoutes = require('./routes/Api');
 const API = require('./controller/API');
+const { user } = require('./controller/API');
 require('dotenv').config();
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 let users = {};
+let randomPool = [];
 
 const weapons = {
   rock: { beats: ['scissors', 'bird'] },
@@ -79,6 +81,57 @@ mongoose
           console.log('err: ', err);
         }
       }
+
+      socket.on('join-random-pool', ({ peerId, socketId, token }) => {
+        let userId;
+        if (!token) {
+          return console.log('no token auth denied');
+        } else {
+          try {
+            const decoded = jwt.verify(token, process.env.SECRET);
+            let current_time = Date.now() / 1000;
+            if (decoded.exp < current_time) {
+              /* token is expired, not authorized */
+            } else {
+              userId = decoded.tokenUser.userId;
+            }
+          } catch (err) {
+            return console.log('err: ', err);
+          }
+        }
+        API.user.findById(userId).then((user) => {
+          const newUser = {
+            userId: user._id,
+            socket: socket,
+            socketId,
+            peerId,
+            name: user.name,
+          };
+          randomPool.push(newUser);
+          if (randomPool.length > 1) {
+            // other user in queue
+            const user1 = randomPool.shift();
+            const user2 = randomPool.shift();
+            const roomId = `Random${user1.userId}VS${user2.userId}`;
+            user1.socket.join(roomId);
+            user2.socket.join(roomId);
+            io.to(user2.socketId).emit('randombattle-opponentinfo', {
+              rando: {
+                userId: user1.userId,
+                name: user1.name,
+              },
+            });
+            io.to(user1.socketId).emit('randombattle-userconnect', {
+              roomId,
+              rando: {
+                userId: user2.userId,
+                peerId: user2.peerId,
+                name: user2.name,
+              },
+            });
+          }
+        });
+      });
 
       socket.on('play-again', (roomId) => {
         const roomCount = io.sockets.adapter.rooms.get(roomId).size;

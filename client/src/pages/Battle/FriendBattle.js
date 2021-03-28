@@ -203,7 +203,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   const myCamRef = useRef();
   const myStreamRef = useRef();
   const peerVideoRef = useRef();
-  const [peerStream, setPeerStream] = useState(null);
+  const [friendStream, setFriendStream] = useState(null);
   const [friendData, setFriendData] = useState({});
 
   const [chatInput, setChatInput] = useState('');
@@ -391,7 +391,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
         myPeer.current.on('call', function (call) {
           call.answer(stream, { metadata: socket.id });
           call.on('stream', function (callStream) {
-            setPeerStream(callStream);
+            setFriendStream(callStream);
           });
         });
 
@@ -406,7 +406,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
         socket.on('user-disconnected', () => {
           if (peerVideoRef.current) peerVideoRef.current.close();
           peerVideoRef.current = null;
-          setPeerStream(null);
+          setFriendStream(null);
         });
 
         const loadState = (gameState) => {
@@ -438,7 +438,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
             setInputFlowRunning(true);
             setTimeout(() => {
               getRoundInput();
-            }, 2500);
+            }, 4000);
           }
         });
 
@@ -501,9 +501,9 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
           });
           if (call) {
             call.on('stream', (userVideoStream) =>
-              setPeerStream(userVideoStream)
+              setFriendStream(userVideoStream)
             );
-            call.on('close', (e) => {
+            call.on('close', () => {
               call.removeAllListeners();
               call.close();
               peerVideoRef.current.close();
@@ -533,8 +533,8 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                 className={classes.playerContainer}
               >
                 <Grid item className={classes.videoContainer}>
-                  {peerStream && peerStream.active ? (
-                    <Video stream={peerStream} display={displayFriend} />
+                  {friendStream && friendStream.active ? (
+                    <Video stream={friendStream} display={displayFriend} />
                   ) : (
                     <img className={classes.friendVideo} src={loadingblue} />
                   )}

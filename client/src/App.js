@@ -103,7 +103,12 @@ const App = () => {
           <Route path='/profile/:id' exact component={Profile} />
           <Route path='/battle' exact component={Battle} />
           <Route path='/battle/computer' component={ComputerBattle} />
-          <Route path='/battle/random' component={RandomBattle} />
+          <Route
+            path='/battle/random'
+            component={() =>
+              socketLoaded && <RandomBattle props={{ socketRef }} />
+            }
+          />
           <Route path='/battle/friends' component={BattleFriends} />
           <Route
             path='/friendbattle/:friendshipId'
