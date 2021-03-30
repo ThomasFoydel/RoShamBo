@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Message = require('../models/Message');
 const Friendship = require('../models/Friendship');
 const Post = require('../models/Post');
+const RandomBattle = require('../models/RandomBattle');
 
 const API = {
   user: {
@@ -98,6 +99,41 @@ const API = {
       roundTie: (id) =>
         Friendship.findByIdAndUpdate(id, { $inc: { 'gameState.round': 1 } }),
     },
+  },
+  randomGame: {
+    create: (roomId, user1, user2) =>
+      RandomBattle.create({
+        roomId,
+        participants: [user1, user2],
+        gameState: {
+          [user1]: 100,
+          [user2]: 100,
+          gameRunning: false,
+          round: 0,
+          choices: [],
+        },
+      }),
+    initState: (roomId, user1, user2) =>
+      RandomBattle.findOneAndUpdate(
+        { roomId },
+        {
+          $set: {
+            gameState: {
+              [user1]: 100,
+              [user2]: 100,
+              gameRunning: false,
+              round: 0,
+              choices: [],
+            },
+          },
+        }
+      ),
+    findByRoomId: (roomId) => RandomBattle.findOne({ roomId }),
+    gameStart: (roomId) =>
+      RandomBattle.findOneAndUpdate(
+        { roomId },
+        { $set: { 'gameState.gameRunning': true } }
+      ),
   },
 };
 

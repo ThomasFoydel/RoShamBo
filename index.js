@@ -115,22 +115,48 @@ mongoose
             const roomId = `Random${user1.userId}VS${user2.userId}`;
             user1.socket.join(roomId);
             user2.socket.join(roomId);
-            io.to(user2.socketId).emit('randombattle-opponentinfo', {
-              rando: {
-                userId: user1.userId,
-                name: user1.name,
-              },
-            });
-            io.to(user1.socketId).emit('randombattle-userconnect', {
-              roomId,
-              rando: {
-                userId: user2.userId,
-                peerId: user2.peerId,
-                name: user2.name,
-              },
+
+            function sendConnectionSignals() {
+              io.to(user2.socketId).emit('randombattle-opponentinfo', {
+                rando: {
+                  userId: user1.userId,
+                  name: user1.name,
+                },
+              });
+              io.to(user1.socketId).emit('randombattle-userconnect', {
+                roomId,
+                rando: {
+                  userId: user2.userId,
+                  peerId: user2.peerId,
+                  name: user2.name,
+                },
+              });
+            }
+            API.randomGame.findByRoomId(roomId).then((foundBattle) => {
+              if (!foundBattle || foundBattle.length === 0) {
+                API.randomGame
+                  .create(roomId, user1.userId, user2.userId)
+                  .then(() => sendConnectionSignals());
+              } else {
+                API.randomGame
+                  .initState(roomId, user1.userId, user2.userId)
+                  .then(() => sendConnectionSignals());
+              }
             });
           }
         });
+      });
+
+      socket.on('randombattle-connectioncomplete', ({ roomId, userId }) => {
+        // both users have connected via peerjs, send begin signal
+        io.to(roomId).emit('randombattle-gamebegin');
+      });
+
+      socket.on('randombattle-userchoice', (roomId) => {});
+
+      socket.on('leave-randomroom', (roomId) => {
+        socket.to(roomId).emit('rando-left-the-building');
+        socket.leave(roomId);
       });
 
       socket.on('play-again', (roomId) => {

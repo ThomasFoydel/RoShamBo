@@ -26,9 +26,6 @@ const useStyles = makeStyles(() => ({
     background: '#111',
     color: 'white',
     fontFamily: 'OpenDyslexic',
-    a: {
-      color: 'red',
-    },
   },
 }));
 const App = () => {

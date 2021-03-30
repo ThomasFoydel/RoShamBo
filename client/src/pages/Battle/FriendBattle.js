@@ -202,7 +202,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   const { friendshipId } = match.params;
   const myCamRef = useRef();
   const myStreamRef = useRef();
-  const peerVideoRef = useRef();
+  const friendVideoRef = useRef();
   const [friendStream, setFriendStream] = useState(null);
   const [friendData, setFriendData] = useState({});
 
@@ -282,7 +282,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
         setCount((c) => c - 1);
       }, 1000);
     } else {
-      if (!myChoice) return setCount(40);
+      if (!myChoice) return setCount(20);
       socket.emit('user-choice', {
         roomId: friendshipId,
         userId: id,
@@ -295,7 +295,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   const getRoundInput = () => {
     setFriendChoice(null);
     setDisplayFriend(false);
-    setCount(10);
+    setCount(20);
   };
 
   useEffect(() => {
@@ -404,8 +404,8 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
         });
 
         socket.on('user-disconnected', () => {
-          if (peerVideoRef.current) peerVideoRef.current.close();
-          peerVideoRef.current = null;
+          if (friendVideoRef.current) friendVideoRef.current.close();
+          friendVideoRef.current = null;
           setFriendStream(null);
         });
 
@@ -506,11 +506,11 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
             call.on('close', () => {
               call.removeAllListeners();
               call.close();
-              peerVideoRef.current.close();
-              peerVideoRef.current.removeAllListeners();
+              friendVideoRef.current.close();
+              friendVideoRef.current.removeAllListeners();
             });
 
-            peerVideoRef.current = call;
+            friendVideoRef.current = call;
           }
         }
       });
