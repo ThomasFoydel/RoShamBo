@@ -99,6 +99,10 @@ mongoose
           }
         }
         API.user.findById(userId).then((user) => {
+          if (!user) return;
+          randomPool = randomPool.filter(
+            (entry) => entry.userId.toString() !== user._id.toString()
+          );
           const newUser = {
             userId: user._id,
             socket: socket,
