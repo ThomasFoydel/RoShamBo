@@ -137,10 +137,10 @@ const useStyles = makeStyles((theme) => ({
     height: '11rem',
     overflow: 'scroll',
   },
-  messages: {},
+  messages: { textAlign: 'left' },
   message: {
     background: 'rgba(0,0,0,0.3)',
-    padding: '.1rem',
+    padding: '.1rem .2rem',
     margin: '.2rem .1rem',
     lineHeight: '1.3rem',
   },
@@ -171,6 +171,7 @@ const useStyles = makeStyles((theme) => ({
   messageInput: {
     padding: '.5rem .2rem',
     fontFamily: 'OpenDyslexic',
+    zIndex: '2',
   },
   friendBattle: {
     background: 'black',
@@ -207,7 +208,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   const [friendData, setFriendData] = useState({});
 
   const [chatInput, setChatInput] = useState('');
-  const [messages, setMessages] = useState(null);
+  const [messages, setMessages] = useState([]);
   const scrollRef = useRef();
   const myPeer = useRef();
   const [handPoseNet, setHandPoseNet] = useState(null);
@@ -282,7 +283,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
         setCount((c) => c - 1);
       }, 1000);
     } else {
-      if (!myChoice) return setCount(20);
+      if (!myChoice) return setCount(10);
       socket.emit('user-choice', {
         roomId: friendshipId,
         userId: id,
@@ -295,7 +296,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
   const getRoundInput = () => {
     setFriendChoice(null);
     setDisplayFriend(false);
-    setCount(20);
+    setCount(10);
   };
 
   useEffect(() => {
@@ -399,9 +400,9 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
           if (userId) connectToNewUser(userId, stream, mySocketId);
         });
 
-        socket.on('friendbattle-message', (message) => {
-          setMessages((messages) => [...messages, message]);
-        });
+        socket.on('friendbattle-message', (message) =>
+          setMessages((messages) => [...messages, message])
+        );
 
         socket.on('user-disconnected', () => {
           if (friendVideoRef.current) friendVideoRef.current.close();

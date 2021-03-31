@@ -6,7 +6,6 @@ const cors = require('cors');
 const path = require('path');
 const apiRoutes = require('./routes/Api');
 const API = require('./controller/API');
-const { user } = require('./controller/API');
 require('dotenv').config();
 const app = express();
 
@@ -122,6 +121,7 @@ mongoose
                   userId: user1.userId,
                   name: user1.name,
                 },
+                roomId,
               });
               io.to(user1.socketId).emit('randombattle-userconnect', {
                 roomId,
@@ -132,13 +132,13 @@ mongoose
                 },
               });
             }
-            API.randomGame.findByRoomId(roomId).then((foundBattle) => {
+            API.randomBattle.findByRoomId(roomId).then((foundBattle) => {
               if (!foundBattle || foundBattle.length === 0) {
-                API.randomGame
+                API.randomBattle
                   .create(roomId, user1.userId, user2.userId)
                   .then(() => sendConnectionSignals());
               } else {
-                API.randomGame
+                API.randomBattle
                   .initState(roomId, user1.userId, user2.userId)
                   .then(() => sendConnectionSignals());
               }
@@ -147,12 +147,71 @@ mongoose
         });
       });
 
-      socket.on('randombattle-connectioncomplete', ({ roomId, userId }) => {
+      socket.on('randombattle-connectioncomplete', ({ roomId }) => {
         // both users have connected via peerjs, send begin signal
         io.to(roomId).emit('randombattle-gamebegin');
       });
 
-      socket.on('randombattle-userchoice', (roomId) => {});
+      socket.on('randombattle-userchoice', ({ roomId, userId, userChoice }) => {
+        API.randomBattle.findByRoomId(roomId).then(({ gameState }) => {
+          API.randomBattle
+            .throwChoice(roomId, userId, userChoice, gameState.round)
+            .then(({ gameState }) => {
+              const roundChoices = gameState.choices[gameState.round];
+              const userIds = Object.keys(roundChoices);
+              if (userIds.length === 2) {
+                const [user1, user2] = userIds;
+                const user1Choice = roundChoices[user1];
+                const user2Choice = roundChoices[user2];
+                const user1Weapon = weapons[user1Choice];
+                const user2Weapon = weapons[user2Choice];
+
+                function outcome(winner, loser, damage) {
+                  const gameOver = gameState[loser] - damage <= 0;
+
+                  const losersNewHealth =
+                    gameState[loser] - damage > 0
+                      ? gameState[loser] - damage
+                      : 0;
+
+                  API.randomBattle
+                    .roundOutcome(
+                      roomId,
+                      loser,
+                      losersNewHealth,
+                      Number(gameState.round),
+                      gameOver
+                    )
+                    .then((updated) => {
+                      io.to(roomId).emit('randombattle-roundoutcome', {
+                        winner,
+                        loser,
+                        newState: updated.gameState,
+                        gameOver,
+                        [user1]: user1Choice,
+                        [user2]: user2Choice,
+                      });
+                    });
+                }
+
+                if (user1Weapon.beats.includes(user2Choice)) {
+                  // user1 wins this round
+                  outcome(user1, user2, 20);
+                } else if (user2Weapon.beats.includes(user1Choice)) {
+                  // user2 wins this round
+                  outcome(user2, user1, 20);
+                } else {
+                  API.randomBattle.roundTie(roomId).then(() => {
+                    io.to(roomId).emit('randombattle-roundoutcome', {
+                      tie: true,
+                      tieWeapon: user1Choice,
+                    });
+                  });
+                }
+              }
+            });
+        });
+      });
 
       socket.on('leave-randomroom', (roomId) => {
         socket.to(roomId).emit('rando-left-the-building');
@@ -166,7 +225,7 @@ mongoose
             .findById(roomId)
             .then(({ participants, gameState: { round } }) => {
               if (round !== 0) {
-                API.friendship.game
+                API.friendship.battle
                   .initState(roomId, participants[0], participants[1])
                   .then(() => io.to(roomId).emit('game-begin'));
               }
@@ -195,7 +254,7 @@ mongoose
             if (foundFriendship.gameState.gameRunning) {
               io.to(socket.id).emit('game-resume', foundFriendship.gameState);
             } else {
-              API.friendship.game
+              API.friendship.battle
                 .start(roomId)
                 .then(() => io.to(roomId).emit('game-begin'));
             }
@@ -204,7 +263,7 @@ mongoose
           API.friendship
             .findById(roomId)
             .then(({ participants }) =>
-              API.friendship.game.initState(
+              API.friendship.battle.initState(
                 roomId,
                 participants[0],
                 participants[1]
@@ -212,8 +271,8 @@ mongoose
             );
         }
         socket.on('user-choice', ({ roomId, userId, userChoice }) => {
-          API.friendship.game.getState(roomId).then(({ gameState }) => {
-            API.friendship.game
+          API.friendship.battle.getState(roomId).then(({ gameState }) => {
+            API.friendship.battle
               .throwChoice(roomId, userId, userChoice, gameState.round)
               .then(({ gameState }) => {
                 const roundChoices = gameState.choices[gameState.round];
@@ -233,7 +292,7 @@ mongoose
                         ? gameState[loser] - damage
                         : 0;
 
-                    API.friendship.game
+                    API.friendship.battle
                       .roundOutcome(
                         roomId,
                         loser,
@@ -260,7 +319,7 @@ mongoose
                     // user2 wins this round
                     outcome(user2, user1, 20);
                   } else {
-                    API.friendship.game.roundTie(roomId).then(() => {
+                    API.friendship.battle.roundTie(roomId).then(() => {
                       io.to(roomId).emit('round-outcome', {
                         tie: true,
                         tieWeapon: user1Choice,

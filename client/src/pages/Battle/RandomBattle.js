@@ -100,6 +100,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
       socket.off('randombattle-opponentinfo');
       socket.off('randombattle-gamebegin');
       socket.off('rando-left-the-building');
+      socket.off('randombattle-roundoutcome');
       socket.emit('leave-randomroom', roomId);
     };
   }, []);
@@ -119,9 +120,10 @@ const RandomBattle = ({ props: { socketRef } }) => {
         connectToNewUser(peerId, stream, roomId);
       });
 
-      socket.on('randombattle-opponentinfo', ({ rando }) => {
+      socket.on('randombattle-opponentinfo', ({ rando, roomId }) => {
         const { userId, name } = rando;
         setRandoInfo({ name, userId });
+        setRoomId(roomId);
       });
 
       socket.on('randombattle-gamebegin', () => {
@@ -136,6 +138,10 @@ const RandomBattle = ({ props: { socketRef } }) => {
             getRoundInput();
           }, 4000);
         }
+      });
+
+      socket.on('randombattle-roundoutcome', (roundOutcome) => {
+        console.log('roundOutcome: ', roundOutcome);
       });
 
       socket.on('rando-left-the-building', () => {

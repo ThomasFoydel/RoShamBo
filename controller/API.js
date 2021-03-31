@@ -48,7 +48,7 @@ const API = {
     reject: (id) =>
       Friendship.findByIdAndUpdate(id, { status: 'rejected' }, { new: true }),
 
-    game: {
+    battle: {
       start: (id) =>
         Friendship.findByIdAndUpdate(id, {
           $set: { 'gameState.gameRunning': true },
@@ -100,7 +100,7 @@ const API = {
         Friendship.findByIdAndUpdate(id, { $inc: { 'gameState.round': 1 } }),
     },
   },
-  randomGame: {
+  randomBattle: {
     create: (roomId, user1, user2) =>
       RandomBattle.create({
         roomId,
@@ -132,7 +132,40 @@ const API = {
     gameStart: (roomId) =>
       RandomBattle.findOneAndUpdate(
         { roomId },
-        { $set: { 'gameState.gameRunning': true } }
+        { $set: { 'gameState.gameRunning': true } },
+        { useFindAndModify: false }
+      ),
+    throwChoice: (roomId, userId, userChoice, round) =>
+      RandomBattle.findOneAndUpdate(
+        { roomId },
+        {
+          $set: {
+            [`gameState.choices.${round}.${userId}`]: userChoice,
+          },
+        },
+        { new: true, useFindAndModify: false }
+      ),
+    roundOutcome: (roomId, loser, health, round, gameOver) => {
+      const update = {
+        [`gameState.${loser}`]: health,
+        'gameState.round': round + 1,
+      };
+      if (gameOver) {
+        update['gameState.gameRunning'] = false;
+      }
+      return RandomBattle.findOneAndUpdate(
+        { roomId },
+        {
+          $set: update,
+        },
+        { new: true, useFindAndModify: false }
+      );
+    },
+    roundTie: (roomId) =>
+      Friendship.findOneAndUpdate(
+        { roomId },
+        { $inc: { 'gameState.round': 1 } },
+        { new: true, useFindAndModify: false }
       ),
   },
 };
