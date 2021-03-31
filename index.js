@@ -217,6 +217,10 @@ mongoose
         });
       });
 
+      socket.on('randombattle-message', ({ content, name, roomId }) => {
+        io.to(roomId).emit('randombattle-message', { content, name });
+      });
+
       socket.on('leave-randomroom', (roomId) => {
         socket.to(roomId).emit('rando-left-the-building');
         socket.leave(roomId);

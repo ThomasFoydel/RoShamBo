@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import * as tf from '@tensorflow/tfjs'; // eslint-disable-line
-import axios from 'axios';
 import Peer from 'peerjs';
 import * as handpose from '@tensorflow-models/handpose';
 import * as fp from 'fingerpose';
@@ -188,7 +187,7 @@ const useStyles = makeStyles((theme) => ({
 
 const RandomBattle = ({ props: { socketRef } }) => {
   const socket = socketRef.current;
-  const [appState, updateState] = useContext(CTX);
+  const [appState] = useContext(CTX);
   const {
     auth: { token },
     user: { id, name },
@@ -201,9 +200,8 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const [handPoseNet, setHandPoseNet] = useState(null);
   const classes = useStyles();
   const [roomId, setRoomId] = useState(null);
-  const [randoInfo, setRandoInfo] = useState({ name: '', userId: null });
   const [randoStream, setRandoStream] = useState(null);
-  const [randoData, setRandoData] = useState({});
+  const [randoData, setRandoData] = useState({ name: '', userId: null });
   const [displayRando, setDisplayRando] = useState(true);
   const [count, setCount] = useState(null);
   const [chatInput, setChatInput] = useState('');
@@ -275,6 +273,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
       socket.off('randombattle-gamebegin');
       socket.off('rando-left-the-building');
       socket.off('randombattle-roundoutcome');
+      socket.off('randombattle-message');
       socket.emit('leave-randomroom', roomId);
     };
   }, []);
@@ -288,15 +287,16 @@ const RandomBattle = ({ props: { socketRef } }) => {
     loadHandPose().then(() => {
       socket.on('randombattle-userconnect', ({ roomId, rando }) => {
         const { userId, peerId, name } = rando;
+
         setRoomId(roomId);
-        setRandoInfo({ name, userId });
+        setRandoData({ name, userId });
         // peer call
         connectToNewUser(peerId, stream, roomId);
       });
 
       socket.on('randombattle-opponentinfo', ({ rando, roomId }) => {
         const { userId, name } = rando;
-        setRandoInfo({ name, userId });
+        setRandoData({ name, userId });
         setRoomId(roomId);
       });
 
@@ -317,6 +317,10 @@ const RandomBattle = ({ props: { socketRef } }) => {
       socket.on('randombattle-roundoutcome', (roundOutcome) => {
         console.log('roundOutcome: ', roundOutcome);
       });
+
+      socket.on('randombattle-message', (message) =>
+        setMessages((messages) => [...messages, message])
+      );
 
       socket.on('rando-left-the-building', () => {
         if (randoVideoRef.current) randoVideoRef.current.close();
@@ -522,7 +526,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
                     </ul>
                   </div>
 
-                  {randoStream && (
+                  {randoStream && roomId && (
                     <input
                       className={classes.messageInput}
                       onKeyPress={handleKeyDown}

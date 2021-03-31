@@ -6,6 +6,10 @@ import { makeStyles } from '@material-ui/core';
 const useStyles = makeStyles((theme) => ({
   hands: {
     ...theme.centerHorizontal,
+    width: '100vw',
+    opacity: '0.7',
+    bottom: '0',
+    position: 'absolute',
   },
 }));
 const Home = () => {
@@ -13,8 +17,8 @@ const Home = () => {
   return (
     <div className={classes.home}>
       <div className={classes.handBackground}></div>
-      <img src={hands} className={classes.hands} alt='hand scissor gesture' />
       <FriendRequests />
+      <img src={hands} className={classes.hands} alt='hand scissor gesture' />
     </div>
   );
 };
