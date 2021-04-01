@@ -101,6 +101,7 @@ const useStyles = makeStyles((theme) => ({
   drawerItem: {
     ...theme.typography.tab,
     color: 'white',
+    padding: '0 1.5rem',
     opacity: 0.7,
   },
   drawerAuthLink: {

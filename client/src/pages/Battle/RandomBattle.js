@@ -13,6 +13,10 @@ import loadingblue from 'imgs/loadingblue.gif';
 
 import weaponAudio from 'audio/weapons';
 import soundFx from 'audio/fx';
+const playSound = (s) => {
+  s.currentTime = 0;
+  s.play();
+};
 
 const useStyles = makeStyles((theme) => ({
   playerContainer: {
@@ -182,6 +186,9 @@ const useStyles = makeStyles((theme) => ({
   },
   readyBtn: {
     maxWidth: '100%',
+    padding: '.1rem .2rem',
+    fontFamily: 'OpenDyslexic',
+    cursor: 'pointer',
   },
 }));
 
@@ -208,6 +215,8 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const [messages, setMessages] = useState([]);
   const [icons, setIcons] = useState({ video: false, audio: false });
   const scrollRef = useRef();
+  const [inPool, setInPool] = useState(false);
+  const [roundProcessing, setRoundProcessing] = useState(false);
 
   const [myHealth, setMyHealth] = useState(100);
   const [randoHealth, setRandoHealth] = useState(100);
@@ -268,6 +277,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
 
   useEffect(() => {
     return () => {
+      socket.off('randombattle-pooljoined');
       socket.off('randombattle-userconnect');
       socket.off('randombattle-opponentinfo');
       socket.off('randombattle-gamebegin');
@@ -285,6 +295,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
       setHandPoseNet(net);
     }
     loadHandPose().then(() => {
+      socket.on('randombattle-pooljoined', () => setInPool(true));
       socket.on('randombattle-userconnect', ({ roomId, rando }) => {
         const { userId, peerId, name } = rando;
 
@@ -314,8 +325,57 @@ const RandomBattle = ({ props: { socketRef } }) => {
         }
       });
 
-      socket.on('randombattle-roundoutcome', (roundOutcome) => {
-        console.log('roundOutcome: ', roundOutcome);
+      socket.on('randombattle-roundoutcome', (outcome) => {
+        console.log('outcome: ', outcome);
+        if (!roundProcessing) {
+          setRoundProcessing(true);
+          const {
+            tie,
+            winner,
+            loser,
+            newState,
+            gameOver,
+            tieWeapon,
+            ...roundChoices
+          } = outcome;
+
+          setDisplayRando(true);
+          if (tie) {
+            playSound(soundFx.tie);
+            setRandoChoice(tieWeapon);
+          } else {
+            const winningWeapon = weaponAudio[outcome[outcome.winner]];
+            [winningWeapon, soundFx.fightShort].forEach((s) => playSound(s));
+            const { gameRunning, round, choices, ...health } = newState;
+            for (let key in health) {
+              if (key === id) setMyHealth(health[key]);
+              else {
+                setRandoChoice(roundChoices[key]);
+                setRandoHealth(health[key]);
+              }
+            }
+          }
+
+          if (gameOver) {
+            setTimeout(() => {
+              if (winner === id) {
+                playSound(soundFx.win);
+              } else {
+                playSound(soundFx.lose);
+              }
+              setWinner(winner);
+
+              setTimeout(() => {
+                setInputFlowRunning(false);
+              }, 3000);
+            }, 4000);
+          } else {
+            setTimeout(() => {
+              setRoundProcessing(false);
+              getRoundInput();
+            }, 10000);
+          }
+        }
       });
 
       socket.on('randombattle-message', (message) =>
@@ -494,9 +554,11 @@ const RandomBattle = ({ props: { socketRef } }) => {
                   <p>RANDOM BATTLE</p>
                 </Grid>
 
-                <Grid item className={classes.readyBtn}>
-                  {userMediaLoaded && (
-                    <button onClick={handleReady}>I'm ready</button>
+                <Grid item>
+                  {userMediaLoaded && !inPool && (
+                    <button className={classes.readyBtn} onClick={handleReady}>
+                      I'm ready
+                    </button>
                   )}
                 </Grid>
 

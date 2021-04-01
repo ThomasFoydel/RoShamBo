@@ -100,6 +100,7 @@ mongoose
         }
         API.user.findById(userId).then((user) => {
           if (!user) return;
+          io.to(socket.id).emit('randombattle-pooljoined');
           randomPool = randomPool.filter(
             (entry) => entry.userId.toString() !== user._id.toString()
           );
@@ -224,6 +225,21 @@ mongoose
       socket.on('leave-randomroom', (roomId) => {
         socket.to(roomId).emit('rando-left-the-building');
         socket.leave(roomId);
+      });
+
+      socket.on('randombattle-playagain', (roomId) => {
+        const roomCount = io.sockets.adapter.rooms.get(roomId).size;
+        if (roomCount === 2) {
+          API.randomBattle
+            .findByRoomId(roomId)
+            .then(({ participants, gameState: { round } }) => {
+              if (round !== 0) {
+                API.randomBattle
+                  .initState(roomId, participants[0], participants[1])
+                  .then(() => io.to(roomId).emit('randombattle-gamebegin'));
+              }
+            });
+        }
       });
 
       socket.on('play-again', (roomId) => {
