@@ -132,12 +132,13 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'space-between',
     maxWidth: '100%',
   },
-  window: {
+  messages: {
+    textAlign: 'left',
     background: 'rgba(255,255,255,0.2)',
     height: '11rem',
-    overflow: 'scroll',
+    overflowY: 'scroll',
+    maxWidth: '100%',
   },
-  messages: { textAlign: 'left' },
   message: {
     background: 'rgba(0,0,0,0.3)',
     padding: '.1rem .2rem',
@@ -596,17 +597,15 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                   )}
                 </Grid>
                 <Grid item className={classes.messenger}>
-                  <div className={classes.window}>
-                    <ul className={classes.messages}>
-                      {messages &&
-                        messages.map((message, i) => (
-                          <li key={i} className={classes.message}>
-                            <strong>{message.name}</strong>: {message.content}
-                          </li>
-                        ))}
-                      <div ref={scrollRef} />
-                    </ul>
-                  </div>
+                  <ul className={classes.messages}>
+                    {messages &&
+                      messages.map((message, i) => (
+                        <li key={i} className={classes.message}>
+                          <strong>{message.name}</strong>: {message.content}
+                        </li>
+                      ))}
+                    <div ref={scrollRef} />
+                  </ul>
 
                   <input
                     className={classes.messageInput}

@@ -11,7 +11,7 @@ const Profile = ({
   const [appState, updateState] = useContext(CTX);
 
   const [user, setUser] = useState(null);
-  const [isFriend, setIsFriend] = useState(false);
+  const [friendshipExists, setFriendshipExists] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const isCurrentUser = id === appState.user.id;
@@ -23,10 +23,10 @@ const Profile = ({
       .get(`/api/user/profile/${id}`, {
         headers: { 'x-auth-token': appState.auth.token },
       })
-      .then(({ data: { user, isFriend } }) => {
+      .then(({ data: { user, friendshipExists } }) => {
         if (subscribed) {
           setUser(user);
-          setIsFriend(isFriend);
+          setFriendshipExists(friendshipExists);
         }
         setLoading(false);
       })
@@ -62,7 +62,7 @@ const Profile = ({
           {isCurrentUser && <Link to='/editprofile'>edit profile</Link>}
           <span>{user.name}</span>
           <span>{user.email}</span>
-          {!isCurrentUser && !isFriend && (
+          {!isCurrentUser && !friendshipExists && (
             <button onClick={requestFriend}>request friendship</button>
           )}
         </div>

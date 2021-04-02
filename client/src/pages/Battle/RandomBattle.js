@@ -13,6 +13,8 @@ import loadingblue from 'imgs/loadingblue.gif';
 
 import weaponAudio from 'audio/weapons';
 import soundFx from 'audio/fx';
+import axios from 'axios';
+
 const playSound = (s) => {
   s.currentTime = 0;
   s.play();
@@ -130,12 +132,14 @@ const useStyles = makeStyles((theme) => ({
     justifyContent: 'space-between',
     maxWidth: '100%',
   },
-  window: {
+
+  messages: {
+    textAlign: 'left',
     background: 'rgba(255,255,255,0.2)',
     height: '11rem',
-    overflow: 'scroll',
+    overflowY: 'scroll',
+    maxWidth: '100%',
   },
-  messages: { textAlign: 'left' },
   message: {
     background: 'rgba(0,0,0,0.3)',
     padding: '.1rem .2rem',
@@ -217,6 +221,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const scrollRef = useRef();
   const [inPool, setInPool] = useState(false);
   const [roundProcessing, setRoundProcessing] = useState(false);
+  const [friendshipExists, setFriendshipExists] = useState(true);
 
   const [myHealth, setMyHealth] = useState(100);
   const [randoHealth, setRandoHealth] = useState(100);
@@ -249,7 +254,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const getRoundInput = () => {
     setRandoChoice(null);
     setDisplayRando(false);
-    setCount(20);
+    setCount(10);
   };
 
   useEffect(() => {
@@ -263,28 +268,32 @@ const RandomBattle = ({ props: { socketRef } }) => {
 
       setTimeout(() => {
         setCount((c) => c - 1);
-      }, 1000);
+      }, 500);
     } else {
-      if (!myChoice) return setCount(20);
-      socket.emit('randombattle-userchoice', {
-        roomId: roomId,
-        userId: id,
-        userChoice: myChoice,
-      });
-      setCount(null);
+      if (!myChoice) return setCount(10);
+      setTimeout(() => {
+        socket.emit('randombattle-userchoice', {
+          roomId: roomId,
+          userId: id,
+          userChoice: myChoice,
+        });
+        setCount(null);
+      }, 500);
     }
   }, [count]);
 
   useEffect(() => {
     return () => {
-      socket.off('randombattle-pooljoined');
-      socket.off('randombattle-userconnect');
-      socket.off('randombattle-opponentinfo');
-      socket.off('randombattle-gamebegin');
-      socket.off('rando-left-the-building');
-      socket.off('randombattle-roundoutcome');
-      socket.off('randombattle-message');
-      socket.emit('leave-randomroom', roomId);
+      if (socket) {
+        socket.off('randombattle-pooljoined');
+        socket.off('randombattle-userconnect');
+        socket.off('randombattle-opponentinfo');
+        socket.off('randombattle-gamebegin');
+        socket.off('rando-left-the-building');
+        socket.off('randombattle-roundoutcome');
+        socket.off('randombattle-message');
+        socket.emit('leave-randomroom', roomId);
+      }
     };
   }, []);
 
@@ -298,10 +307,8 @@ const RandomBattle = ({ props: { socketRef } }) => {
       socket.on('randombattle-pooljoined', () => setInPool(true));
       socket.on('randombattle-userconnect', ({ roomId, rando }) => {
         const { userId, peerId, name } = rando;
-
         setRoomId(roomId);
         setRandoData({ name, userId });
-        // peer call
         connectToNewUser(peerId, stream, roomId);
       });
 
@@ -321,7 +328,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
           setInputFlowRunning(true);
           setTimeout(() => {
             getRoundInput();
-          }, 4000);
+          }, 8000);
         }
       });
 
@@ -368,12 +375,12 @@ const RandomBattle = ({ props: { socketRef } }) => {
               setTimeout(() => {
                 setInputFlowRunning(false);
               }, 3000);
-            }, 4000);
+            }, 5000);
           } else {
             setTimeout(() => {
               setRoundProcessing(false);
               getRoundInput();
-            }, 10000);
+            }, 5000);
           }
         }
       });
@@ -383,9 +390,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
       );
 
       socket.on('rando-left-the-building', () => {
-        if (randoVideoRef.current) randoVideoRef.current.close();
-        randoVideoRef.current = null;
-        setRandoStream(null);
+        handleBackToPool();
       });
 
       setUserMediaLoaded(true);
@@ -416,10 +421,8 @@ const RandomBattle = ({ props: { socketRef } }) => {
       myCamRef.current.video.readyState === 4
     ) {
       const video = myCamRef.current.video;
-      // Detect hand
       if (!net) return;
       const hand = await net.estimateHands(video);
-      // If there's a hand estimate gesture
       if (hand.length > 0) {
         const GE = new fp.GestureEstimator([
           gestures.scissors,
@@ -495,6 +498,55 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const playAgain = () => {
     setWinner(null);
     socket.emit('randombattle-playagain', roomId);
+  };
+
+  useEffect(() => {
+    randoData.userId &&
+      axios
+        .get(`/api/user/profile/${randoData.userId}`, {
+          headers: { 'x-auth-token': token },
+        })
+        .then(({ data: { friendshipExists } }) => {
+          setFriendshipExists(friendshipExists);
+        });
+  }, [randoData]);
+
+  const handleAddFriend = () => {
+    randoData.userId &&
+      axios
+        .post(
+          '/api/user/friendrequest',
+          { id: randoData.userId },
+          { headers: { 'x-auth-token': token } }
+        )
+        .then(() => setFriendshipExists(true));
+  };
+
+  const handleBackToPool = () => {
+    // reset state, end peer call, create new call and enter the pool
+    if (randoVideoRef.current) {
+      randoVideoRef.current.close();
+      randoVideoRef.current.removeAllListeners();
+    }
+    setWinner(null);
+    myPeer.current.destroy();
+    socket.emit('leave-randomroom', roomId);
+    setRandoStream(null);
+    randoVideoRef.current = null;
+    setRoomId(null);
+    setRandoData({ name: '', userId: null });
+    setDisplayRando(true);
+    setCount(null);
+    setChatInput('');
+    setMessages([]);
+    setRoundProcessing(false);
+    setFriendshipExists(true);
+    setMyHealth(100);
+    setRandoHealth(100);
+    setMyChoice(null);
+    setRandoChoice(null);
+    setInputFlowRunning(false);
+    handleReady();
   };
   return (
     <div className={classes.randomBattle}>
@@ -572,21 +624,25 @@ const RandomBattle = ({ props: { socketRef } }) => {
                       >
                         play again
                       </button>
+                      {!friendshipExists && (
+                        <button onClick={handleAddFriend}>add friend</button>
+                      )}
+                      <button onClick={handleBackToPool}>
+                        next random user
+                      </button>
                     </>
                   )}
                 </Grid>
                 <Grid item className={classes.messenger}>
-                  <div className={classes.window}>
-                    <ul className={classes.messages}>
-                      {messages &&
-                        messages.map((message, i) => (
-                          <li key={i} className={classes.message}>
-                            <strong>{message.name}</strong>: {message.content}
-                          </li>
-                        ))}
-                      <div ref={scrollRef} />
-                    </ul>
-                  </div>
+                  <ul className={classes.messages}>
+                    {messages &&
+                      messages.map((message, i) => (
+                        <li key={i} className={classes.message}>
+                          <strong>{message.name}</strong>: {message.content}
+                        </li>
+                      ))}
+                    <div ref={scrollRef} />
+                  </ul>
 
                   {randoStream && roomId && (
                     <input

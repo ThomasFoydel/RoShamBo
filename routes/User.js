@@ -99,11 +99,11 @@ router.get('/profile/:profileId', auth, async (req, res) => {
   API.friendship
     .findByUsers(userId, profileObjId)
     .then((existingFriendShip) => {
-      const isFriend = !!existingFriendShip;
+      const friendshipExists = !!existingFriendShip;
 
       API.user
         .findById(profileObjId)
-        .then((user) => res.status(201).send({ user, isFriend }))
+        .then((user) => res.status(201).send({ user, friendshipExists }))
         .catch(() => {
           return res.sendStatus(500);
         });
