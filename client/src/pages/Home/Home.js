@@ -18,7 +18,11 @@ const Home = () => {
     <div className={classes.home}>
       <div className={classes.handBackground}></div>
       <FriendRequests />
-      <img src={hands} className={classes.hands} alt='hand scissor gesture' />
+      <img
+        src={hands}
+        className={classes.hands}
+        alt='two hands throwing scissors and paper'
+      />
     </div>
   );
 };

@@ -42,6 +42,9 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down('xs')]: {
       marginBottom: '1.25em',
     },
+    [theme.breakpoints.down('xs')]: {
+      marginBottom: '.5em',
+    },
   },
   logo: {
     height: '8em',
@@ -50,6 +53,9 @@ const useStyles = makeStyles((theme) => ({
     },
     [theme.breakpoints.down('xs')]: {
       height: '5.5em',
+    },
+    [theme.breakpoints.down('xs')]: {
+      height: '4.5em',
     },
   },
   tabContainer: {
@@ -94,6 +100,10 @@ const useStyles = makeStyles((theme) => ({
   drawerIcon: {
     height: '50px',
     width: '50px',
+    [theme.breakpoints.down('xs')]: {
+      height: '35px',
+      width: '35px',
+    },
   },
   drawer: {
     backgroundColor: theme.palette.common.blue,

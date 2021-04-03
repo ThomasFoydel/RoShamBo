@@ -8,7 +8,7 @@ const API = {
   user: {
     create: (user) => User.create(user),
     findById: (id) => User.findById(id),
-    findByEmail: (email) => User.findOne({ email }).select('password'),
+    findByEmail: (email) => User.findOne({ email }).select('password email'),
   },
   message: {
     create: ({ sender, receiver, content }) =>

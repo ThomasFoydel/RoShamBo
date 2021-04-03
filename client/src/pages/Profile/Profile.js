@@ -2,15 +2,77 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CTX } from 'context/Store';
 import { Link } from 'react-router-dom';
+import { Avatar, makeStyles, Card, Typography } from '@material-ui/core';
+import rps from 'imgs/rps.jpeg';
+import loadingblue from 'imgs/loadingblue.gif';
 
+const useStyles = makeStyles((theme) => ({
+  profilePage: { padding: '5rem 0' },
+  profilePic: {
+    width: '15rem',
+    height: '15rem',
+    fontSize: '4.8rem',
+    backgroundColor: theme.palette.primary.light,
+    zIndex: 200,
+    position: 'absolute',
+    left: '50%',
+    transition: 'all 0.8s ease',
+    transform: 'translateX(-50%) translateY(-15.5rem)',
+    [theme.breakpoints.down('sm')]: {
+      width: '12rem',
+      height: '12rem',
+    },
+  },
+  background: {
+    background: `linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.9) 60%), url(${rps})`,
+    bacgkroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    top: 0,
+    left: 0,
+    minWidth: '100vw',
+    minHeight: '100vh',
+    position: 'fixed',
+    // paddingTop: '7rem',
+  },
+  card: {
+    ...theme.centerHorizontal,
+    background: '#ddd',
+    overflow: 'visible',
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '8rem 0',
+    alignItems: 'center',
+    width: '90vw',
+    marginTop: '8rem',
+    minHeight: '25rem',
+  },
+  infoSection: {
+    width: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column',
+  },
+  username: {
+    textAlign: 'center',
+    width: '100%',
+    fontSize: '3rem',
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '2rem',
+    },
+  },
+  editLink: { textAlign: 'center', minWidth: '100%' },
+  email: {},
+}));
 const Profile = ({
   match: {
     params: { id },
   },
 }) => {
   const [appState, updateState] = useContext(CTX);
+  const classes = useStyles();
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({});
   const [friendshipExists, setFriendshipExists] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
@@ -25,14 +87,20 @@ const Profile = ({
       })
       .then(({ data: { user, friendshipExists } }) => {
         if (subscribed) {
-          setUser(user);
-          setFriendshipExists(friendshipExists);
+          setTimeout(() => {
+            setUser(user);
+            setFriendshipExists(friendshipExists);
+            setLoading(false);
+          }, 1200);
         }
-        setLoading(false);
       })
       .catch(() => {
-        setErr('No user found');
-        setLoading(false);
+        if (subscribed) {
+          setTimeout(() => {
+            setErr('No user found');
+            setLoading(false);
+          }, 1200);
+        }
       });
     return () => (subscribed = false);
   }, [appState.auth.token]);
@@ -54,20 +122,53 @@ const Profile = ({
       });
   };
 
+  const [backgroundPosition, setBackgroundPosition] = useState(null);
+  useEffect(() => {
+    setBackgroundPosition(
+      ['left', 'center', 'right'][Math.floor(Math.random() * 3)]
+    );
+  }, []);
+
   return (
-    <>
-      {loading && <div>loading</div>}
-      {user && (
-        <div className='profile'>
-          {isCurrentUser && <Link to='/editprofile'>edit profile</Link>}
-          <span>{user.name}</span>
-          <span>{user.email}</span>
+    <div className={classes.profilePage}>
+      {backgroundPosition && (
+        <div
+          className={classes.background}
+          style={{ backgroundPosition: `${backgroundPosition} bottom` }}
+        ></div>
+      )}
+      <Card className={`${classes.card} `}>
+        <Avatar
+          className={classes.profilePic}
+          alt={user.name || 'loading'}
+          src={loading || !user.name ? loadingblue : user.profilePic}
+        >
+          {!user.profilePic && user.name && user.name[0].toUpperCase()}
+        </Avatar>
+        <div className={classes.infoSection}>
+          <Typography className={classes.username}>
+            {user.name || 'loading'}
+          </Typography>
+          {isCurrentUser && !loading && (
+            <Typography
+              className={classes.editLink}
+              component={Link}
+              to='/editprofile'
+            >
+              edit profile
+            </Typography>
+          )}
+          {user.displayEmail && (
+            <Typography className={classes.email}>
+              {user.displayEmail || ''}
+            </Typography>
+          )}
           {!isCurrentUser && !friendshipExists && (
             <button onClick={requestFriend}>request friendship</button>
           )}
         </div>
-      )}
-    </>
+      </Card>
+    </div>
   );
 };
 

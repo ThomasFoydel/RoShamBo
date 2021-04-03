@@ -22,14 +22,26 @@ const userSchema = mongoose.Schema({
     required: true,
     validate: {
       validator: (str) => {
-        return str.length >= 8 && str.length <= 16;
+        return str.length >= 5 && str.length <= 10;
       },
-      message: 'name must be between 8 and 16 characters',
+      message: 'username must be between 5 and 10 characters',
     },
   },
   email: {
     type: String,
     required: true,
+    unique: true,
+    select: false,
+    validate: {
+      validator: (str) => {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(str).toLowerCase());
+      },
+      message: 'must be a valid email',
+    },
+  },
+  displayEmail: {
+    type: String,
     unique: true,
     validate: {
       validator: (str) => {
