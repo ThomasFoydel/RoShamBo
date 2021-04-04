@@ -5,14 +5,22 @@ import CommentForm from './components/CommentForm';
 
 import { CTX } from 'context/Store';
 import { Link } from 'react-router-dom';
-import { makeStyles, Card, Typography, Avatar, Grid } from '@material-ui/core';
-
+import {
+  makeStyles,
+  Card,
+  Typography,
+  Avatar,
+  Grid,
+  IconButton,
+} from '@material-ui/core';
+import { Delete as DeleteIcon } from '@material-ui/icons';
 const useStyles = makeStyles((theme) => ({
   forum: {
     marginTop: '5rem',
     paddingBottom: '5rem',
   },
   post: {
+    position: 'relative',
     background: '#eee',
     margin: '2em',
     color: theme.palette.primary.dark,
@@ -25,7 +33,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   postAvatar: {
-    background: theme.palette.primary.light,
+    background: theme.palette.primary.dark,
   },
   postContent: {
     background: 'white',
@@ -38,23 +46,24 @@ const useStyles = makeStyles((theme) => ({
   },
   postTitle: {
     textAlign: 'center',
-    fontSize: '3rem',
+    fontSize: '3.4rem',
     letterSpacing: '0.25rem',
     fontWeight: 'bold',
     [theme.breakpoints.down('sm')]: {
-      fontSize: '1.5rem',
+      fontSize: '1.8rem',
     },
     [theme.breakpoints.down('xs')]: {
-      fontSize: '1.3rem',
+      fontSize: '1.5rem',
     },
   },
   authorName: {
     color: theme.palette.primary.dark,
-    fontSize: '1.3rem',
+    fontSize: '1.2rem',
     marginLeft: '0.25em',
   },
   comments: {
     padding: '1em',
+    maxWidth: '100%',
     [theme.breakpoints.down('xs')]: {
       padding: '0',
     },
@@ -65,6 +74,7 @@ const useStyles = makeStyles((theme) => ({
     padding: '.75em',
     color: theme.palette.primary.light,
     margin: '.5em',
+    maxWidth: '100%',
     [theme.breakpoints.down('xs')]: {
       margin: '0.5em 0',
     },
@@ -76,21 +86,30 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '1.2rem',
   },
   commentContent: {
+    ...theme.centerHorizontal,
     background: 'rgba(255,255,255,0.08)',
     padding: '1.5em .5em',
     margin: '.5em',
     borderRadius: '10px',
     maxHeight: '20rem',
     overFlowY: 'scroll',
+    width: '90%',
+    maxWidth: '70vw',
+    overflowWrap: 'break-word',
+  },
+  deleteBtn: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
   },
 }));
 
-const Comment = ({ props: { comment } }) => {
+const Comment = ({ props: { comment, userId, deleteComment } }) => {
   const classes = useStyles();
   return (
     <div className={classes.comment}>
       <Grid container direction='column'>
-        <Grid item>
+        <Grid item style={{ position: 'relative' }}>
           <Link to={`/profile/${comment.author._id}`}>
             <Grid container alignItems='center'>
               <Grid item>
@@ -108,6 +127,16 @@ const Comment = ({ props: { comment } }) => {
               </Grid>
             </Grid>
           </Link>
+          {comment.author._id === userId && (
+            <IconButton
+              onClick={() => deleteComment(comment._id)}
+              className={classes.deleteBtn}
+              aria-label='delete'
+              style={{ color: 'white' }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          )}
         </Grid>
         <Grid item>
           <Typography className={classes.commentContent}>
@@ -118,29 +147,43 @@ const Comment = ({ props: { comment } }) => {
     </div>
   );
 };
-const Post = ({ props: { post, setPosts, token } }) => {
+const Post = ({
+  props: { post, setPosts, token, userId, deletePost, deleteComment },
+}) => {
   const classes = useStyles();
+
   return (
     <Card className={classes.post}>
       <Grid container direction='column'>
         <Grid item>
-          <Link to={`/profile/${post.author._id}`}>
-            <Grid container alignItems='center'>
-              <Grid item>
-                <Avatar
-                  src={post.author.profilePic}
-                  className={classes.postAvatar}
-                >
-                  {post.author.name && post.author.name[0].toUpperCase()}
-                </Avatar>
-              </Grid>
-              <Grid item>
-                <Typography className={classes.authorName}>
-                  {post.author.name}
-                </Typography>
-              </Grid>
+          <Grid container alignItems='center'>
+            <Grid item>
+              <Avatar
+                src={post.author.profilePic}
+                className={classes.postAvatar}
+              >
+                {post.author.name && post.author.name[0].toUpperCase()}
+              </Avatar>
             </Grid>
-          </Link>
+            <Grid item>
+              <Typography
+                component={Link}
+                to={`/profile/${post.author._id}`}
+                className={classes.authorName}
+              >
+                {post.author.name}
+              </Typography>
+            </Grid>
+            {post.author._id === userId && (
+              <IconButton
+                onClick={() => deletePost(post._id)}
+                className={classes.deleteBtn}
+                aria-label='delete'
+              >
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </Grid>
         </Grid>
 
         <Grid item>
@@ -153,7 +196,10 @@ const Post = ({ props: { post, setPosts, token } }) => {
         </Grid>
         <Grid item className={classes.comments}>
           {post.comments.map((comment) => (
-            <Comment key={comment._id} props={{ comment }} />
+            <Comment
+              key={comment._id}
+              props={{ comment, userId, deleteComment }}
+            />
           ))}
         </Grid>
         <Grid item>
@@ -166,8 +212,10 @@ const Post = ({ props: { post, setPosts, token } }) => {
 const Forum = () => {
   const [appState] = useContext(CTX);
   const { token } = appState.auth;
+  const userId = appState.user.id;
   const [posts, setPosts] = useState([]);
   const classes = useStyles();
+
   useEffect(() => {
     axios
       .get('/api/forum/posts', { headers: { 'x-auth-token': token } })
@@ -175,11 +223,43 @@ const Forum = () => {
       .catch((err) => console.log({ err }));
   }, [token]);
 
+  const deletePost = (id) => {
+    console.log({ id });
+    axios
+      .delete(`/api/forum/post/${id}`, { headers: { 'x-auth-token': token } })
+      .then(
+        ({ data }) =>
+          data && setPosts((posts) => posts.filter((p) => p._id !== data))
+      )
+      .catch((err) => console.log(err));
+  };
+  const deleteComment = (id) => {
+    axios
+      .delete(`/api/forum/comment/${id}`, {
+        headers: { 'x-auth-token': token },
+      })
+      .then(
+        ({ data }) =>
+          data &&
+          data._id &&
+          setPosts((posts) => {
+            const copy = [...posts];
+            const post = copy.find((p) => p._id === data._id);
+            Object.assign(post, data);
+            return copy;
+          })
+      )
+      .catch((err) => console.log(err));
+  };
+
   return (
     <div className={classes.forum}>
       <PostForm props={{ setPosts, token }} />
       {posts.map((post) => (
-        <Post key={post._id} props={{ post, setPosts, token }} />
+        <Post
+          key={post._id}
+          props={{ post, setPosts, token, userId, deletePost, deleteComment }}
+        />
       ))}
     </div>
   );

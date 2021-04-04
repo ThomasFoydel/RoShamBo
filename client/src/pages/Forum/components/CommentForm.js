@@ -10,12 +10,23 @@ const useStyles = makeStyles((theme) => ({
   input: {
     padding: '1em',
     marginRight: '1em',
+    [theme.breakpoints.down('xs')]: {
+      padding: '.4em',
+      marginRight: '.4em',
+    },
   },
   button: {
     padding: '1em',
     marginLeft: '1em',
     color: 'white',
     backgroundColor: theme.palette.primary.main,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
+    },
+    [theme.breakpoints.down('xs')]: {
+      padding: '.4em',
+      marginRight: '.4em',
+    },
   },
 }));
 const CommentForm = ({ props: { postId, setPosts, token } }) => {
@@ -47,6 +58,8 @@ const CommentForm = ({ props: { postId, setPosts, token } }) => {
     setCommentInput(value);
   };
 
+  const handleKeyPress = ({ charCode }) => charCode === 13 && makeComment();
+
   return (
     <Grid
       container
@@ -59,6 +72,7 @@ const CommentForm = ({ props: { postId, setPosts, token } }) => {
         <Input
           className={classes.input}
           onChange={handleChange}
+          onKeyPress={handleKeyPress}
           value={commentInput}
           placeholder='comment'
         />

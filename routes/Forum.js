@@ -27,6 +27,16 @@ router.get('/posts', auth, async (req, res) => {
     );
 });
 
+router.delete('/post/:postId', auth, async (req, res) => {
+  const { userId } = req.tokenUser;
+  const { postId } = req.params;
+  const foundPost = await API.post.findById(postId);
+  if (foundPost.author._id.toString() !== userId) return res.sendStatus(401);
+  const deletedPost = await API.post.delete(postId);
+  if (!deletedPost) res.sendStatus(501);
+  res.send(deletedPost._id.toString());
+});
+
 router.post('/comment', auth, (req, res) => {
   const { content, postId } = req.body;
   const { userId } = req.tokenUser;
@@ -41,6 +51,22 @@ router.post('/comment', auth, (req, res) => {
             .then((updatedPost) => res.send(updatedPost))
         )
     );
+});
+
+router.delete('/comment/:commentId', auth, async (req, res) => {
+  const { userId } = req.tokenUser;
+  const { commentId } = req.params;
+  const foundComment = await API.comment.find(commentId);
+  if (!foundComment) return res.sendStatus(404);
+  if (foundComment.author._id.toString() !== userId) return res.sendStatus(401);
+  API.comment.delete(commentId).then(async () => {
+    const updatedPost = await API.post.removeComment(
+      foundComment.post,
+      foundComment._id
+    );
+    if (!updatedPost) return res.sendStatus(500);
+    return res.send(updatedPost);
+  });
 });
 
 module.exports = router;

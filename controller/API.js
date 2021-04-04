@@ -20,6 +20,13 @@ const API = {
       }),
   },
   post: {
+    create: async (title, content, author) => {
+      let post = await Post.create({ author, title, content });
+      post = await post.populate('author').execPopulate();
+      return post;
+    },
+    delete: (id) => Post.findByIdAndDelete(id),
+    findById: (id) => Post.findById(id),
     find: () =>
       Post.find({})
         .populate([
@@ -35,11 +42,6 @@ const API = {
         ])
         .sort({ createdAt: 'descending' })
         .limit(100),
-    create: async (title, content, author) => {
-      let post = await Post.create({ author, title, content });
-      post = await post.populate('author').execPopulate();
-      return post;
-    },
     addComment: (post, comment) =>
       Post.findByIdAndUpdate(
         post,
@@ -56,10 +58,28 @@ const API = {
         },
         { path: 'author' },
       ]),
+    removeComment: (postId, commentId) =>
+      Post.findByIdAndUpdate(
+        postId,
+        { $pull: { comments: commentId } },
+        { new: true }
+      ).populate([
+        {
+          path: 'comments',
+          model: 'Comment',
+          populate: {
+            path: 'author',
+            model: 'User',
+          },
+        },
+        { path: 'author' },
+      ]),
   },
   comment: {
     create: (content, author, post) =>
       Comment.create({ content, author, post }),
+    find: (id) => Comment.findById(id),
+    delete: (id) => Comment.findByIdAndDelete(id),
   },
   friendship: {
     create: (sender, receiver) => Friendship.create({ sender, receiver }),
