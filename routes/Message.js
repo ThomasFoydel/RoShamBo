@@ -7,7 +7,7 @@ router.post('/', auth, async (req, res) => {
   const { receiver, content } = req.body;
   const sender = req.tokenUser.userId;
   API.message
-    .create({ sender, receiver, content })
+    .create(sender, receiver, content)
     .then((message) => res.status(201).send(message))
     .catch((err) => {
       console.log('new message error: ', err);

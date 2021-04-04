@@ -3,7 +3,7 @@ const Message = require('../models/Message');
 const Friendship = require('../models/Friendship');
 const Post = require('../models/Post');
 const RandomBattle = require('../models/RandomBattle');
-
+const Comment = require('../models/Comment');
 const API = {
   user: {
     create: (user) => User.create(user),
@@ -11,7 +11,7 @@ const API = {
     findByEmail: (email) => User.findOne({ email }).select('password email'),
   },
   message: {
-    create: ({ sender, receiver, content }) =>
+    create: (sender, receiver, content) =>
       Message.create({ sender, receiver, content }),
     findById: (id) => Message.findById(id),
     findByUser: (userId) =>
@@ -20,9 +20,42 @@ const API = {
       }),
   },
   post: {
-    find: () => Post.find({}).populate('author'),
-    create: ({ author, title, content }) =>
-      Post.create({ author, title, content }),
+    find: () =>
+      Post.find({})
+        .populate([
+          {
+            path: 'comments',
+            model: 'Comment',
+            populate: {
+              path: 'author',
+              model: 'User',
+            },
+          },
+          { path: 'author' },
+        ])
+        .sort({ createdAt: 'descending' })
+        .limit(100),
+    create: (title, content, author) => Post.create({ author, title, content }),
+    addComment: (post, comment) =>
+      Post.findByIdAndUpdate(
+        post,
+        { $push: { comments: [comment] } },
+        { new: true }
+      ).populate([
+        {
+          path: 'comments',
+          model: 'Comment',
+          populate: {
+            path: 'author',
+            model: 'User',
+          },
+        },
+        { path: 'author' },
+      ]),
+  },
+  comment: {
+    create: (content, author, post) =>
+      Comment.create({ content, author, post }),
   },
   friendship: {
     create: (sender, receiver) => Friendship.create({ sender, receiver }),

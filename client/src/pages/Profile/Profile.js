@@ -73,7 +73,7 @@ const Profile = ({
   const classes = useStyles();
 
   const [user, setUser] = useState({});
-  const [friendshipExists, setFriendshipExists] = useState(false);
+  const [friendshipExists, setFriendshipExists] = useState(true);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const isCurrentUser = id === appState.user.id;
