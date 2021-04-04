@@ -1,38 +1,87 @@
-import React, { useState, useContext } from 'react';
-import { CTX } from 'context/Store';
+import React, { useState } from 'react';
 import axios from 'axios';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, Grid, Button, Input } from '@material-ui/core';
 const useStyles = makeStyles((theme) => ({
   form: {
+    ...theme.centerHorizontal,
+    background: 'rgba(255,255,255,0.2)',
+    background: 'linear-gradient(to bottom right, #bbb, #eee)',
+    width: '80%',
+    maxWidth: '400px',
+    padding: '2em',
+    borderRadius: '4px',
+  },
+  input: {
+    width: '100%',
+    padding: '1em',
+    margin: '.5em 0',
     background: 'white',
   },
+  button: {
+    padding: '1em',
+    color: 'white',
+    backgroundColor: theme.palette.primary.main,
+    '&:hover': {
+      backgroundColor: theme.palette.primary.dark,
+    },
+  },
 }));
-const PostForm = ({ props: { setPosts } }) => {
+const PostForm = ({ props: { setPosts, token } }) => {
   const classes = useStyles();
-  const [appState, updateState] = useContext(CTX);
+
   const [form, setForm] = useState({
     title: '',
     content: '',
   });
   const makePost = () => {
-    const { token } = appState.auth;
-    axios
-      .post('/api/forum/post', form, { headers: { 'x-auth-token': token } })
-      .then(({ data }) => setPosts((posts) => [data, ...posts]))
-      .catch((err) => {
-        console.log('new post error ', err);
-      });
+    if (form.content && form.title) {
+      setForm({ title: '', content: '' });
+      axios
+        .post('/api/forum/post', form, { headers: { 'x-auth-token': token } })
+        .then(({ data }) => setPosts((posts) => [data, ...posts]))
+        .catch((err) => console.log('new post error ', err));
+    }
   };
   const handleChange = ({ target: { id, value } }) => {
     setForm((f) => ({ ...f, [id]: value }));
   };
 
+  const handleKeyPress = ({ charCode }) => charCode === 13 && makePost();
+
   return (
-    <div className={classes.form}>
-      <input id='title' onChange={handleChange} placeholder='title' />
-      <input id='content' onChange={handleChange} placeholder='content' />
-      <button onClick={makePost}>submit</button>
-    </div>
+    <Grid
+      container
+      alignItems='center'
+      justify='center'
+      direction='column'
+      className={classes.form}
+    >
+      <Grid item>
+        <Input
+          className={classes.input}
+          id='title'
+          onChange={handleChange}
+          onKeyPress={handleKeyPress}
+          placeholder='title'
+          value={form.title}
+        />
+      </Grid>
+      <Grid item>
+        <Input
+          className={classes.input}
+          id='content'
+          onChange={handleChange}
+          onKeyPress={handleKeyPress}
+          placeholder='content'
+          value={form.content}
+        />
+      </Grid>
+      <Grid item>
+        <Button className={classes.button} onClick={makePost}>
+          submit
+        </Button>
+      </Grid>
+    </Grid>
   );
 };
 

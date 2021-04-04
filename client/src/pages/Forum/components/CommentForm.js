@@ -1,10 +1,21 @@
 import React, { useState, useContext } from 'react';
 
 import axios from 'axios';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, Grid, Input, Button } from '@material-ui/core';
 const useStyles = makeStyles((theme) => ({
   form: {
-    background: 'white',
+    ...theme.centerHorizontal,
+    width: '80%',
+  },
+  input: {
+    padding: '1em',
+    marginRight: '1em',
+  },
+  button: {
+    padding: '1em',
+    marginLeft: '1em',
+    color: 'white',
+    backgroundColor: theme.palette.primary.main,
   },
 }));
 const CommentForm = ({ props: { postId, setPosts, token } }) => {
@@ -37,14 +48,31 @@ const CommentForm = ({ props: { postId, setPosts, token } }) => {
   };
 
   return (
-    <div className={classes.form}>
-      <input
-        onChange={handleChange}
-        value={commentInput}
-        placeholder='comment'
-      />
-      <button onClick={makeComment}>submit</button>
-    </div>
+    <Grid
+      container
+      justify='center'
+      alignItems='center'
+      className={classes.form}
+      wrap='nowrap'
+    >
+      <Grid item>
+        <Input
+          className={classes.input}
+          onChange={handleChange}
+          value={commentInput}
+          placeholder='comment'
+        />
+      </Grid>
+      <Grid>
+        <Button
+          className={classes.button}
+          onClick={makeComment}
+          background='primary'
+        >
+          submit
+        </Button>
+      </Grid>
+    </Grid>
   );
 };
 

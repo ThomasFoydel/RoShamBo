@@ -10,12 +10,16 @@ import { makeStyles, Card, Typography, Avatar, Grid } from '@material-ui/core';
 const useStyles = makeStyles((theme) => ({
   forum: {
     marginTop: '5rem',
+    paddingBottom: '5rem',
   },
   post: {
     background: '#eee',
-    margin: '2em 1em',
+    margin: '2em',
     color: theme.palette.primary.dark,
     padding: '1em',
+    [theme.breakpoints.down('md')]: {
+      margin: '2em 1em',
+    },
     [theme.breakpoints.down('xs')]: {
       padding: '0.5em',
     },
@@ -36,6 +40,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'center',
     fontSize: '3rem',
     letterSpacing: '0.25rem',
+    fontWeight: 'bold',
     [theme.breakpoints.down('sm')]: {
       fontSize: '1.5rem',
     },
@@ -167,14 +172,12 @@ const Forum = () => {
     axios
       .get('/api/forum/posts', { headers: { 'x-auth-token': token } })
       .then(({ data }) => setPosts(data))
-      .catch((err) => {
-        console.log({ err });
-      });
+      .catch((err) => console.log({ err }));
   }, [token]);
 
   return (
     <div className={classes.forum}>
-      <PostForm props={{ setPosts }} />
+      <PostForm props={{ setPosts, token }} />
       {posts.map((post) => (
         <Post key={post._id} props={{ post, setPosts, token }} />
       ))}

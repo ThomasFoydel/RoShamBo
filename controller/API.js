@@ -35,7 +35,11 @@ const API = {
         ])
         .sort({ createdAt: 'descending' })
         .limit(100),
-    create: (title, content, author) => Post.create({ author, title, content }),
+    create: async (title, content, author) => {
+      let post = await Post.create({ author, title, content });
+      post = await post.populate('author').execPopulate();
+      return post;
+    },
     addComment: (post, comment) =>
       Post.findByIdAndUpdate(
         post,
