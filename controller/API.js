@@ -27,7 +27,7 @@ const API = {
     },
     delete: (id) => Post.findByIdAndDelete(id),
     findById: (id) => Post.findById(id),
-    find: () =>
+    findAll: () =>
       Post.find({})
         .populate([
           {

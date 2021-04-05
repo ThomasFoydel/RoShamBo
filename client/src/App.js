@@ -18,6 +18,7 @@ import RandomBattle from 'pages/Battle/RandomBattle';
 import Forum from 'pages/Forum/Forum';
 import Landing from 'pages/Landing/Landing';
 import Home from 'pages/Home/Home';
+import EditProfile from 'pages/EditProfile/EditProfile';
 
 import { makeStyles } from '@material-ui/core';
 const useStyles = makeStyles(() => ({
@@ -113,7 +114,8 @@ const App = () => {
             <Route path='/game' exact component={Game} />
             <Route path='/profile/:id' exact component={Profile} />
             <Route path='/battle' exact component={Battle} />
-            <Route path='/battle/computer' component={ComputerBattle} />
+            <Route path='/battle/computer' exact component={ComputerBattle} />
+            <Route path='/editprofile' exact component={EditProfile} />
             <Route
               path='/battle/random'
               component={() =>
