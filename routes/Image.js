@@ -6,7 +6,8 @@ const crypto = require('crypto');
 const path = require('path');
 require('dotenv').config();
 const auth = require('../middleware/auth');
-const User = require('../models/User');
+const API = require('../controller/API');
+
 const mongoURI = process.env.MONGO_URI;
 const conn = mongoose.createConnection(mongoURI, {
   useNewUrlParser: true,
@@ -15,7 +16,6 @@ const conn = mongoose.createConnection(mongoURI, {
 
 let gfs;
 conn.once('open', () => {
-  // init stream
   gfs = new mongoose.mongo.GridFSBucket(conn.db, {
     bucketName: 'images',
   });
@@ -71,7 +71,6 @@ router.get('/', (req, res) => {
     process.exit(0);
   }
   gfs.find().toArray((err, files) => {
-    /* check if files exist */
     if (!files || files.length === 0) {
       return res.send({ err: 'no files' });
     } else {
@@ -117,7 +116,7 @@ router.post(
       return res.send({ err: 'file may not exceed 5mb' });
     }
 
-    const foundUser = await User.findById(userId);
+    const foundUser = await API.user.findById(userId);
     if (!foundUser) return res.send({ err: 'user not found' });
     let currentPic = foundUser.profilePic;
     if (currentPic) {
@@ -129,11 +128,8 @@ router.post(
       });
     }
 
-    User.findOneAndUpdate(
-      { _id: userId },
-      { profilePic: id },
-      { new: true, useFindAndModify: false }
-    )
+    API.user
+      .updateProfile(userId, { profilePic: id })
       .then((user) => res.send(user.profilePic))
       .catch(() => {
         return res.send({ err: 'database error' });
