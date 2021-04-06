@@ -51,6 +51,9 @@ const userSchema = mongoose.Schema({
       message: 'must be a valid email',
     },
   },
+  profilePic: {
+    type: String,
+  },
   password: {
     type: String,
     required: [true, 'Password required'],

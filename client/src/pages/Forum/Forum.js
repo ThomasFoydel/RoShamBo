@@ -114,7 +114,7 @@ const Comment = ({ props: { comment, userId, deleteComment } }) => {
             <Grid container alignItems='center'>
               <Grid item>
                 <Avatar
-                  src={comment.author.profilePic}
+                  src={`/api/image/${comment.author.profilePic}`}
                   className={classes.commentAvatar}
                 >
                   {comment.author.name && comment.author.name[0].toUpperCase()}
@@ -159,7 +159,7 @@ const Post = ({
           <Grid container alignItems='center'>
             <Grid item>
               <Avatar
-                src={post.author.profilePic}
+                src={`/api/image/${post.author.profilePic}`}
                 className={classes.postAvatar}
               >
                 {post.author.name && post.author.name[0].toUpperCase()}

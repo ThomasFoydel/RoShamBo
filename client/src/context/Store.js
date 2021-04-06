@@ -5,10 +5,9 @@ export { CTX };
 
 export function reducer(state, action) {
   let { payload } = action;
-  let { user, token, profilePic, coverPic, kind, message } = payload || {};
+  let { user, token, profilePic, message } = payload || {};
   switch (action.type) {
     case 'LOGIN':
-      console.log('login action: ', action);
       localStorage.setItem('roshambo-token', token);
       return {
         ...state,
@@ -17,7 +16,6 @@ export function reducer(state, action) {
           id: user.id,
           name: user.name,
           displayEmail: user.displayEmail,
-          coverPic: user.coverPic,
           profilePic: user.profilePic,
         },
         auth: { token },
@@ -37,11 +35,10 @@ export function reducer(state, action) {
       };
     case 'TOGGLE_AUTH_MODAL':
       return { ...state, authModal: !state.authModal };
-    case 'CHANGE_PIC':
-      let newPic = kind === 'coverPic' ? coverPic : profilePic;
+    case 'CHANGE_PROFILE_PIC':
       return {
         ...state,
-        user: { ...state.user, [kind]: newPic },
+        user: { ...state.user, profilePic },
       };
     case 'NEW_MESSAGE':
       let copy = { ...state.messages };

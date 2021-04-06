@@ -114,9 +114,7 @@ const Profile = ({
           headers: { 'x-auth-token': appState.auth.token },
         }
       )
-      .then((result) => {
-        console.log(result);
-      })
+      .then(() => setFriendshipExists(true))
       .catch(() => {
         setErr('Something went wrong, friend request not created');
       });
@@ -141,7 +139,11 @@ const Profile = ({
         <Avatar
           className={classes.profilePic}
           alt={user.name || 'loading'}
-          src={loading || !user.name ? loadingblue : user.profilePic}
+          src={
+            loading || !user.name
+              ? loadingblue
+              : `/api/image/${user.profilePic}`
+          }
         >
           {!user.profilePic && user.name && user.name[0].toUpperCase()}
         </Avatar>

@@ -2,40 +2,58 @@ import React, { useState, useContext } from 'react';
 import ImageUpload from 'components/ImageUpload/ImageUpload';
 import axios from 'axios';
 import { CTX } from 'context/Store';
-
+import { Avatar } from '@material-ui/core';
 const EditProfile = () => {
-  const [appState] = useContext(CTX);
+  const [appState, updateState] = useContext(CTX);
   const { token } = appState.auth;
+  const { name, profilePic } = appState.user;
   const [showProfileInput, setShowProfileInput] = useState(false);
   const [profileImage, setProfileImage] = useState([]);
 
   const toggleProfile = () => setShowProfileInput((s) => !s);
 
-  const handleProfileFile = ([file]) => {
-    console.log(file);
-    setProfileImage(file);
-  };
+  const handleProfileFile = ([file]) => file && setProfileImage(file);
 
-  const handleImageSubmit = (file) => {
+  const handleImageSubmit = ([file]) => {
     if (profileImage) {
-      axios.post('/api/user/profilepic', file, {
-        headers: { 'x-auth-token': token },
-      });
+      const fd = new FormData();
+      fd.append('image', file, file.name);
+      axios
+        .post('/api/image/upload/profilepic', fd, {
+          headers: { 'x-auth-token': token },
+        })
+        .then(({ data }) => {
+          updateState({
+            type: 'CHANGE_PROFILE_PIC',
+            payload: { profilePic: data },
+          });
+          setShowProfileInput(false);
+        })
+        .catch((err) => console.log(err));
     }
   };
+
   return (
-    <div>
-      <ImageUpload
-        props={{
-          toggle: toggleProfile,
-          text: 'New profile pic',
-          buttonText: 'Edit Profile Picture',
-          show: showProfileInput,
-          handleFile: handleProfileFile,
-          handleSubmit: handleImageSubmit,
-        }}
-      />
-    </div>
+    <>
+      {appState.user && (
+        <div>
+          <Avatar src={`/api/image/${profilePic}`} alt='your profile'>
+            {name[0] && name[0].toUpperCase()}
+          </Avatar>
+          <ImageUpload
+            props={{
+              toggle: toggleProfile,
+              text: 'New profile pic',
+              buttonText: 'Edit Profile Picture',
+              show: showProfileInput,
+              handleFile: handleProfileFile,
+              handleSubmit: handleImageSubmit,
+              handleDelete: () => setProfileImage(null),
+            }}
+          />
+        </div>
+      )}
+    </>
   );
 };
 
