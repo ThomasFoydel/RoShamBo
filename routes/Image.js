@@ -1,14 +1,13 @@
+const mongoose = require('mongoose');
+const GridFsStorage = require('multer-gridfs-storage');
 const router = require('express').Router();
-
+const multer = require('multer');
 const crypto = require('crypto');
 const path = require('path');
-const mongoose = require('mongoose');
-const multer = require('multer');
-const GridFsStorage = require('multer-gridfs-storage');
-const auth = require('../middleware/auth');
 require('dotenv').config();
-const mongoURI = process.env.MONGO_URI;
+const auth = require('../middleware/auth');
 const User = require('../models/User');
+const mongoURI = process.env.MONGO_URI;
 const conn = mongoose.createConnection(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,

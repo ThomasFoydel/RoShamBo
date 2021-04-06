@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@material-ui/core';
 import { DropzoneDialog } from 'material-ui-dropzone';
+
 const ImageUpload = ({
   props: {
     toggle,
@@ -10,11 +11,12 @@ const ImageUpload = ({
     handleDelete,
     buttonText,
     handleSubmit,
+    btnClass,
   },
 }) => {
   return (
     <div>
-      <Button color='primary' onClick={toggle}>
+      <Button className={btnClass} onClick={toggle}>
         {buttonText}
       </Button>
       <DropzoneDialog
