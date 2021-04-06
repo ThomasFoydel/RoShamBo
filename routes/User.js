@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const API = require('../controller/API');
 const auth = require('../middleware/auth');
+const { route } = require('./Image');
 const router = express.Router();
 
 router.post('/friendrequest', auth, async (req, res) => {
@@ -108,6 +109,15 @@ router.get('/profile/:profileId', auth, async (req, res) => {
           return res.sendStatus(500);
         });
     });
+});
+
+router.put('/profile', auth, (req, res) => {
+  const { userId } = req.tokenUser;
+  const update = req.body;
+  API.user
+    .updateProfile(userId, update)
+    .then((updatedUser) => res.send(updatedUser))
+    .catch(() => res.sendStatus(500));
 });
 
 module.exports = router;

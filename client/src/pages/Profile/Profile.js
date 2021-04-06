@@ -151,6 +151,18 @@ const Profile = ({
           <Typography className={classes.username}>
             {user.name || 'loading'}
           </Typography>
+
+          {user.displayEmail && (
+            <Typography className={classes.email}>
+              {user.displayEmail}
+            </Typography>
+          )}
+          {user.bio && (
+            <Typography className={classes.email}>{user.bio}</Typography>
+          )}
+          {!isCurrentUser && !friendshipExists && (
+            <button onClick={requestFriend}>request friendship</button>
+          )}
           {isCurrentUser && !loading && (
             <Typography
               className={classes.editLink}
@@ -159,14 +171,6 @@ const Profile = ({
             >
               edit profile
             </Typography>
-          )}
-          {user.displayEmail && (
-            <Typography className={classes.email}>
-              {user.displayEmail || ''}
-            </Typography>
-          )}
-          {!isCurrentUser && !friendshipExists && (
-            <button onClick={requestFriend}>request friendship</button>
           )}
         </div>
       </Card>

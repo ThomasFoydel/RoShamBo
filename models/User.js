@@ -54,6 +54,13 @@ const userSchema = mongoose.Schema({
   profilePic: {
     type: String,
   },
+  bio: {
+    type: String,
+    validate: {
+      validator: (c) => c.length < 200,
+      message: 'must be less than 200 characters',
+    },
+  },
   password: {
     type: String,
     required: [true, 'Password required'],

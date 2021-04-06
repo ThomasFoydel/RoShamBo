@@ -5,6 +5,18 @@ const API = require('../controller/API');
 const auth = require('../middleware/auth');
 const router = express.Router();
 
+const sendUser = (res, user, token) => {
+  const userInfo = {
+    name: user.name,
+    email: user.email,
+    id: user._id,
+    profilePic: user.profilePic,
+    displayEmail: user.displayEmail,
+    bio: user.bio,
+  };
+  return res.send({ user: userInfo, token });
+};
+
 router.post('/register', async (req, res) => {
   let { email, name, password, confirmpassword } = req.body || {};
   let allFieldsExist = email && name && password && confirmpassword;
@@ -52,13 +64,7 @@ router.post('/register', async (req, res) => {
         process.env.SECRET,
         { expiresIn: '1000hr' }
       );
-      const userInfo = {
-        name: user.name,
-        email: user.email,
-        id: user._id,
-      };
-
-      res.status(201).send({ user: userInfo, token });
+      return sendUser(res, user, token);
     })
     .catch(() => {
       res
@@ -94,12 +100,7 @@ router.post('/login', async (req, res) => {
           process.env.SECRET,
           { expiresIn: '1000hr' }
         );
-        const userInfo = {
-          name: user.name,
-          email: user.email,
-          id: user._id,
-        };
-        res.status(200).send({ user: userInfo, token });
+        return sendUser(res, user, token);
       } else {
         return res.status(401).send({ err: 'Incorrect auth info' });
       }
@@ -113,21 +114,12 @@ router.post('/login', async (req, res) => {
 
 router.get('/', auth, async (req, res) => {
   let { tokenUser } = req;
+  const token = req.header('x-auth-token');
   if (tokenUser) {
     let { userId } = tokenUser;
     API.user
       .findById({ _id: userId })
-      .then(async (foundUser) => {
-        const { name, email, _id, coverPic, profilePic } = foundUser;
-
-        return res.status(200).send({
-          name,
-          email,
-          id: _id,
-          coverPic,
-          profilePic,
-        });
-      })
+      .then(async (user) => sendUser(res, user, token))
       .catch(() => {
         res.status(500).send({ err: 'database error' });
       });

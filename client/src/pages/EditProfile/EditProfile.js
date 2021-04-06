@@ -2,13 +2,19 @@ import React, { useState, useContext } from 'react';
 import ImageUpload from 'components/ImageUpload/ImageUpload';
 import axios from 'axios';
 import { CTX } from 'context/Store';
-import { Avatar } from '@material-ui/core';
+import { Avatar, Input, Button, Typography } from '@material-ui/core';
+
 const EditProfile = () => {
   const [appState, updateState] = useContext(CTX);
   const { token } = appState.auth;
   const { name, profilePic } = appState.user;
   const [showProfileInput, setShowProfileInput] = useState(false);
   const [profileImage, setProfileImage] = useState([]);
+  const [formData, setFormData] = useState({
+    name: '',
+    displayEmail: '',
+    bio: '',
+  });
 
   const toggleProfile = () => setShowProfileInput((s) => !s);
 
@@ -33,10 +39,29 @@ const EditProfile = () => {
     }
   };
 
+  const handleChange = ({ target: { id, value } }) =>
+    setFormData((f) => ({ ...f, [id]: value }));
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const update = Object.fromEntries(
+      Object.entries(formData).filter((e) => e[1].length > 0)
+    );
+
+    axios
+      .put('/api/user/profile', update, {
+        headers: { 'x-auth-token': token },
+      })
+      .then(({ data }) => {
+        updateState({ type: 'UPDATE_USER_INFO', payload: { update: data } });
+        setFormData({ name: '', displayEmail: '', bio: '' });
+      })
+      .catch((err) => console.log(err));
+  };
   return (
     <>
       {appState.user && (
-        <div>
+        <div style={{ background: '#ccc' }}>
           <Avatar src={`/api/image/${profilePic}`} alt='your profile'>
             {name[0] && name[0].toUpperCase()}
           </Avatar>
@@ -51,6 +76,30 @@ const EditProfile = () => {
               handleDelete: () => setProfileImage(null),
             }}
           />
+          <form onSubmit={handleSubmit}>
+            <Typography>{appState.user.name}</Typography>
+            <Input
+              id='name'
+              placeholder='edit name'
+              onChange={handleChange}
+              value={formData.name}
+            />
+            <Typography>{appState.user.displayEmail}</Typography>
+            <Input
+              id='displayEmail'
+              placeholder='edit display email'
+              onChange={handleChange}
+              value={formData.displayEmail}
+            />
+            <Typography>{appState.user.bio}</Typography>
+            <Input
+              id='bio'
+              placeholder='edit bio'
+              onChange={handleChange}
+              value={formData.bio}
+            />
+            <Button type='submit'>submit</Button>
+          </form>
         </div>
       )}
     </>

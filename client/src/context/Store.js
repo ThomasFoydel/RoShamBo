@@ -5,7 +5,7 @@ export { CTX };
 
 export function reducer(state, action) {
   let { payload } = action;
-  let { user, token, profilePic, message } = payload || {};
+  let { user, token, profilePic, message, update } = payload || {};
   switch (action.type) {
     case 'LOGIN':
       localStorage.setItem('roshambo-token', token);
@@ -17,6 +17,7 @@ export function reducer(state, action) {
           name: user.name,
           displayEmail: user.displayEmail,
           profilePic: user.profilePic,
+          bio: user.bio,
         },
         auth: { token },
         messages: user.messages,
@@ -39,6 +40,11 @@ export function reducer(state, action) {
       return {
         ...state,
         user: { ...state.user, profilePic },
+      };
+    case 'UPDATE_USER_INFO':
+      return {
+        ...state,
+        user: { ...state.user, ...update },
       };
     case 'NEW_MESSAGE':
       let copy = { ...state.messages };

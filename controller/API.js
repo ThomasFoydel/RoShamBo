@@ -9,6 +9,8 @@ const API = {
     create: (user) => User.create(user),
     findById: (id) => User.findById(id),
     findByEmail: (email) => User.findOne({ email }).select('password email'),
+    updateProfile: (id, update) =>
+      User.findByIdAndUpdate(id, { $set: update }, { new: true }),
   },
   message: {
     create: (sender, receiver, content) =>

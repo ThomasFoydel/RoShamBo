@@ -51,11 +51,12 @@ const App = () => {
           if (subscribed) {
             if (data.err && process.env.NODE_ENV === 'production')
               return updateState({ type: 'LOGOUT' });
-            if (data)
+            if (data) {
               updateState({
                 type: 'LOGIN',
-                payload: { user: data, token: rsbToken },
+                payload: { user: data.user, token: data.token },
               });
+            }
           }
         })
         .catch(() => {
