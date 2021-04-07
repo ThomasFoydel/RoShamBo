@@ -120,7 +120,12 @@ router.post(
     if (!foundUser) return res.send({ err: 'user not found' });
     let currentPic = foundUser.profilePic;
     if (currentPic) {
-      let currentPicId = new mongoose.Types.ObjectId(currentPic);
+      let currentPicId;
+      try {
+        currentPicId = new mongoose.Types.ObjectId(currentPic);
+      } catch (err) {
+        console.log('invalid id: ', currentPic);
+      }
       gfs.delete(currentPicId, (err) => {
         if (err) {
           return res.send({ err: 'database error' });

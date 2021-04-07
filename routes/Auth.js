@@ -66,7 +66,8 @@ router.post('/register', async (req, res) => {
       );
       return sendUser(res, user, token);
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log('ERROR: ', err);
       res
         .status(500)
         .send({ err: 'Database is down, we are working to fix this' });

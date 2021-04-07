@@ -11,6 +11,7 @@ const API = {
     findByEmail: (email) => User.findOne({ email }).select('password email'),
     updateProfile: (id, update) =>
       User.findByIdAndUpdate(id, { $set: update }, { new: true }),
+    getFriendList: (id) => User.findById(id).populate('friends'),
   },
   message: {
     create: (sender, receiver, content) =>
@@ -103,7 +104,21 @@ const API = {
         $and: [{ status: 'pending' }, { receiver: id }],
       }).populate('sender'),
     accept: (id) =>
-      Friendship.findByIdAndUpdate(id, { status: 'accepted' }, { new: true }),
+      Friendship.findById(id).then(({ sender, receiver }) =>
+        User.findByIdAndUpdate(sender, {
+          $addToSet: { friends: [receiver] },
+        }).then(() =>
+          User.findByIdAndUpdate(receiver, {
+            $addToSet: { friends: [sender] },
+          }).then(() =>
+            Friendship.findByIdAndUpdate(
+              id,
+              { status: 'accepted' },
+              { new: true }
+            )
+          )
+        )
+      ),
     reject: (id) =>
       Friendship.findByIdAndUpdate(id, { status: 'rejected' }, { new: true }),
 

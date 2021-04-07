@@ -2,7 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CTX } from 'context/Store';
 import { Link } from 'react-router-dom';
-import { Avatar, makeStyles, Card, Typography } from '@material-ui/core';
+import {
+  Avatar,
+  makeStyles,
+  Card,
+  Typography,
+  Button,
+} from '@material-ui/core';
 import rps from 'imgs/rps.jpeg';
 import loadingblue from 'imgs/loadingblue.gif';
 
@@ -32,7 +38,6 @@ const useStyles = makeStyles((theme) => ({
     minWidth: '100vw',
     minHeight: '100vh',
     position: 'fixed',
-    // paddingTop: '7rem',
   },
   card: {
     ...theme.centerHorizontal,
@@ -63,6 +68,13 @@ const useStyles = makeStyles((theme) => ({
   },
   editLink: { textAlign: 'center', minWidth: '100%' },
   email: {},
+  requestButton: {
+    color: 'white',
+    background: theme.palette.primary.main,
+    '&:hover': {
+      background: theme.palette.primary.dark,
+    },
+  },
 }));
 const Profile = ({
   match: {
@@ -161,7 +173,9 @@ const Profile = ({
             <Typography className={classes.email}>{user.bio}</Typography>
           )}
           {!isCurrentUser && !friendshipExists && (
-            <button onClick={requestFriend}>request friendship</button>
+            <Button className={classes.requestButton} onClick={requestFriend}>
+              request friendship
+            </Button>
           )}
           {isCurrentUser && !loading && (
             <Typography

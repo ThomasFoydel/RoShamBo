@@ -117,6 +117,7 @@ const App = () => {
             <Route path='/battle' exact component={Battle} />
             <Route path='/battle/computer' exact component={ComputerBattle} />
             <Route path='/editprofile' exact component={EditProfile} />
+
             <Route
               path='/battle/random'
               component={() =>

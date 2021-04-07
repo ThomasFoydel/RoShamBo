@@ -2,7 +2,6 @@ const express = require('express');
 const mongoose = require('mongoose');
 const API = require('../controller/API');
 const auth = require('../middleware/auth');
-const { route } = require('./Image');
 const router = express.Router();
 
 router.post('/friendrequest', auth, async (req, res) => {
@@ -46,17 +45,20 @@ router.get('/friendrequests', auth, async (req, res) => {
 router.post('/accept-fr', auth, async (req, res) => {
   const { userId } = req.tokenUser;
   const { id } = req.body;
-
   API.friendship
     .findById(id)
     .then((friendrequest) => {
-      if (friendrequest.receiver.toString() === userId)
-        API.friendship.accept(id).then(async () => {
-          const remainingFriendRequests = await API.friendship.findPending(
-            userId
-          );
-          res.status(201).send(remainingFriendRequests);
-        });
+      if (friendrequest.receiver._doc._id.toString() === userId) {
+        API.friendship
+          .accept(id)
+          .then(async () => {
+            const remainingFriendRequests = await API.friendship.findPending(
+              userId
+            );
+            res.status(201).send(remainingFriendRequests);
+          })
+          .catch(() => res.sendStatus(500));
+      }
     })
     .catch(() => res.sendStatus(400));
 });
@@ -78,13 +80,20 @@ router.post('/reject-fr', auth, async (req, res) => {
     .catch(() => res.sendStatus(400));
 });
 
-router.get('/friendlist', auth, async ({ tokenUser: { userId } }, res) => {
+router.get('/friendships', auth, async ({ tokenUser: { userId } }, res) => {
   API.friendship
     .findFriendlist(userId)
     .then((result) => {
       res.status(200).send(result);
     })
     .catch(() => res.sendStatus(500));
+});
+
+router.get('/friendlist', auth, async (req, res) => {
+  const { userId } = req.tokenUser;
+  const foundUser = await API.user.getFriendList(userId);
+  console.log(foundUser);
+  return res.send(foundUser.friends);
 });
 
 router.get('/profile/:profileId', auth, async (req, res) => {
@@ -101,7 +110,6 @@ router.get('/profile/:profileId', auth, async (req, res) => {
     .findByUsers(userId, profileObjId)
     .then((existingFriendShip) => {
       const friendshipExists = !!existingFriendShip;
-
       API.user
         .findById(profileObjId)
         .then((user) => res.status(201).send({ user, friendshipExists }))

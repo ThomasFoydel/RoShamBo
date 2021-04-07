@@ -1,13 +1,21 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CTX } from 'context/Store';
-import { makeStyles } from '@material-ui/core';
+import { makeStyles, Button } from '@material-ui/core';
 const useStyles = makeStyles((theme) => ({
   friendRequests: {
     ...theme.centerHorizontal,
     fontFamily: 'OpenDyslexic',
     qidth: '100%',
     textAlign: 'center',
+  },
+  btn: {
+    color: 'white',
+    margin: '0 1em',
+    background: theme.palette.primary.main,
+    '&:hover': {
+      background: theme.palette.primary.dark,
+    },
   },
 }));
 const FriendRequests = () => {
@@ -23,17 +31,20 @@ const FriendRequests = () => {
       .catch((err) => console.log({ err }));
     return () => (subscribed = false);
   }, []);
-  const accept = ({ target: { id } }) => {
+  const accept = (id) => {
     axios
       .post(
         '/api/user/accept-fr',
         { id },
         { headers: { 'x-auth-token': token } }
       )
-      .then(({ data }) => setFriendRequests(data))
+      .then(({ data }) => {
+        console.log('DATA:::', data);
+        setFriendRequests(data);
+      })
       .catch((err) => console.log({ err }));
   };
-  const reject = ({ target: { id } }) => {
+  const reject = (id) => {
     axios
       .post(
         '/api/user/reject-fr',
@@ -51,23 +62,26 @@ const FriendRequests = () => {
           : 'Friend Requests: '}
       </h3>
       {friendRequests.map((request) => (
-        <FriendRequest key={request._id} props={{ request, reject, accept }} />
+        <FriendRequest
+          key={request._id}
+          props={{ request, reject, accept, classes }}
+        />
       ))}
     </div>
   );
 };
 
-const FriendRequest = ({ props: { request, reject, accept } }) => {
+const FriendRequest = ({ props: { request, reject, accept, classes } }) => {
   const { _id } = request;
   return (
     <>
       <div>{request.sender.name}</div>
-      <button id={_id} onClick={accept}>
+      <Button className={classes.btn} onClick={() => accept(_id)}>
         accept
-      </button>
-      <button id={_id} onClick={reject}>
+      </Button>
+      <Button className={classes.btn} onClick={() => reject(_id)}>
         reject
-      </button>
+      </Button>
     </>
   );
 };

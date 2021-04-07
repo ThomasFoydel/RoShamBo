@@ -12,7 +12,7 @@ const BattleFriends = () => {
   useEffect(() => {
     if (!token) return;
     axios
-      .get('/api/user/friendlist', { headers: { 'x-auth-token': token } })
+      .get('/api/user/friendships', { headers: { 'x-auth-token': token } })
       .then(({ data }) => setFriendlist(data))
       .catch((err) => console.log({ err }));
   }, [token]);
