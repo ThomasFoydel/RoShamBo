@@ -92,7 +92,6 @@ router.get('/friendships', auth, async ({ tokenUser: { userId } }, res) => {
 router.get('/friendlist', auth, async (req, res) => {
   const { userId } = req.tokenUser;
   const foundUser = await API.user.getFriendList(userId);
-  console.log(foundUser);
   return res.send(foundUser.friends);
 });
 

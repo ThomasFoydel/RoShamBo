@@ -4,10 +4,11 @@ const socketio = require('socket.io');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const path = require('path');
-const apiRoutes = require('./routes/Api');
+const apiRoutes = require('./routes');
 const API = require('./controller/API');
 require('dotenv').config();
 const app = express();
+const auth = require('./middleware/auth');
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
@@ -60,7 +61,6 @@ mongoose
     }
 
     io.on('connection', (socket) => {
-      /* set up initial connection for chat and notifications */
       const token = socket.handshake.query.token;
       if (!token) {
         console.log('no token auth denied');
@@ -80,6 +80,35 @@ mongoose
           console.log('err: ', err);
         }
       }
+
+      app.post('/api/message/new', auth, async (req, res) => {
+        const { receiver, content } = req.body;
+        const sender = req.tokenUser.userId;
+        API.message
+          .create(sender, receiver, content)
+          .then((message) => {
+            if (users[receiver]) {
+              io.to(users[receiver]).emit('chat-message-notification', message);
+              io.to(users[receiver]).emit('chat-message', message);
+              io.to(users[sender]).emit('chat-message', message);
+            }
+            return res.status(201).send(message);
+          })
+          .catch(() => {
+            return res
+              .status(500)
+              .send({ err: 'Database is down, we are working to fix this' });
+          });
+      });
+
+      app.get('/api/message/thread/:friendId', auth, (req, res) => {
+        const { userId } = req.tokenUser;
+        const { friendId } = req.params;
+
+        API.message.findByUsers(userId, friendId).then((messages) => {
+          res.send(messages);
+        });
+      });
 
       socket.on('join-random-pool', ({ peerId, socketId, token }) => {
         let userId;

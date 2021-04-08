@@ -21,6 +21,13 @@ const API = {
       Message.find({
         participants: { $in: [userId] },
       }),
+    findByUsers: (user1, user2) =>
+      Message.find({
+        $and: [
+          { participants: { $in: [user2] } },
+          { participants: { $in: [user1] } },
+        ],
+      }),
   },
   post: {
     create: async (title, content, author) => {

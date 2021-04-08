@@ -19,6 +19,7 @@ import Forum from 'pages/Forum/Forum';
 import Landing from 'pages/Landing/Landing';
 import Home from 'pages/Home/Home';
 import EditProfile from 'pages/EditProfile/EditProfile';
+import Messages from 'pages/Messages/Messages';
 
 import { makeStyles } from '@material-ui/core';
 const useStyles = makeStyles(() => ({
@@ -90,9 +91,9 @@ const App = () => {
       setSocketLoaded(true);
 
       if (subscribed) {
-        socketRef.current.on('chat-message', (message) =>
-          updateState({ type: 'NEW_MESSAGE', payload: { message } })
-        );
+        socketRef.current.on('chat-message-notification', (message) => {
+          // update context state with notification
+        });
       }
     }
 
@@ -117,7 +118,12 @@ const App = () => {
             <Route path='/battle' exact component={Battle} />
             <Route path='/battle/computer' exact component={ComputerBattle} />
             <Route path='/editprofile' exact component={EditProfile} />
-
+            <Route
+              path='/messages'
+              component={() =>
+                socketLoaded && <Messages props={{ socketRef }} />
+              }
+            />
             <Route
               path='/battle/random'
               component={() =>
