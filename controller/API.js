@@ -27,7 +27,7 @@ const API = {
           { participants: { $in: [user2] } },
           { participants: { $in: [user1] } },
         ],
-      }),
+      }).populate('sender'),
   },
   post: {
     create: async (title, content, author) => {
