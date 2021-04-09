@@ -41,6 +41,11 @@ const useStyles = makeStyles((theme) => ({
     background: theme.palette.primary.dark,
     marginRight: '.5em',
   },
+  friendName: {
+    [theme.breakpoints.down('sm')]: {
+      display: 'none',
+    },
+  },
   messageContent: {
     background: 'rgba(255,255,255,0.2)',
     borderRadius: '12px',
@@ -142,7 +147,7 @@ const Friend = ({ props: { friend, handleSelectFriend } }) => {
       >
         {!friend.profilePic && friend.name && friend.name[0].toUpperCase()}
       </Avatar>
-      <Typography>{friend.name}</Typography>
+      <Typography className={classes.friendName}>{friend.name}</Typography>
     </Grid>
   );
 };
@@ -260,6 +265,7 @@ const ChatBox = ({ props: { token, currentThread } }) => {
       justify='space-around'
       alignItems='flex-end'
       direction='row'
+      wrap='nowrap'
       className={classes.chatbox}
     >
       <Grid
