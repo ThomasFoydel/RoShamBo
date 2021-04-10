@@ -113,29 +113,47 @@ const App = () => {
           <NavBar />
           <Switch>
             <Route path='/' exact component={isLoggedIn ? Home : Landing} />
-            <Route path='/game' exact component={Game} />
+            <Route path='/game' exact component={isLoggedIn ? Game : Landing} />
             <Route path='/profile/:id' exact component={Profile} />
-            <Route path='/battle' exact component={Battle} />
+            <Route
+              path='/battle'
+              exact
+              component={isLoggedIn ? Battle : Landing}
+            />
             <Route path='/battle/computer' exact component={ComputerBattle} />
             <Route path='/editprofile' exact component={EditProfile} />
             <Route
               path='/messages'
               component={() =>
-                socketLoaded && <Messages props={{ socketRef }} />
+                isLoggedIn && socketLoaded ? (
+                  <Messages props={{ socketRef }} />
+                ) : (
+                  Landing
+                )
               }
             />
             <Route
               path='/battle/random'
               component={() =>
-                socketLoaded && <RandomBattle props={{ socketRef }} />
+                isLoggedIn && socketLoaded ? (
+                  <RandomBattle props={{ socketRef }} />
+                ) : (
+                  <Landing />
+                )
               }
             />
-            <Route path='/battle/friends' component={BattleFriends} />
+            <Route
+              path='/battle/friends'
+              component={isLoggedIn ? BattleFriends : Landing}
+            />
             <Route
               path='/friendbattle/:friendshipId'
               component={({ match }) =>
-                socketLoaded &&
-                token && <FriendBattle props={{ match, socketRef }} />
+                socketLoaded && token && isLoggedIn ? (
+                  <FriendBattle props={{ match, socketRef }} />
+                ) : (
+                  <Landing />
+                )
               }
             />
             <Route path='/forum' exact component={Forum} />

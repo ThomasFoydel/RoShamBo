@@ -176,7 +176,7 @@ const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
   }, [currentThread]);
   useEffect(() => {
     let subscribed = true;
-    if (currentThread) {
+    if (currentThread && token) {
       axios
         .get(`/api/message/thread/${currentThread}`, {
           headers: { 'x-auth-token': token },
@@ -192,7 +192,7 @@ const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
       setThread([]);
     }
     return () => (subscribed = false);
-  }, [currentThread]);
+  }, [currentThread, token]);
 
   useEffect(() => {
     if (scrollRef.current)
