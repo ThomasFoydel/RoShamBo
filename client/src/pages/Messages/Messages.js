@@ -99,7 +99,7 @@ const Messages = ({ props: { socketRef } }) => {
     axios
       .get('/api/user/friendlist', { headers: { 'x-auth-token': token } })
       .then(({ data }) => {
-        setFriends(data);
+        if (data) setFriends(data);
       })
       .catch((err) => console.log(err));
   }, [token]);
