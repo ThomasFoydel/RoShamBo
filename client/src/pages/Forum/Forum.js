@@ -221,7 +221,8 @@ const Post = ({
 };
 const Forum = () => {
   const [appState] = useContext(CTX);
-  const { token, isLoggedIn } = appState.auth;
+  const { token } = appState.auth;
+  const { isLoggedIn } = appState;
   const userId = appState.user.id;
   const [posts, setPosts] = useState([]);
   const classes = useStyles();

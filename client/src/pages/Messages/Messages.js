@@ -182,7 +182,8 @@ const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
           headers: { 'x-auth-token': token },
         })
         .then(({ data }) => {
-          if (data && subscribed) {
+          console.log({ data });
+          if (data && Array.isArray(data) && subscribed) {
             setThread(data);
           }
         })

@@ -76,9 +76,8 @@ router.post('/register', async (req, res) => {
 
 router.post('/login', async (req, res) => {
   if (!req.body.email || !req.body.password) {
-    return res.send({ err: 'all fields required' });
+    return res.status(400).send({ err: 'all fields required' });
   }
-
   API.user
     .findByEmail(req.body.email)
     .then(async (user) => {
