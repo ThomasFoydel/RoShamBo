@@ -73,6 +73,12 @@ const useStyles = makeStyles((theme) => ({
     marginRight: '25px',
     height: '45px',
   },
+  authBtn: {
+    background: theme.palette.secondary.main,
+    '&:hover': {
+      background: theme.palette.secondary.dark,
+    },
+  },
   logoContainer: {
     padding: 0,
     '&:hover': {
@@ -115,7 +121,10 @@ const useStyles = makeStyles((theme) => ({
     opacity: 0.7,
   },
   drawerAuthLink: {
-    backgroundColor: theme.palette.common.magenta,
+    backgroundColor: theme.palette.secondary.main,
+    '&:hover': {
+      backgroundColor: theme.palette.secondary.dark,
+    },
   },
   drawerItemSelected: {
     '& .MuiListItemText-root': {
@@ -181,10 +190,11 @@ export default function Header() {
       ariaOwns: (anchorEl) => (anchorEl ? 'simple-menu' : undefined),
       ariaPopup: (anchorEl) => (anchorEl ? true : undefined),
       mouseOver: (event, handleClick) => handleClick(event),
+      auth: true,
     },
 
-    { name: 'Profile', link: `/profile/${id}`, activeIndex: 2 },
-    { name: 'Messages', link: '/messages', activeIndex: 3 },
+    { name: 'Profile', link: `/profile/${id}`, activeIndex: 2, auth: true },
+    { name: 'Messages', link: '/messages', activeIndex: 3, auth: true },
     { name: 'Forum', link: '/forum', activeIndex: 4 },
   ];
 
@@ -233,20 +243,22 @@ export default function Header() {
         onChange={handleChange}
         indicatorColor='primary'
       >
-        {routes.map((route, index) => (
-          <Tab
-            key={`${route}${index}`}
-            className={classes.tab}
-            component={Link}
-            to={route.link}
-            label={route.name}
-            aria-owns={route.ariaOwns && route.ariaOwns(anchorEl)}
-            aria-haspopup={route.ariaPopup && route.ariaPopup(anchorEl)}
-            onMouseOver={(e) =>
-              route.mouseOver && route.mouseOver(e, handleClick)
-            }
-          />
-        ))}
+        {routes.map((route, index) =>
+          route.auth && !isLoggedIn ? null : (
+            <Tab
+              key={`${route}${index}`}
+              className={classes.tab}
+              component={Link}
+              to={route.link}
+              label={route.name}
+              aria-owns={route.ariaOwns && route.ariaOwns(anchorEl)}
+              aria-haspopup={route.ariaPopup && route.ariaPopup(anchorEl)}
+              onMouseOver={(e) =>
+                route.mouseOver && route.mouseOver(e, handleClick)
+              }
+            />
+          )
+        )}
       </Tabs>
       {isLoggedIn && (
         <Button
@@ -262,8 +274,8 @@ export default function Header() {
       )}
       {!isLoggedIn && (
         <Button
-          variant='contained'
           color='secondary'
+          variant='contained'
           onClick={toggleModal}
           className={classes.button}
         >
@@ -313,25 +325,27 @@ export default function Header() {
       >
         <div className={classes.toolbarMargin} />
         <List disablePadding>
-          {routes.map((route) => (
-            <ListItem
-              key={`${route}${route.activeIndex}`}
-              onClick={() => {
-                setOpenDrawer(false);
-                setValue(route.activeIndex);
-              }}
-              divider
-              button
-              component={Link}
-              to={route.link}
-              selected={value === route.activeIndex}
-              classes={{ selected: classes.drawerItemSelected }}
-            >
-              <ListItemText className={classes.drawerItem} disableTypography>
-                {route.name}
-              </ListItemText>
-            </ListItem>
-          ))}
+          {routes.map((route) =>
+            route.auth && !isLoggedIn ? null : (
+              <ListItem
+                key={`${route}${route.activeIndex}`}
+                onClick={() => {
+                  setOpenDrawer(false);
+                  setValue(route.activeIndex);
+                }}
+                divider
+                button
+                component={Link}
+                to={route.link}
+                selected={value === route.activeIndex}
+                classes={{ selected: classes.drawerItemSelected }}
+              >
+                <ListItemText className={classes.drawerItem} disableTypography>
+                  {route.name}
+                </ListItemText>
+              </ListItem>
+            )
+          )}
           {isLoggedIn ? (
             <ListItem
               divider

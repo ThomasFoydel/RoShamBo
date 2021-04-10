@@ -16,7 +16,7 @@ router.post('/post', auth, async (req, res) => {
     );
 });
 
-router.get('/posts', auth, async (req, res) => {
+router.get('/posts', async (req, res) => {
   API.post
     .findAll()
     .then((posts) => res.status(201).send(posts))

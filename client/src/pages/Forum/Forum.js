@@ -148,7 +148,15 @@ const Comment = ({ props: { comment, userId, deleteComment } }) => {
   );
 };
 const Post = ({
-  props: { post, setPosts, token, userId, deletePost, deleteComment },
+  props: {
+    post,
+    setPosts,
+    token,
+    userId,
+    deletePost,
+    deleteComment,
+    isLoggedIn,
+  },
 }) => {
   const classes = useStyles();
 
@@ -203,7 +211,9 @@ const Post = ({
           ))}
         </Grid>
         <Grid item>
-          <CommentForm props={{ postId: post._id, setPosts, token }} />
+          {isLoggedIn && (
+            <CommentForm props={{ postId: post._id, setPosts, token }} />
+          )}
         </Grid>
       </Grid>
     </Card>
@@ -211,14 +221,14 @@ const Post = ({
 };
 const Forum = () => {
   const [appState] = useContext(CTX);
-  const { token } = appState.auth;
+  const { token, isLoggedIn } = appState.auth;
   const userId = appState.user.id;
   const [posts, setPosts] = useState([]);
   const classes = useStyles();
 
   useEffect(() => {
     axios
-      .get('/api/forum/posts', { headers: { 'x-auth-token': token } })
+      .get('/api/forum/posts')
       .then(({ data }) => setPosts(data))
       .catch((err) => console.log({ err }));
   }, [token]);
@@ -254,11 +264,19 @@ const Forum = () => {
 
   return (
     <div className={classes.forum}>
-      <PostForm props={{ setPosts, token }} />
+      {isLoggedIn && <PostForm props={{ setPosts, token }} />}
       {posts.map((post) => (
         <Post
           key={post._id}
-          props={{ post, setPosts, token, userId, deletePost, deleteComment }}
+          props={{
+            post,
+            setPosts,
+            token,
+            userId,
+            deletePost,
+            deleteComment,
+            isLoggedIn,
+          }}
         />
       ))}
     </div>

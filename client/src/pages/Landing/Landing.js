@@ -10,7 +10,6 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '6rem',
     letterSpacing: '1rem',
     marginLeft: '1rem',
-
     backgroundImage: `linear-gradient(to bottom right, ${theme.palette.secondary.light}, ${theme.palette.primary.main})`,
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
