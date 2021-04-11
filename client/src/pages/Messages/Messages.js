@@ -167,9 +167,7 @@ const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
   };
   useEffect(() => {
     if (socket) socket.off('chat-message');
-    socket.on('chat-message', (message) => {
-      handleNewMessage(message);
-    });
+    socket.on('chat-message', (message) => handleNewMessage(message));
     return () => {
       if (socket) socket.off('chat-message');
     };
@@ -181,7 +179,8 @@ const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
         .get(`/api/message/thread/${currentThread}`, {
           headers: { 'x-auth-token': token },
         })
-        .then(({ data }) => {
+        .then((result) => {
+          const data = result.data;
           if (data && Array.isArray(data) && subscribed) {
             setThread(data);
           }

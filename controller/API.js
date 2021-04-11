@@ -15,7 +15,9 @@ const API = {
   },
   message: {
     create: (sender, receiver, content) =>
-      Message.create({ sender, receiver, content }),
+      Message.create({ sender, receiver, content }).then((message) =>
+        Message.findById(message._id).populate('sender')
+      ),
     findById: (id) => Message.findById(id),
     findByUser: (userId) =>
       Message.find({

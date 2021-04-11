@@ -36,21 +36,12 @@ mongoose
 
     app.use('/api', apiRoutes);
 
-    app.post('/api/message', (req, res) => {
-      let { userId, message, sender } = req.body;
-      const newMessage = new Message({
-        sender,
-        receiver: userId,
-        content: message,
+    app.get('/api/message/thread/:friendId', auth, (req, res) => {
+      const { userId } = req.tokenUser;
+      const { friendId } = req.params;
+      API.message.findByUsers(userId, friendId).then((messages) => {
+        res.send(messages);
       });
-      newMessage
-        .save()
-        .then((result) => {
-          let receiver = users[userId];
-          if (receiver) io.to(receiver.socketId).emit('chat-message', result);
-          res.send(result);
-        })
-        .catch(() => res.send({ err: 'message error' }));
     });
 
     io.on('connection', (socket) => {
@@ -83,6 +74,8 @@ mongoose
             if (users[receiver]) {
               io.to(users[receiver]).emit('chat-message-notification', message);
               io.to(users[receiver]).emit('chat-message', message);
+            }
+            if (users[sender]) {
               io.to(users[sender]).emit('chat-message', message);
             }
             return res.status(201).send(message);
@@ -92,14 +85,6 @@ mongoose
               .status(500)
               .send({ err: 'Database is down, we are working to fix this' });
           });
-      });
-
-      app.get('/api/message/thread/:friendId', auth, (req, res) => {
-        const { userId } = req.tokenUser;
-        const { friendId } = req.params;
-        API.message.findByUsers(userId, friendId).then((messages) => {
-          res.send(messages);
-        });
       });
 
       socket.on('join-random-pool', ({ peerId, socketId, token }) => {
@@ -401,16 +386,13 @@ mongoose
           returningPeer,
         });
       });
-
-      if (process.env.NODE_ENV === 'production') {
-        app.use(express.static('client/build'));
-        app.get('*', (req, res) => {
-          res.sendFile(
-            path.resolve(__dirname, 'client', 'build', 'index.html')
-          );
-        });
-      }
     });
+    if (process.env.NODE_ENV === 'production') {
+      app.use(express.static('client/build'));
+      app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+      });
+    }
   })
   .catch((err) => {
     console.log('database connection error: ', err);
