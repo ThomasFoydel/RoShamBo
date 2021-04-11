@@ -81,22 +81,20 @@ const Profile = ({
     params: { id },
   },
 }) => {
-  const [appState, updateState] = useContext(CTX);
-  const classes = useStyles();
-
+  const [appState] = useContext(CTX);
+  const isCurrentUser = id === appState.user.id;
+  const { isLoggedIn } = appState;
   const [user, setUser] = useState({});
   const [friendshipExists, setFriendshipExists] = useState(true);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
-  const isCurrentUser = id === appState.user.id;
+  const classes = useStyles();
 
   useEffect(() => {
     let subscribed = true;
     setLoading(true);
     axios
-      .get(`/api/user/profile/${id}`, {
-        headers: { 'x-auth-token': appState.auth.token },
-      })
+      .get(`/api/user/profile/${id}`, { headers: { userId: appState.user.id } })
       .then(({ data: { user, friendshipExists } }) => {
         if (subscribed) {
           setTimeout(() => {
@@ -172,7 +170,7 @@ const Profile = ({
           {user.bio && (
             <Typography className={classes.email}>{user.bio}</Typography>
           )}
-          {!isCurrentUser && !friendshipExists && (
+          {!isCurrentUser && !friendshipExists && isLoggedIn && (
             <Button className={classes.requestButton} onClick={requestFriend}>
               request friendship
             </Button>

@@ -10,7 +10,11 @@ const API = {
     findById: (id) => User.findById(id),
     findByEmail: (email) => User.findOne({ email }).select('password email'),
     updateProfile: (id, update) =>
-      User.findByIdAndUpdate(id, { $set: update }, { new: true }),
+      User.findByIdAndUpdate(
+        id,
+        { $set: update },
+        { new: true, useFindAndModify: false }
+      ),
     getFriendList: (id) => User.findById(id).populate('friends'),
   },
   message: {
@@ -37,7 +41,7 @@ const API = {
       post = await post.populate('author').execPopulate();
       return post;
     },
-    delete: (id) => Post.findByIdAndDelete(id),
+    delete: (id) => Post.findByIdAndDelete(id, { useFindAndModify: false }),
     findById: (id) => Post.findById(id),
     findAll: () =>
       Post.find({})
@@ -58,7 +62,7 @@ const API = {
       Post.findByIdAndUpdate(
         post,
         { $push: { comments: [comment] } },
-        { new: true }
+        { new: true, useFindAndModify: false }
       ).populate([
         {
           path: 'comments',
@@ -74,7 +78,7 @@ const API = {
       Post.findByIdAndUpdate(
         postId,
         { $pull: { comments: commentId } },
-        { new: true }
+        { new: true, useFindAndModify: false }
       ).populate([
         {
           path: 'comments',
@@ -91,7 +95,7 @@ const API = {
     create: (content, author, post) =>
       Comment.create({ content, author, post }),
     find: (id) => Comment.findById(id),
-    delete: (id) => Comment.findByIdAndDelete(id),
+    delete: (id) => Comment.findByIdAndDelete(id, { useFindAndModify: false }),
   },
   friendship: {
     create: (sender, receiver) => Friendship.create({ sender, receiver }),
@@ -114,28 +118,38 @@ const API = {
       }).populate('sender'),
     accept: (id) =>
       Friendship.findById(id).then(({ sender, receiver }) =>
-        User.findByIdAndUpdate(sender, {
-          $addToSet: { friends: [receiver] },
-        }).then(() =>
-          User.findByIdAndUpdate(receiver, {
-            $addToSet: { friends: [sender] },
-          }).then(() =>
+        User.findByIdAndUpdate(
+          sender,
+          { $addToSet: { friends: [receiver] } },
+          { useFindAndModify: false }
+        ).then(() =>
+          User.findByIdAndUpdate(
+            receiver,
+            { $addToSet: { friends: [sender] } },
+            { useFindAndModify: false }
+          ).then(() =>
             Friendship.findByIdAndUpdate(
               id,
               { status: 'accepted' },
-              { new: true }
+              { new: true, useFindAndModify: false }
             )
           )
         )
       ),
     reject: (id) =>
-      Friendship.findByIdAndUpdate(id, { status: 'rejected' }, { new: true }),
+      Friendship.findByIdAndUpdate(
+        id,
+        { status: 'rejected' },
+        { new: true, useFindAndModify: false }
+      ),
 
     battle: {
       start: (id) =>
-        Friendship.findByIdAndUpdate(id, {
-          $set: { 'gameState.gameRunning': true },
-        }),
+        Friendship.findByIdAndUpdate(
+          id,
+          { $set: { 'gameState.gameRunning': true } },
+          { useFindAndModify: false }
+        ),
       getState: (id) => Friendship.findById(id).select('gameState'),
       initState: (id, user1, user2) =>
         Friendship.findByIdAndUpdate(
@@ -151,7 +165,7 @@ const API = {
               },
             },
           },
-          { new: true }
+          { new: true, useFindAndModify: false }
         ),
       throwChoice: (id, userId, userChoice, round) =>
         Friendship.findByIdAndUpdate(
@@ -161,7 +175,7 @@ const API = {
               [`gameState.choices.${round}.${userId}`]: userChoice,
             },
           },
-          { new: true }
+          { new: true, useFindAndModify: false }
         ),
       roundOutcome: (id, loser, health, round, gameOver) => {
         const update = {
@@ -176,11 +190,15 @@ const API = {
           {
             $set: update,
           },
-          { new: true }
+          { new: true, useFindAndModify: false }
         );
       },
       roundTie: (id) =>
-        Friendship.findByIdAndUpdate(id, { $inc: { 'gameState.round': 1 } }),
+        Friendship.findByIdAndUpdate(
+          id,
+          { $inc: { 'gameState.round': 1 } },
+          { useFindAndModify: false }
+        ),
     },
   },
   randomBattle: {
@@ -209,7 +227,8 @@ const API = {
               choices: [],
             },
           },
-        }
+        },
+        { useFindAndModify: false }
       ),
     findByRoomId: (roomId) => RandomBattle.findOne({ roomId }),
     gameStart: (roomId) =>

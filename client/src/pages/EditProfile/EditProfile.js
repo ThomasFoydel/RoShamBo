@@ -104,6 +104,7 @@ const EditProfile = () => {
   };
   return (
     <>
+      {console.log({ appState })}
       {appState.user && (
         <Grid
           container
@@ -138,7 +139,7 @@ const EditProfile = () => {
               alt='your profile'
               onClick={toggleProfile}
             >
-              {name[0] && name[0].toUpperCase()}
+              {name && name[0] && name[0].toUpperCase()}
             </Avatar>
             <ImageUpload
               props={{

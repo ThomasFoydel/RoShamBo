@@ -24,7 +24,7 @@ router.post('/friendrequest', auth, async (req, res) => {
         .then((newFriendRequest) => {
           res.status(201).send(newFriendRequest);
         })
-        .catch((err) => {
+        .catch(() => {
           res.sendStatus(500);
         });
     });
@@ -95,27 +95,24 @@ router.get('/friendlist', auth, async (req, res) => {
   return res.send(foundUser.friends);
 });
 
-router.get('/profile/:profileId', auth, async (req, res) => {
+router.get('/profile/:profileId', async (req, res) => {
   const { profileId } = req.params;
-  const { userId } = req.tokenUser;
+  const userId = req.header('userId');
   let profileObjId;
+  let userObjId;
   try {
     profileObjId = new mongoose.Types.ObjectId(profileId);
+    if (userId !== 'null') userObjId = new mongoose.Types.ObjectId(userId);
   } catch (err) {
     return res.status(404).send({ err: 'Invalid ID' });
   }
-
-  API.friendship
-    .findByUsers(userId, profileObjId)
-    .then((existingFriendShip) => {
-      const friendshipExists = !!existingFriendShip;
-      API.user
-        .findById(profileObjId)
-        .then((user) => res.status(201).send({ user, friendshipExists }))
-        .catch(() => {
-          return res.sendStatus(500);
-        });
-    });
+  const existingFriendship = await API.friendship.findByUsers(
+    userObjId,
+    profileObjId
+  );
+  const friendshipExists = !!existingFriendship;
+  const user = await API.user.findById(profileObjId);
+  res.status(201).send({ user, friendshipExists });
 });
 
 router.put('/profile', auth, (req, res) => {
