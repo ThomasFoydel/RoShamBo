@@ -53,13 +53,6 @@ mongoose
         .catch(() => res.send({ err: 'message error' }));
     });
 
-    if (process.env.NODE_ENV === 'production') {
-      app.use(express.static('client/build'));
-      app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
-      });
-    }
-
     io.on('connection', (socket) => {
       const token = socket.handshake.query.token;
       if (!token) {
@@ -77,7 +70,7 @@ mongoose
             users[userId] = socket.id;
           }
         } catch (err) {
-          console.log('err: ', err);
+          console.log('jwt decoding error err: ', err);
         }
       }
 
@@ -104,7 +97,6 @@ mongoose
       app.get('/api/message/thread/:friendId', auth, (req, res) => {
         const { userId } = req.tokenUser;
         const { friendId } = req.params;
-
         API.message.findByUsers(userId, friendId).then((messages) => {
           res.send(messages);
         });
@@ -409,6 +401,15 @@ mongoose
           returningPeer,
         });
       });
+
+      if (process.env.NODE_ENV === 'production') {
+        app.use(express.static('client/build'));
+        app.get('*', (req, res) => {
+          res.sendFile(
+            path.resolve(__dirname, 'client', 'build', 'index.html')
+          );
+        });
+      }
     });
   })
   .catch((err) => {

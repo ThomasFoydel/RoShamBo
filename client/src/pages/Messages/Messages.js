@@ -182,7 +182,6 @@ const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
           headers: { 'x-auth-token': token },
         })
         .then(({ data }) => {
-          console.log({ data });
           if (data && Array.isArray(data) && subscribed) {
             setThread(data);
           }
@@ -247,15 +246,17 @@ const ChatBox = ({ props: { token, currentThread } }) => {
   const classes = useStyles();
   const [inputValue, setInputValue] = useState('');
   const sendMessage = () => {
-    setInputValue('');
-    axios
-      .post(
-        '/api/message/new',
-        { receiver: currentThread, content: inputValue },
-        { headers: { 'x-auth-token': token } }
-      )
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
+    if (token && inputValue) {
+      setInputValue('');
+      axios
+        .post(
+          '/api/message/new',
+          { receiver: currentThread, content: inputValue },
+          { headers: { 'x-auth-token': token } }
+        )
+        .then((res) => console.log(res))
+        .catch((err) => console.log(err));
+    }
   };
   const handleChange = ({ target: { value } }) => setInputValue(value);
   const handleKeyDown = ({ charCode }) => charCode === 13 && sendMessage();
