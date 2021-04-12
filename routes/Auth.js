@@ -6,14 +6,7 @@ const auth = require('../middleware/auth');
 const router = express.Router();
 
 const sendUser = (res, user, token) => {
-  const userInfo = {
-    name: user.name,
-    email: user.email,
-    id: user._id,
-    profilePic: user.profilePic,
-    displayEmail: user.displayEmail,
-    bio: user.bio,
-  };
+  const { password, email, ...userInfo } = user._doc;
   return res.send({ user: userInfo, token });
 };
 
@@ -67,7 +60,6 @@ router.post('/register', async (req, res) => {
       return sendUser(res, user, token);
     })
     .catch((err) => {
-      console.log('ERROR: ', err);
       res
         .status(500)
         .send({ err: 'Database is down, we are working to fix this' });

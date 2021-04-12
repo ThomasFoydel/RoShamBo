@@ -136,7 +136,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'left',
     background: 'rgba(255,255,255,0.2)',
     height: '11rem',
-    overflowY: 'scroll',
+    overflowY: 'auto',
     maxWidth: '100%',
   },
   message: {
@@ -522,7 +522,6 @@ const RandomBattle = ({ props: { socketRef } }) => {
   };
 
   const handleBackToPool = () => {
-    // reset state, end peer call, create new call and enter the pool
     if (randoVideoRef.current) {
       randoVideoRef.current.close();
       randoVideoRef.current.removeAllListeners();

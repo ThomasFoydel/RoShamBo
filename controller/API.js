@@ -8,7 +8,10 @@ const API = {
   user: {
     create: (user) => User.create(user),
     findById: (id) => User.findById(id),
-    findByEmail: (email) => User.findOne({ email }).select('password email'),
+    findByEmail: (email) =>
+      User.findOne({ email }).select(
+        'password email displayEmail name bio profilePic'
+      ),
     updateProfile: (id, update) =>
       User.findByIdAndUpdate(
         id,

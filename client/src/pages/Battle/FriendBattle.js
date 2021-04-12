@@ -135,7 +135,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: 'left',
     background: 'rgba(255,255,255,0.2)',
     height: '11rem',
-    overflowY: 'scroll',
+    overflowY: 'auto',
     maxWidth: '100%',
   },
   message: {
