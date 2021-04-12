@@ -5,7 +5,6 @@ import axios from 'axios';
 import { ThemeProvider } from '@material-ui/styles';
 import theme from 'theme/Theme';
 import NavBar from 'components/NavBar/NavBar';
-import Game from 'components/Game/Game';
 import { CTX } from 'context/Store';
 import './global.css';
 import Auth from 'components/Auth/Auth';
@@ -113,7 +112,6 @@ const App = () => {
           <NavBar />
           <Switch>
             <Route path='/' exact component={isLoggedIn ? Home : Landing} />
-            <Route path='/game' exact component={isLoggedIn ? Game : Landing} />
             <Route path='/profile/:id' exact component={Profile} />
             <Route
               path='/battle'
