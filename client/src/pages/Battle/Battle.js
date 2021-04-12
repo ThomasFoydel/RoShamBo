@@ -18,9 +18,9 @@ const useStyles = makeStyles((theme) => ({
     borderRadius: '4px',
     transition: 'all 0.3s ease',
     '&:hover': {
-      background: '#111',
+      background: 'linear-gradient(to bottom right, #111, #222)',
       '& $text': {
-        color: theme.palette.secondary.main,
+        color: theme.palette.primary.light,
       },
       '& $icon': {
         color: theme.palette.primary.main,
@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   text: {
+    transition: 'all 0.3s ease',
     color: theme.palette.primary.dark,
     fontSize: '2rem',
     fontWeight: 'bold',
@@ -36,6 +37,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   icon: {
+    transition: 'all 0.3s ease',
     width: '100%',
     height: '100%',
     color: theme.palette.primary.dark,

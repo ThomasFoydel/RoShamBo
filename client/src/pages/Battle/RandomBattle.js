@@ -118,7 +118,6 @@ const useStyles = makeStyles((theme) => ({
     width: '5.7rem',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
     justifyContent: 'space-between',
     padding: '.1rem .2rem',
     cursor: 'pointer',
@@ -563,13 +562,17 @@ const RandomBattle = ({ props: { socketRef } }) => {
                   {randoStream && randoStream.active ? (
                     <Video stream={randoStream} display={displayRando} />
                   ) : (
-                    <img className={classes.randoVideo} src={loadingblue} />
+                    <img
+                      className={classes.randoVideo}
+                      src={loadingblue}
+                      alt='random user webcam'
+                    />
                   )}
 
                   <div className={classes.iconLayer}>
                     <img
                       src={weaponImgs[randoChoice || 'blank']}
-                      alt='rando choice'
+                      alt={`rando choice: ${randoChoice}`}
                       className={classes.randoChoiceIcon}
                     />
                   </div>

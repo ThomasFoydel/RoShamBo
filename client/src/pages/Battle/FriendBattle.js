@@ -118,7 +118,6 @@ const useStyles = makeStyles((theme) => ({
     width: '5.7rem',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
     justifyContent: 'space-between',
     padding: '.1rem .2rem',
     cursor: 'pointer',
@@ -538,13 +537,17 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                   {friendStream && friendStream.active ? (
                     <Video stream={friendStream} display={displayFriend} />
                   ) : (
-                    <img className={classes.friendVideo} src={loadingblue} />
+                    <img
+                      className={classes.friendVideo}
+                      src={loadingblue}
+                      alt='friends webcam'
+                    />
                   )}
 
                   <div className={classes.iconLayer}>
                     <img
                       src={weaponImgs[friendChoice || 'blank']}
-                      alt='friends choice'
+                      alt={`friends choice: ${friendChoice}`}
                       className={classes.friendChoiceIcon}
                     />
                   </div>

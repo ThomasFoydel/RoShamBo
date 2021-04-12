@@ -15,16 +15,34 @@ import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   login: {
+    maxWidth: '500px',
+    minWidth: '275px',
     padding: '2rem 4rem',
+    [theme.breakpoints.down('xs')]: {
+      padding: '2rem 2rem',
+    },
   },
   avatar: {
-    backgroundColor: theme.palette.common.blue,
+    backgroundColor: theme.palette.primary.main,
   },
   button: {
     margin: '8px 0',
   },
   header: {
     fontFamily: 'OpenDyslexic',
+  },
+  registerLink: {
+    color: theme.palette.primary.dark,
+    cursor: 'pointer',
+    '&:hover': {
+      color: theme.palette.primary.main,
+    },
+  },
+  forgotPw: {
+    color: theme.palette.primary.dark,
+    '&:hover': {
+      color: theme.palette.primary.main,
+    },
   },
 }));
 
@@ -93,11 +111,18 @@ const Login = ({
         Sign in
       </Button>
       <Typography>
-        <Link to='/forgot-pw'>Forgot password?</Link>
+        <Link className={classes.forgotPw} to='/forgot-pw'>
+          Forgot password?
+        </Link>
       </Typography>
       <Typography>
         Need an account?{' '}
-        <Link onClick={() => setAuthPage('register')}>Sign Up</Link>
+        <span
+          className={classes.registerLink}
+          onClick={() => setAuthPage('register')}
+        >
+          Sign Up
+        </span>
       </Typography>
     </Paper>
   );

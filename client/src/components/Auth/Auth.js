@@ -9,7 +9,7 @@ import Login from './Login';
 const useStyles = makeStyles((theme) => ({
   modalBody: {
     position: 'absolute',
-    width: 400,
+    // width: 400,
     backgroundColor: theme.palette.background.paper,
     border: `2px solid ${theme.palette.common.blue}`,
     boxShadow: theme.shadows[5],

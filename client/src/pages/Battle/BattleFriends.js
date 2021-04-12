@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 const BattleFriends = () => {
   const classes = useStyles();
-  const [appState, updateState] = useContext(CTX);
+  const [appState] = useContext(CTX);
   const { token } = appState.auth;
   const { id } = appState.user;
   const [friendlist, setFriendlist] = useState([]);

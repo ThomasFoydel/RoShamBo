@@ -102,7 +102,8 @@ router.get('/profile/:profileId', async (req, res) => {
   let userObjId;
   try {
     profileObjId = new mongoose.Types.ObjectId(profileId);
-    if (userId !== 'null') userObjId = new mongoose.Types.ObjectId(userId);
+    if (userId !== 'null' && userId !== 'undefined')
+      userObjId = new mongoose.Types.ObjectId(userId);
   } catch (err) {
     return res.status(404).send({ err: 'Invalid ID' });
   }
@@ -111,8 +112,8 @@ router.get('/profile/:profileId', async (req, res) => {
     profileObjId
   );
   const friendshipExists = !!existingFriendship;
-  const user = await API.user.findById(profileObjId);
-  res.status(201).send({ user, friendshipExists });
+  const userProfile = await API.user.findById(profileObjId);
+  res.status(201).send({ user: userProfile, friendshipExists });
 });
 
 router.put('/profile', auth, (req, res) => {

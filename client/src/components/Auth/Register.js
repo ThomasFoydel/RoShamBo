@@ -10,12 +10,16 @@ import {
   Button,
   makeStyles,
 } from '@material-ui/core';
-import { Link } from 'react-router-dom';
 import LockIcon from '@material-ui/icons/Lock';
 
 const useStyles = makeStyles((theme) => ({
   register: {
+    maxWidth: '500px',
+    minWidth: '275px',
     padding: '2rem 4rem',
+    [theme.breakpoints.down('xs')]: {
+      padding: '2rem 2rem',
+    },
   },
   avatar: {
     backgroundColor: theme.palette.common.blue,
@@ -24,6 +28,13 @@ const useStyles = makeStyles((theme) => ({
     margin: '8px 0',
   },
   header: { fontFamily: 'OpenDyslexic' },
+  loginLink: {
+    color: theme.palette.primary.dark,
+    cursor: 'pointer',
+    '&:hover': {
+      color: theme.palette.primary.main,
+    },
+  },
 }));
 
 const Register = ({
@@ -114,7 +125,12 @@ const Register = ({
 
       <Typography>
         Already have an account?
-        <Link onClick={() => setAuthPage('login')}>Sign In</Link>
+        <span
+          className={classes.loginLink}
+          onClick={() => setAuthPage('login')}
+        >
+          Sign In
+        </span>
       </Typography>
     </Paper>
   );

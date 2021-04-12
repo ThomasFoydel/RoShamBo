@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { makeStyles, Typography, Button } from '@material-ui/core';
 import weaponSystem from 'imgs/weaponsystem.png';
+import { CTX } from 'context/Store';
 const useStyles = makeStyles((theme) => ({
   container: {
     background: 'white',
@@ -25,20 +26,65 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   weaponSystem: {
-    borderTop: '8px solid black',
+    border: '8px solid black',
+    borderBottom: 'none',
     background: `radial-gradient(${theme.palette.secondary.dark}, ${theme.palette.primary.main})`,
-    width: '100vw',
+    width: '100%',
+  },
+  startBtn: {
+    position: 'absolute',
+    top: '52%',
+    left: '50%',
+
+    transform: 'translateX(-50%) translateY(-50%)',
+    padding: '.5rem 2.5rem',
+    fontSize: '5rem',
+    boxShadow:
+      '.5rem .5rem 1rem rgba(0,0,0,0.2), -.5rem -.5rem 1.5rem rgba(255,255,255,0.15)',
+    backdropFilter: 'blur(2px)',
+    transition: 'all 0.45s ease',
+    whiteSpace: 'nowrap',
+    background: theme.palette.secondary.light,
+    color: '#ddd',
+    '&:hover': {
+      background: 'rgba(255,255,255,0.15)',
+      color: '#fff',
+    },
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '2rem',
+      padding: '.2rem 1rem',
+    },
+    [theme.breakpoints.down('xs')]: {
+      fontSize: '1.4rem',
+      padding: '.2rem 1rem',
+    },
   },
 }));
 const Landing = () => {
+  const [, updateState] = useContext(CTX);
+
   const classes = useStyles();
   return (
-    <div>
-      <img className={classes.weaponSystem} src={weaponSystem} />
+    <>
+      <div style={{ position: 'relative' }}>
+        <img
+          className={classes.weaponSystem}
+          src={weaponSystem}
+          alt='weapons system: scisscors beats bird and paper. paper beats tree and rock. rock beats bird and scissors. tree beats rock and scissors. '
+        />
+        <Button
+          onClick={() => {
+            updateState({ type: 'TOGGLE_AUTH_MODAL' });
+          }}
+          className={classes.startBtn}
+        >
+          Get Started
+        </Button>
+      </div>
       <div className={classes.container}>
         <Typography className={classes.title}>ROSHAMBO</Typography>
       </div>
-    </div>
+    </>
   );
 };
 

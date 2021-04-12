@@ -20,12 +20,12 @@ const useStyles = makeStyles((theme) => ({
   },
   profilePic: {
     ...theme.centerHorizontal,
-    width: '65vw',
-    height: '65vw',
-    minWidth: '15rem',
-    minHeight: '15rem',
-    maxHeight: '22rem',
-    maxWidth: '22rem',
+    width: '30vw',
+    height: '30vw',
+    minWidth: '3em',
+    minHeight: '3em',
+    marginBottom: '.2em',
+    fontSize: '6rem',
   },
   sectionOne: { textAlign: 'center', padding: '2rem' },
   sectionTwo: {
@@ -104,7 +104,6 @@ const EditProfile = () => {
   };
   return (
     <>
-      {console.log({ appState })}
       {appState.user && (
         <Grid
           container

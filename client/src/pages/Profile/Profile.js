@@ -113,16 +113,14 @@ const Profile = ({
         }
       });
     return () => (subscribed = false);
-  }, [appState.auth.token]);
+  }, [appState.user.id, id]);
 
   const requestFriend = () => {
     axios
       .post(
         '/api/user/friendrequest/',
         { id },
-        {
-          headers: { 'x-auth-token': appState.auth.token },
-        }
+        { headers: { 'x-auth-token': appState.auth.token } }
       )
       .then(() => setFriendshipExists(true))
       .catch(() => {

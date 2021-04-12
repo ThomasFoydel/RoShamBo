@@ -4,7 +4,6 @@ import { makeStyles, Grid, Button, Input } from '@material-ui/core';
 const useStyles = makeStyles((theme) => ({
   form: {
     ...theme.centerHorizontal,
-    background: 'rgba(255,255,255,0.2)',
     background: 'linear-gradient(to bottom right, #bbb, #eee)',
     width: '80%',
     maxWidth: '400px',

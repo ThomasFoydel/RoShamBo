@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: '2em',
     borderRadius: '10px',
     maxHeight: '40rem',
-    overFlowY: 'scroll',
+    overFlowY: 'auto',
   },
   postTitle: {
     textAlign: 'center',
@@ -92,7 +92,7 @@ const useStyles = makeStyles((theme) => ({
     margin: '.5em',
     borderRadius: '10px',
     maxHeight: '20rem',
-    overFlowY: 'scroll',
+    overFlowY: 'auto',
     width: '90%',
     maxWidth: '70vw',
     overflowWrap: 'break-word',
