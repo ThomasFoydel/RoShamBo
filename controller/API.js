@@ -19,6 +19,7 @@ const API = {
         { new: true, useFindAndModify: false }
       ),
     getFriendList: (id) => User.findById(id).populate('friends'),
+    incExp: (id, exp) => User.findByIdAndUpdate(id, { $inc: { exp } }),
   },
   message: {
     create: (sender, receiver, content) =>

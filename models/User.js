@@ -1,21 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const recordSchema = mongoose.Schema({
-  wins: {
-    type: Number,
-    required: true,
-  },
-  losses: {
-    type: Number,
-    required: true,
-  },
-  draws: {
-    type: Number,
-    required: true,
-  },
-});
-
 const userSchema = mongoose.Schema({
   name: {
     type: String,
@@ -69,7 +54,10 @@ const userSchema = mongoose.Schema({
     type: [mongoose.Schema.Types.ObjectId],
     ref: 'User',
   },
-  record: recordSchema,
+  exp: {
+    type: Number,
+    default: 0,
+  },
 });
 
 userSchema.pre('save', async function save(next) {
