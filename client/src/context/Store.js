@@ -13,7 +13,7 @@ export function reducer(state, action) {
         ...state,
         isLoggedIn: true,
         user: {
-          id: user.id,
+          id: user._id,
           name: user.name,
           displayEmail: user.displayEmail,
           profilePic: user.profilePic,
