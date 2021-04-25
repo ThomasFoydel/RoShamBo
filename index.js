@@ -9,6 +9,7 @@ const API = require('./controller/API');
 require('dotenv').config();
 const app = express();
 const auth = require('./middleware/auth');
+const { update } = require('./models/User');
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
@@ -195,6 +196,10 @@ mongoose
                       gameOver
                     )
                     .then((updated) => {
+                      if (updated.gameState.gameOver) {
+                        API.user.incExp(winner, 5);
+                      }
+
                       io.to(roomId).emit('randombattle-roundoutcome', {
                         winner,
                         loser,
@@ -332,6 +337,9 @@ mongoose
                         gameOver
                       )
                       .then((updated) => {
+                        if (updated.gameState.gameOver) {
+                          API.user.incExp(winner, 10);
+                        }
                         io.to(roomId).emit('round-outcome', {
                           winner,
                           loser,
