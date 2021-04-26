@@ -9,7 +9,6 @@ const API = require('./controller/API');
 require('dotenv').config();
 const app = express();
 const auth = require('./middleware/auth');
-const { update } = require('./models/User');
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));

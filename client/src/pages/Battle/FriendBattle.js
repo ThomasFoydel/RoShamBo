@@ -53,7 +53,6 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: '100%',
     objectFit: 'cover',
   },
-
   friendVideo: {
     width: '100%',
     display: 'block',
@@ -61,7 +60,6 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: '100%',
     minHeight: '100%',
     objectFit: 'cover',
-
     transition: 'all .8s ease',
   },
   iconLayer: {
@@ -72,8 +70,8 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     display: 'flex',
     justifyContent: 'center',
+    transition: 'all 0.3s ease',
   },
-
   friendChoiceIcon: {
     width: '70%',
     minHeight: '0%',
@@ -177,7 +175,6 @@ const useStyles = makeStyles((theme) => ({
     background: 'black',
     paddingBottom: '20rem',
   },
-  game: {},
   results: {
     maxWidth: '100%',
   },
@@ -524,7 +521,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
 
   return (
     <div className={classes.friendBattle}>
-      <Grid container className={classes.game} direction='column'>
+      <Grid container direction='column'>
         <Grid item>
           <Grid container alignContent='stretch' direction='row'>
             <Grid item xs={12} sm={12} md={5} lg={5}>
@@ -544,7 +541,14 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                     />
                   )}
 
-                  <div className={classes.iconLayer}>
+                  <div
+                    className={classes.iconLayer}
+                    style={{
+                      background: friendChoice
+                        ? 'rgba(255,255,255,0.2)'
+                        : 'rgba(255,255,255,0)',
+                    }}
+                  >
                     <img
                       src={weaponImgs[friendChoice || 'blank']}
                       alt={`friends choice: ${friendChoice}`}
@@ -635,7 +639,14 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                     onUserMedia={handleUserMedia}
                   />
 
-                  <div className={classes.iconLayer}>
+                  <div
+                    className={classes.iconLayer}
+                    style={{
+                      background: myChoice
+                        ? 'rgba(255,255,255,0.2)'
+                        : 'rgba(255,255,255,0)',
+                    }}
+                  >
                     <img
                       src={weaponImgs[myChoice || 'blank']}
                       alt='friends choice'

@@ -383,7 +383,6 @@ function ComputerBattle() {
         music.pause();
         music.currentTime = 0;
         const userWon = winner === 'user';
-        // // todo: add points to user's profile if  they won
         const sound = soundFx[userWon ? 'win' : 'lose'];
         setMessage(userWon ? 'YOU WON!!' : 'YOU LOST!!');
         sound.currentTime = 0;

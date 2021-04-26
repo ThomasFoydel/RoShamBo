@@ -53,7 +53,6 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: '100%',
     objectFit: 'cover',
   },
-
   randoVideo: {
     width: '100%',
     display: 'block',
@@ -61,7 +60,6 @@ const useStyles = makeStyles((theme) => ({
     maxHeight: '100%',
     minHeight: '100%',
     objectFit: 'cover',
-
     transition: 'all .8s ease',
   },
   iconLayer: {
@@ -72,8 +70,8 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     display: 'flex',
     justifyContent: 'center',
+    transition: 'all 0.3s ease',
   },
-
   randoChoiceIcon: {
     width: '70%',
     minHeight: '0%',
@@ -84,7 +82,6 @@ const useStyles = makeStyles((theme) => ({
     transform: 'scaleX(-1)',
     minHeight: '0%',
   },
-
   healthbarContainer: {
     ...theme.healthbarContainer,
     borderRadius: '0 0 3rem 3rem',
@@ -568,7 +565,14 @@ const RandomBattle = ({ props: { socketRef } }) => {
                     />
                   )}
 
-                  <div className={classes.iconLayer}>
+                  <div
+                    className={classes.iconLayer}
+                    style={{
+                      background: randoChoice
+                        ? 'rgba(255,255,255,0.2)'
+                        : 'rgba(255,255,255,0)',
+                    }}
+                  >
                     <img
                       src={weaponImgs[randoChoice || 'blank']}
                       alt={`rando choice: ${randoChoice}`}
@@ -672,7 +676,14 @@ const RandomBattle = ({ props: { socketRef } }) => {
                     ref={myCamRef}
                     onUserMedia={handleUserMedia}
                   />
-                  <div className={classes.iconLayer}>
+                  <div
+                    className={classes.iconLayer}
+                    style={{
+                      background: myChoice
+                        ? 'rgba(255,255,255,0.2)'
+                        : 'rgba(255,255,255,0)',
+                    }}
+                  >
                     <img
                       src={weaponImgs[myChoice || 'blank']}
                       alt='randos choice'
