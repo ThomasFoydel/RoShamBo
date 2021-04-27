@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
   makeStyles,
   Avatar,
@@ -223,10 +224,16 @@ const Message = ({ props: { message, userId } }) => {
             mine && classes.mineAuthorSection
           }`}
         >
-          <Avatar
-            className={classes.senderProfilePic}
-            src={`/api/image/${message.sender.profilePic}`}
-          ></Avatar>
+          <Link to={`/profile/${message.sender._id}`}>
+            <Avatar
+              className={classes.senderProfilePic}
+              src={`/api/image/${message.sender.profilePic}`}
+            >
+              {!message.sender.profilePic &&
+                message.sender.name &&
+                message.sender.name[0].toUpperCase()}
+            </Avatar>
+          </Link>
           <Typography className={classes.senderName}>
             {message.sender.name}
           </Typography>
