@@ -2,9 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import PostForm from './components/PostForm';
 import CommentForm from './components/CommentForm';
-
-import { CTX } from 'context/Store';
 import { Link } from 'react-router-dom';
+import { CTX } from 'context/Store';
 import {
   makeStyles,
   Card,
@@ -113,12 +112,15 @@ const Comment = ({ props: { comment, userId, deleteComment } }) => {
           <Link to={`/profile/${comment.author._id}`}>
             <Grid container alignItems='center'>
               <Grid item>
-                <Avatar
-                  src={`/api/image/${comment.author.profilePic}`}
-                  className={classes.commentAvatar}
-                >
-                  {comment.author.name && comment.author.name[0].toUpperCase()}
-                </Avatar>
+                <Link to={`/profile/${comment.author._id}`}>
+                  <Avatar
+                    src={`/api/image/${comment.author.profilePic}`}
+                    className={classes.commentAvatar}
+                  >
+                    {comment.author.name &&
+                      comment.author.name[0].toUpperCase()}
+                  </Avatar>
+                </Link>
               </Grid>
               <Grid item>
                 <Typography className={classes.commentAuthor}>
@@ -166,12 +168,14 @@ const Post = ({
         <Grid item>
           <Grid container alignItems='center'>
             <Grid item>
-              <Avatar
-                src={`/api/image/${post.author.profilePic}`}
-                className={classes.postAvatar}
-              >
-                {post.author.name && post.author.name[0].toUpperCase()}
-              </Avatar>
+              <Link to={`/profile/${post.author._id}`}>
+                <Avatar
+                  src={`/api/image/${post.author.profilePic}`}
+                  className={classes.postAvatar}
+                >
+                  {post.author.name && post.author.name[0].toUpperCase()}
+                </Avatar>
+              </Link>
             </Grid>
             <Grid item>
               <Typography
