@@ -47,7 +47,7 @@ const API = {
     },
     delete: (id) => Post.findByIdAndDelete(id, { useFindAndModify: false }),
     findById: (id) => Post.findById(id),
-    findAll: () =>
+    findAll: (skip = 0, limit = 100) =>
       Post.find({})
         .populate([
           {
@@ -61,7 +61,8 @@ const API = {
           { path: 'author' },
         ])
         .sort({ createdAt: 'descending' })
-        .limit(100),
+        .skip(skip)
+        .limit(limit),
     addComment: (post, comment) =>
       Post.findByIdAndUpdate(
         post,
