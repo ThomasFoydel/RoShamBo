@@ -64,6 +64,7 @@ const Landing = () => {
   const [, updateState] = useContext(CTX);
 
   const classes = useStyles();
+  const openModal = () => updateState({ type: 'AUTH_MODAL', payload: true });
   return (
     <>
       <div style={{ position: 'relative' }}>
@@ -72,12 +73,7 @@ const Landing = () => {
           src={weaponSystem}
           alt='weapons system: scisscors beats bird and paper. paper beats tree and rock. rock beats bird and scissors. tree beats rock and scissors. '
         />
-        <Button
-          onClick={() => {
-            updateState({ type: 'TOGGLE_AUTH_MODAL' });
-          }}
-          className={classes.startBtn}
-        >
+        <Button onClick={openModal} className={classes.startBtn}>
           Get Started
         </Button>
       </div>

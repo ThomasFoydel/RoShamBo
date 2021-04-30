@@ -42,8 +42,9 @@ const Auth = () => {
   const [formState, setFormState] = useState(initialState);
   const [err, setErr] = useState(null);
 
-  const toggleModal = () => {
-    updateState({ type: 'TOGGLE_AUTH_MODAL' });
+  const closeModal = () => {
+    console.log('close modal');
+    updateState({ type: 'AUTH_MODAL', payload: false });
   };
 
   const handleAuth = ({ currentTarget: { id } }) => {
@@ -90,7 +91,7 @@ const Auth = () => {
   const closeErr = () => setErr(null);
 
   return (
-    <Modal className={classes.modal} open={authModal} onClose={toggleModal}>
+    <Modal className={classes.modal} open={authModal} onClose={closeModal}>
       <>
         {ModalBody}
         <Snackbar

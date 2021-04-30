@@ -202,8 +202,8 @@ export default function Header() {
     setValue(newValue);
   };
 
-  const toggleModal = () => {
-    updateState({ type: 'TOGGLE_AUTH_MODAL' });
+  const openModal = () => {
+    updateState({ type: 'AUTH_MODAL', payload: true });
   };
 
   useEffect(() => {
@@ -276,7 +276,7 @@ export default function Header() {
         <Button
           color='secondary'
           variant='contained'
-          onClick={toggleModal}
+          onClick={openModal}
           className={classes.button}
         >
           Sign In
@@ -375,7 +375,7 @@ export default function Header() {
               className={classes.drawerAuthLink}
             >
               <ListItemText
-                onClick={toggleModal}
+                onClick={openModal}
                 className={classes.drawerItem}
                 disableTypography
               >

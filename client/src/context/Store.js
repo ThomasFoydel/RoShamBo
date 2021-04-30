@@ -34,8 +34,8 @@ export function reducer(state, action) {
         },
         user: { name: '', displayEmail: '' },
       };
-    case 'TOGGLE_AUTH_MODAL':
-      return { ...state, authModal: !state.authModal };
+    case 'AUTH_MODAL':
+      return { ...state, authModal: payload };
     case 'CHANGE_PROFILE_PIC':
       return {
         ...state,
