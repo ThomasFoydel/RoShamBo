@@ -119,7 +119,11 @@ const App = () => {
               component={isLoggedIn ? Battle : Landing}
             />
             <Route path='/battle/computer' exact component={ComputerBattle} />
-            <Route path='/editprofile' exact component={EditProfile} />
+            <Route
+              path='/editprofile'
+              exact
+              component={isLoggedIn ? EditProfile : Landing}
+            />
             <Route
               path='/messages'
               component={() =>
