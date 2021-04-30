@@ -42,14 +42,11 @@ const Auth = () => {
   const [formState, setFormState] = useState(initialState);
   const [err, setErr] = useState(null);
 
-  const closeModal = () => {
-    console.log('close modal');
-    updateState({ type: 'AUTH_MODAL', payload: false });
-  };
+  const closeModal = () => updateState({ type: 'AUTH_MODAL', payload: false });
 
-  const handleAuth = ({ currentTarget: { id } }) => {
+  const handleAuth = (type) => {
     axios
-      .post(`/api/auth/${id}`, formState[id])
+      .post(`/api/auth/${type}`, formState[type])
       .then(({ data }) => {
         const { token, user } = data;
         updateState({ type: 'LOGIN', payload: { token, user } });

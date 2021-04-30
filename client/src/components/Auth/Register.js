@@ -52,8 +52,13 @@ const Register = ({
 
   const handleKeyDown = ({ charCode }) => {
     if (charCode === 13) {
-      handleAuth({ currentTarget: { id: 'register' } });
+      handleAuth('register');
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleAuth('register');
   };
 
   return (
@@ -64,74 +69,77 @@ const Register = ({
         </Avatar>
         <h2 className={classes.header}>Register</h2>
       </Grid>
-
-      <TextField
-        label='Email'
-        placeholder='Enter email'
-        fullWidth
-        id='email'
-        required
-        value={email}
-        onChange={handleChange}
-        onKeyPress={handleKeyDown}
-      />
-      <TextField
-        label='Name'
-        placeholder='Enter name'
-        fullWidth
-        id='name'
-        required
-        value={name}
-        onChange={handleChange}
-        onKeyPress={handleKeyDown}
-      />
-      <TextField
-        label='Confirm password'
-        placeholder='Enter password'
-        id='confirmpassword'
-        type='password'
-        fullWidth
-        required
-        value={confirmpassword}
-        onChange={handleChange}
-        onKeyPress={handleKeyDown}
-      />
-      <TextField
-        label='Password'
-        placeholder='Enter password'
-        id='password'
-        type='password'
-        fullWidth
-        required
-        value={password}
-        onChange={handleChange}
-        onKeyPress={handleKeyDown}
-      />
-      <FormControlLabel
-        control={<Checkbox name='checkedB' color='primary' />}
-        label='Remember me'
-      />
-      <Button
-        className={classes.button}
-        onClick={handleAuth}
-        type='submit'
-        color='primary'
-        variant='contained'
-        fullWidth
-        id='register'
-      >
-        Sign up
-      </Button>
-
-      <Typography>
-        Already have an account?
-        <span
-          className={classes.loginLink}
-          onClick={() => setAuthPage('login')}
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label='Email'
+          placeholder='Enter email'
+          fullWidth
+          id='email'
+          required
+          value={email}
+          onChange={handleChange}
+          onKeyPress={handleKeyDown}
+          autoComplete='email'
+        />
+        <TextField
+          label='Name'
+          placeholder='Enter name'
+          fullWidth
+          id='name'
+          required
+          value={name}
+          onChange={handleChange}
+          onKeyPress={handleKeyDown}
+          autoComplete='username'
+        />
+        <TextField
+          label='Confirm password'
+          placeholder='Enter password'
+          id='confirmpassword'
+          type='password'
+          fullWidth
+          required
+          value={confirmpassword}
+          onChange={handleChange}
+          onKeyPress={handleKeyDown}
+          autoComplete='new-password'
+        />
+        <TextField
+          label='Password'
+          placeholder='Enter password'
+          id='password'
+          type='password'
+          fullWidth
+          required
+          value={password}
+          onChange={handleChange}
+          onKeyPress={handleKeyDown}
+          autoComplete='new-password'
+        />
+        <FormControlLabel
+          control={<Checkbox name='checkedB' color='primary' />}
+          label='Remember me'
+        />
+        <Button
+          className={classes.button}
+          type='submit'
+          color='primary'
+          variant='contained'
+          fullWidth
         >
-          Sign In
-        </span>
-      </Typography>
+          Sign up
+        </Button>
+
+        <Typography>
+          Already have an account?
+          <span
+            className={classes.loginLink}
+            onClick={() => setAuthPage('login')}
+          >
+            Sign In
+          </span>
+        </Typography>
+      </form>
     </Paper>
   );
 };

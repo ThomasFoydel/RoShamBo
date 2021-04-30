@@ -61,8 +61,12 @@ const Login = ({
 
   const handleKeyDown = ({ charCode }) => {
     if (charCode === 13) {
-      handleAuth({ currentTarget: { id: 'login' } });
+      handleAuth('login');
     }
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleAuth('login');
   };
 
   return (
@@ -73,57 +77,58 @@ const Login = ({
         </Avatar>
         <h2 className={classes.header}>Sign In</h2>
       </Grid>
-
-      <TextField
-        label='Email'
-        placeholder='Enter email'
-        fullWidth
-        id='email'
-        required
-        value={email}
-        onChange={handleChange}
-        onKeyPress={handleKeyDown}
-      />
-      <TextField
-        label='Password'
-        placeholder='Enter password'
-        id='password'
-        type='password'
-        fullWidth
-        required
-        value={password}
-        onChange={handleChange}
-        onKeyPress={handleKeyDown}
-      />
-      <FormControlLabel
-        control={<Checkbox name='checkedB' color='primary' />}
-        label='Remember me'
-      />
-      <Button
-        className={classes.button}
-        onClick={handleAuth}
-        type='submit'
-        color='primary'
-        variant='contained'
-        fullWidth
-        id='login'
-      >
-        Sign in
-      </Button>
-      <Typography>
-        <Link className={classes.forgotPw} to='/forgot-pw'>
-          Forgot password?
-        </Link>
-      </Typography>
-      <Typography>
-        Need an account?{' '}
-        <span
-          className={classes.registerLink}
-          onClick={() => setAuthPage('register')}
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label='Email'
+          placeholder='Enter email'
+          fullWidth
+          id='email'
+          required
+          value={email}
+          onChange={handleChange}
+          onKeyPress={handleKeyDown}
+          autoComplete='email'
+        />
+        <TextField
+          label='Password'
+          placeholder='Enter password'
+          id='password'
+          type='password'
+          fullWidth
+          required
+          value={password}
+          onChange={handleChange}
+          onKeyPress={handleKeyDown}
+          autoComplete='current-password'
+        />
+        <FormControlLabel
+          control={<Checkbox name='checkedB' color='primary' />}
+          label='Remember me'
+        />
+        <Button
+          className={classes.button}
+          type='submit'
+          color='primary'
+          variant='contained'
+          fullWidth
         >
-          Sign Up
-        </span>
-      </Typography>
+          Sign in
+        </Button>
+        <Typography>
+          <Link className={classes.forgotPw} to='/forgot-pw'>
+            Forgot password?
+          </Link>
+        </Typography>
+        <Typography>
+          Need an account?{' '}
+          <span
+            className={classes.registerLink}
+            onClick={() => setAuthPage('register')}
+          >
+            Sign Up
+          </span>
+        </Typography>
+      </form>
     </Paper>
   );
 };
