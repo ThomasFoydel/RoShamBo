@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
+    "@material-ui/lab": "*",
     "@tensorflow-models/handpose": "0.0.7",
     "@tensorflow/tfjs": "^3.3.0",
     "@testing-library/jest-dom": "^5.11.9",

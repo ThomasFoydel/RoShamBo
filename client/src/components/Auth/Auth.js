@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import { Modal, makeStyles } from '@material-ui/core';
-
+import { Modal, makeStyles, Snackbar } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
 import { CTX } from 'context/Store';
 import Register from './Register';
 import Login from './Login';
@@ -40,6 +40,7 @@ const Auth = () => {
   let { authModal } = appState;
   const [authPage, setAuthPage] = useState('login');
   const [formState, setFormState] = useState(initialState);
+  const [err, setErr] = useState(null);
 
   const toggleModal = () => {
     updateState({ type: 'TOGGLE_AUTH_MODAL' });
@@ -58,9 +59,7 @@ const Auth = () => {
           response: {
             data: { err },
           },
-        }) => {
-          if (err) return console.log('handleAuth err: ', err);
-        }
+        }) => err && setErr(err)
       );
   };
 
@@ -88,9 +87,23 @@ const Auth = () => {
     </div>
   );
 
+  const closeErr = () => setErr(null);
+
   return (
     <Modal className={classes.modal} open={authModal} onClose={toggleModal}>
-      {ModalBody}
+      <>
+        {ModalBody}
+        <Snackbar
+          open={err}
+          autoHideDuration={5000}
+          onClose={closeErr}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        >
+          <Alert onClose={closeErr} severity='error'>
+            {err}
+          </Alert>
+        </Snackbar>
+      </>
     </Modal>
   );
 };

@@ -372,11 +372,7 @@ export default function Header() {
               }}
               divider
               button
-              classes={{
-                root: classes.drawerAuthLink,
-                selected: classes.drawerItemSelected,
-              }}
-              selected={value === 5}
+              className={classes.drawerAuthLink}
             >
               <ListItemText
                 onClick={toggleModal}
