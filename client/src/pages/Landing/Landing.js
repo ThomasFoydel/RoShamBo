@@ -27,15 +27,15 @@ const useStyles = makeStyles((theme) => ({
   },
   weaponSystem: {
     border: '8px solid black',
+    padding: '5%',
     borderBottom: 'none',
     background: `radial-gradient(${theme.palette.secondary.dark}, ${theme.palette.primary.main})`,
     width: '100%',
   },
   startBtn: {
-    position: 'absolute',
-    top: '52%',
+    position: 'fixed',
+    top: '50vh',
     left: '50%',
-
     transform: 'translateX(-50%) translateY(-50%)',
     padding: '.5rem 2.5rem',
     fontSize: '5rem',
@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
     backdropFilter: 'blur(2px)',
     transition: 'all 0.45s ease',
     whiteSpace: 'nowrap',
-    background: theme.palette.secondary.light,
+    background: theme.palette.secondary.main,
     color: '#ddd',
     '&:hover': {
       background: 'rgba(255,255,255,0.15)',
