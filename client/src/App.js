@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import io from 'socket.io-client';
-import { BrowserRouter as Router, Switch, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import axios from 'axios';
 import { ThemeProvider } from '@material-ui/styles';
 import theme from 'theme/Theme';
@@ -19,8 +19,10 @@ import Landing from 'pages/Landing/Landing';
 import Home from 'pages/Home/Home';
 import EditProfile from 'pages/EditProfile/EditProfile';
 import Messages from 'pages/Messages/Messages';
+import { makeStyles, Snackbar } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
+import { SignalCellularNull } from '@material-ui/icons';
 
-import { makeStyles } from '@material-ui/core';
 const useStyles = makeStyles(() => ({
   app: {
     minHeight: '100vh',
@@ -32,6 +34,10 @@ const useStyles = makeStyles(() => ({
 const App = () => {
   const [appState, updateState] = useContext(CTX);
   const [socketLoaded, setSocketLoaded] = useState(false);
+  const [messageNotification, setMessageNotification] = useState({
+    sender: null,
+    content: null,
+  });
   let {
     isLoggedIn,
     auth: { token },
@@ -90,9 +96,12 @@ const App = () => {
       setSocketLoaded(true);
 
       if (subscribed) {
-        socketRef.current.on('chat-message-notification', (message) => {
-          // update context state with notification
-        });
+        socketRef.current.on('chat-message-notification', (message) =>
+          setMessageNotification({
+            sender: message.sender.name,
+            content: message.content,
+          })
+        );
       }
     }
 
@@ -104,6 +113,9 @@ const App = () => {
       }
     };
   }, [token, updateState]);
+
+  const closeMessageNotification = () =>
+    setMessageNotification({ sender: null, message: SignalCellularNull });
 
   return (
     <ThemeProvider theme={theme}>
@@ -161,6 +173,23 @@ const App = () => {
             <Route path='/forum' exact component={Forum} />
           </Switch>
           <Auth />
+          <Snackbar
+            open={messageNotification.sender}
+            autoHideDuration={5000}
+            onClose={closeMessageNotification}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+          >
+            {messageNotification.content && (
+              <Link to='/messages'>
+                <Alert onClose={closeMessageNotification} severity='info'>
+                  {messageNotification.sender}:{' '}
+                  {messageNotification.content.length < 20
+                    ? messageNotification.content
+                    : `${messageNotification.content.substring(0, 20)}...`}
+                </Alert>
+              </Link>
+            )}
+          </Snackbar>
         </div>
       </Router>
     </ThemeProvider>
