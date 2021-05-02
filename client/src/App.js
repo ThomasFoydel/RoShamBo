@@ -21,7 +21,6 @@ import EditProfile from 'pages/EditProfile/EditProfile';
 import Messages from 'pages/Messages/Messages';
 import { makeStyles, Snackbar } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
-import { SignalCellularNull } from '@material-ui/icons';
 
 const useStyles = makeStyles(() => ({
   app: {
@@ -115,7 +114,7 @@ const App = () => {
   }, [token, updateState]);
 
   const closeMessageNotification = () =>
-    setMessageNotification({ sender: null, message: SignalCellularNull });
+    setMessageNotification({ sender: null, message: null });
 
   return (
     <ThemeProvider theme={theme}>
@@ -142,7 +141,7 @@ const App = () => {
                 isLoggedIn && socketLoaded ? (
                   <Messages props={{ socketRef }} />
                 ) : (
-                  Landing
+                  <Landing />
                 )
               }
             />
@@ -174,13 +173,13 @@ const App = () => {
           </Switch>
           <Auth />
           <Snackbar
-            open={messageNotification.sender}
+            open={!!messageNotification.sender}
             autoHideDuration={5000}
             onClose={closeMessageNotification}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
           >
             {messageNotification.content && (
-              <Link to='/messages'>
+              <Link to='/messages' onClick={closeMessageNotification}>
                 <Alert onClose={closeMessageNotification} severity='info'>
                   {messageNotification.sender}:{' '}
                   {messageNotification.content.length < 20

@@ -99,15 +99,14 @@ const Messages = ({ props: { socketRef } }) => {
   useEffect(() => {
     axios
       .get('/api/user/friendlist', { headers: { 'x-auth-token': token } })
-      .then(({ data }) => {
-        if (data) setFriends(data);
-      })
+      .then(({ data }) => data && setFriends(data))
       .catch((err) => console.log(err));
   }, [token]);
 
   const handleSelectFriend = (id) => {
     setCurrentThread((current) => (id === current ? null : id));
   };
+
   return (
     <Grid
       container
@@ -119,7 +118,7 @@ const Messages = ({ props: { socketRef } }) => {
       <Grid item className={classes.friendList} xs={4}>
         {friends.map((friend) => (
           <Friend
-            key={friend}
+            key={friend._id}
             props={{ friend, className: classes.friend, handleSelectFriend }}
           />
         ))}
@@ -197,6 +196,7 @@ const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
     if (scrollRef.current)
       scrollRef.current.scrollIntoView({ behavior: 'smooth' });
   }, [thread, currentThread]);
+
   return (
     <div className={classes.thread}>
       {thread.map((message) => (
