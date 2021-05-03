@@ -7,11 +7,11 @@ const Comment = require('../models/Comment');
 const API = {
   user: {
     create: (user) => User.create(user),
-    findById: (id) => User.findById(id),
+    findById: (id) => User.findById(id).populate('friends'),
     findByEmail: (email) =>
-      User.findOne({ email }).select(
-        'password email displayEmail name bio profilePic friends exp'
-      ),
+      User.findOne({ email })
+        .select('password email displayEmail name bio profilePic friends exp')
+        .populate('friends'),
     updateProfile: (id, update) =>
       User.findByIdAndUpdate(
         id,

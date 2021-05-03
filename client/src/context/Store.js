@@ -18,6 +18,7 @@ export function reducer(state, action) {
           displayEmail: user.displayEmail,
           profilePic: user.profilePic,
           bio: user.bio,
+          friends: user.friends,
         },
         auth: { token },
         messages: user.messages,
@@ -53,7 +54,8 @@ export function reducer(state, action) {
       let updatedThread = thread ? [...thread, message] : [message];
       let updatedMessages = { ...copy, [other]: updatedThread };
       return { ...state, messages: updatedMessages };
-
+    case 'CURRENT_THREAD':
+      return { ...state, currentThread: payload };
     default:
       console.log('REDUCER ERROR: action: ', action);
       return { ...state };
@@ -67,6 +69,8 @@ export default function Store(props) {
     authModal: false,
     user: { name: '', displayEmail: '', id: null },
     messages: {},
+    messageNotification: { sender: null, content: null },
+    currentThread: null,
   });
 
   return <CTX.Provider value={stateHook}>{props.children}</CTX.Provider>;

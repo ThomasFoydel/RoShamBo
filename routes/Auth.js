@@ -29,10 +29,10 @@ router.post('/register', async (req, res) => {
       .send({ err: 'Account with this email already exists' });
   }
 
-  if (name.length < 8 || name.length > 16) {
+  if (name.length < 5 || name.length > 10) {
     return res
       .status(400)
-      .send({ err: 'Name must be between 8 and 16 characters' });
+      .send({ err: 'Name must be between 5 and 10 characters' });
   }
 
   if (password !== confirmpassword) {
@@ -59,7 +59,7 @@ router.post('/register', async (req, res) => {
       );
       return sendUser(res, user, token);
     })
-    .catch((err) => {
+    .catch(() => {
       res
         .status(500)
         .send({ err: 'Database is down, we are working to fix this' });

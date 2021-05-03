@@ -19,8 +19,7 @@ import Landing from 'pages/Landing/Landing';
 import Home from 'pages/Home/Home';
 import EditProfile from 'pages/EditProfile/EditProfile';
 import Messages from 'pages/Messages/Messages';
-import { makeStyles, Snackbar } from '@material-ui/core';
-import Alert from '@material-ui/lab/Alert';
+import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles(() => ({
   app: {
@@ -33,10 +32,7 @@ const useStyles = makeStyles(() => ({
 const App = () => {
   const [appState, updateState] = useContext(CTX);
   const [socketLoaded, setSocketLoaded] = useState(false);
-  const [messageNotification, setMessageNotification] = useState({
-    sender: null,
-    content: null,
-  });
+
   let {
     isLoggedIn,
     auth: { token },
@@ -93,15 +89,6 @@ const App = () => {
       });
 
       setSocketLoaded(true);
-
-      if (subscribed) {
-        socketRef.current.on('chat-message-notification', (message) =>
-          setMessageNotification({
-            sender: message.sender.name,
-            content: message.content,
-          })
-        );
-      }
     }
 
     return () => {
@@ -113,17 +100,32 @@ const App = () => {
     };
   }, [token, updateState]);
 
-  const closeMessageNotification = () =>
-    setMessageNotification({ sender: null, message: null });
-
   return (
     <ThemeProvider theme={theme}>
       <Router>
         <div className={classes.app}>
           <NavBar />
           <Switch>
-            <Route path='/' exact component={isLoggedIn ? Home : Landing} />
-            <Route path='/profile/:id' exact component={Profile} />
+            <Route
+              path='/'
+              exact
+              component={() =>
+                isLoggedIn && socketLoaded ? (
+                  <Home props={{ socketRef }} />
+                ) : (
+                  <Landing />
+                )
+              }
+            />
+            <Route
+              path='/profile/:id'
+              exact
+              component={({ match }) =>
+                !isLoggedIn || socketLoaded ? (
+                  <Profile props={{ socketRef, match }} />
+                ) : null
+              }
+            />
             <Route
               path='/battle'
               exact
@@ -133,7 +135,13 @@ const App = () => {
             <Route
               path='/editprofile'
               exact
-              component={isLoggedIn ? EditProfile : Landing}
+              component={() =>
+                isLoggedIn && socketLoaded ? (
+                  <EditProfile props={{ socketRef }} />
+                ) : (
+                  <Landing />
+                )
+              }
             />
             <Route
               path='/messages'
@@ -157,7 +165,13 @@ const App = () => {
             />
             <Route
               path='/battle/friends'
-              component={isLoggedIn ? BattleFriends : Landing}
+              component={() =>
+                isLoggedIn ? (
+                  <BattleFriends props={{ socketRef }} />
+                ) : (
+                  <Landing />
+                )
+              }
             />
             <Route
               path='/friendbattle/:friendshipId'
@@ -169,26 +183,17 @@ const App = () => {
                 )
               }
             />
-            <Route path='/forum' exact component={Forum} />
+            <Route
+              path='/forum'
+              exact
+              component={() =>
+                socketLoaded || !isLoggedIn ? (
+                  <Forum props={{ socketRef }} />
+                ) : null
+              }
+            />
           </Switch>
           <Auth />
-          <Snackbar
-            open={!!messageNotification.sender}
-            autoHideDuration={5000}
-            onClose={closeMessageNotification}
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-          >
-            {messageNotification.content && (
-              <Link to='/messages' onClick={closeMessageNotification}>
-                <Alert onClose={closeMessageNotification} severity='info'>
-                  {messageNotification.sender}:{' '}
-                  {messageNotification.content.length < 20
-                    ? messageNotification.content
-                    : `${messageNotification.content.substring(0, 20)}...`}
-                </Alert>
-              </Link>
-            )}
-          </Snackbar>
         </div>
       </Router>
     </ThemeProvider>

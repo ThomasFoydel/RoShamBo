@@ -77,8 +77,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 const Profile = ({
-  match: {
-    params: { id },
+  props: {
+    match: {
+      params: { id },
+    },
   },
 }) => {
   const [appState] = useContext(CTX);

@@ -88,23 +88,20 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 const Messages = ({ props: { socketRef } }) => {
+  console.log('messages renderer');
   const socket = socketRef.current;
-  const [friends, setFriends] = useState([]);
-  const [appState] = useContext(CTX);
-  const [currentThread, setCurrentThread] = useState(null);
+  const [appState, updateState] = useContext(CTX);
   const classes = useStyles();
   const { token } = appState.auth;
   const userId = appState.user.id;
-
-  useEffect(() => {
-    axios
-      .get('/api/user/friendlist', { headers: { 'x-auth-token': token } })
-      .then(({ data }) => data && setFriends(data))
-      .catch((err) => console.log(err));
-  }, [token]);
+  const friends = appState.user.friends || [];
+  const currentThread = appState.currentThread;
 
   const handleSelectFriend = (id) => {
-    setCurrentThread((current) => (id === current ? null : id));
+    updateState({
+      type: 'CURRENT_THREAD',
+      payload: id === appState.currentThread ? null : id,
+    });
   };
 
   return (
