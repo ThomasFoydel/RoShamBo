@@ -21,11 +21,8 @@ const Home = ({ props: { socketRef } }) => {
   );
 
   useEffect(() => {
-    console.log('home use effect');
     let subscribed = true;
     socketRef.current.on('chat-message-notification', (message) => {
-      console.log('message: ', message);
-
       if (subscribed) {
         setMessageNotification({
           sender: message.sender.name,
@@ -34,7 +31,6 @@ const Home = ({ props: { socketRef } }) => {
         });
       }
     });
-
     return () => {
       subscribed = false;
       setMessageNotification(initMessageNotification);

@@ -22,7 +22,11 @@ const MessageNotification = ({
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
     >
       {content && (
-        <Alert onClose={close} severity='info'>
+        <Alert
+          onClose={close}
+          severity='info'
+          style={{ border: '1px solid black' }}
+        >
           <Link to='/messages' onClick={handleClick}>
             {sender}:{' '}
             {content.length < 20 ? content : `${content.substring(0, 20)}...`}

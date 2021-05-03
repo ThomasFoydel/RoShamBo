@@ -4,6 +4,7 @@ import PostForm from './components/PostForm';
 import CommentForm from './components/CommentForm';
 import { Link } from 'react-router-dom';
 import { CTX } from 'context/Store';
+import MessageNotification from 'components/MessageNotification/MessageNotification';
 import {
   makeStyles,
   Card,
@@ -102,53 +103,107 @@ const useStyles = makeStyles((theme) => ({
     right: 0,
   },
 }));
-
-const Comment = ({ props: { comment, userId, deleteComment } }) => {
+const initMessageNotification = { sender: null, content: null, senderId: null };
+const Forum = ({ props: { socketRef } }) => {
+  const [appState] = useContext(CTX);
+  const { token } = appState.auth;
+  const { isLoggedIn } = appState;
+  const userId = appState.user.id;
+  const [posts, setPosts] = useState([]);
   const classes = useStyles();
+  const [messageNotification, setMessageNotification] = useState(
+    initMessageNotification
+  );
+
+  useEffect(() => {
+    axios
+      .get('/api/forum/posts')
+      .then(({ data }) => setPosts(data))
+      .catch((err) => console.log({ err }));
+  }, [token]);
+
+  useEffect(() => {
+    let subscribed = true;
+    if (socketRef && socketRef.current) {
+      socketRef.current.on('chat-message-notification', (message) => {
+        if (subscribed) {
+          setMessageNotification({
+            sender: message.sender.name,
+            content: message.content,
+            senderId: message.sender._id,
+          });
+        }
+      });
+    }
+    return () => {
+      subscribed = false;
+      if (socketRef && socketRef.current) {
+        setMessageNotification(initMessageNotification);
+        socketRef.current.off('chat-message-notification');
+      }
+    };
+  }, []);
+
+  const deletePost = (id) => {
+    console.log({ id });
+    axios
+      .delete(`/api/forum/post/${id}`, { headers: { 'x-auth-token': token } })
+      .then(
+        ({ data }) =>
+          data && setPosts((posts) => posts.filter((p) => p._id !== data))
+      )
+      .catch((err) => console.log(err));
+  };
+  const deleteComment = (id) => {
+    axios
+      .delete(`/api/forum/comment/${id}`, {
+        headers: { 'x-auth-token': token },
+      })
+      .then(
+        ({ data }) =>
+          data &&
+          data._id &&
+          setPosts((posts) => {
+            const copy = [...posts];
+            const post = copy.find((p) => p._id === data._id);
+            Object.assign(post, data);
+            return copy;
+          })
+      )
+      .catch((err) => console.log(err));
+  };
+
+  const closeMessageNotification = () =>
+    setMessageNotification(initMessageNotification);
+
   return (
-    <div className={classes.comment}>
-      <Grid container direction='column'>
-        <Grid item style={{ position: 'relative' }}>
-          <Link to={`/profile/${comment.author._id}`}>
-            <Grid container alignItems='center'>
-              <Grid item>
-                <Link to={`/profile/${comment.author._id}`}>
-                  <Avatar
-                    src={`/api/image/${comment.author.profilePic}`}
-                    className={classes.commentAvatar}
-                  >
-                    {comment.author.name &&
-                      comment.author.name[0].toUpperCase()}
-                  </Avatar>
-                </Link>
-              </Grid>
-              <Grid item>
-                <Typography className={classes.commentAuthor}>
-                  {comment.author.name}
-                </Typography>
-              </Grid>
-            </Grid>
-          </Link>
-          {comment.author._id === userId && (
-            <IconButton
-              onClick={() => deleteComment(comment._id)}
-              className={classes.deleteBtn}
-              aria-label='delete'
-              style={{ color: 'white' }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          )}
-        </Grid>
-        <Grid item>
-          <Typography className={classes.commentContent}>
-            {comment.content}
-          </Typography>
-        </Grid>
-      </Grid>
+    <div className={classes.forum}>
+      {isLoggedIn && <PostForm props={{ setPosts, token }} />}
+      {posts.map((post) => (
+        <Post
+          key={post._id}
+          props={{
+            post,
+            setPosts,
+            token,
+            userId,
+            deletePost,
+            deleteComment,
+            isLoggedIn,
+          }}
+        />
+      ))}
+      <MessageNotification
+        props={{
+          message: messageNotification,
+          severity: 'info',
+          close: closeMessageNotification,
+        }}
+      />
     </div>
   );
 };
+
 const Post = ({
   props: {
     post,
@@ -223,67 +278,50 @@ const Post = ({
     </Card>
   );
 };
-const Forum = () => {
-  const [appState] = useContext(CTX);
-  const { token } = appState.auth;
-  const { isLoggedIn } = appState;
-  const userId = appState.user.id;
-  const [posts, setPosts] = useState([]);
+
+const Comment = ({ props: { comment, userId, deleteComment } }) => {
   const classes = useStyles();
-
-  useEffect(() => {
-    axios
-      .get('/api/forum/posts')
-      .then(({ data }) => setPosts(data))
-      .catch((err) => console.log({ err }));
-  }, [token]);
-
-  const deletePost = (id) => {
-    console.log({ id });
-    axios
-      .delete(`/api/forum/post/${id}`, { headers: { 'x-auth-token': token } })
-      .then(
-        ({ data }) =>
-          data && setPosts((posts) => posts.filter((p) => p._id !== data))
-      )
-      .catch((err) => console.log(err));
-  };
-  const deleteComment = (id) => {
-    axios
-      .delete(`/api/forum/comment/${id}`, {
-        headers: { 'x-auth-token': token },
-      })
-      .then(
-        ({ data }) =>
-          data &&
-          data._id &&
-          setPosts((posts) => {
-            const copy = [...posts];
-            const post = copy.find((p) => p._id === data._id);
-            Object.assign(post, data);
-            return copy;
-          })
-      )
-      .catch((err) => console.log(err));
-  };
-
   return (
-    <div className={classes.forum}>
-      {isLoggedIn && <PostForm props={{ setPosts, token }} />}
-      {posts.map((post) => (
-        <Post
-          key={post._id}
-          props={{
-            post,
-            setPosts,
-            token,
-            userId,
-            deletePost,
-            deleteComment,
-            isLoggedIn,
-          }}
-        />
-      ))}
+    <div className={classes.comment}>
+      <Grid container direction='column'>
+        <Grid item style={{ position: 'relative' }}>
+          <Link to={`/profile/${comment.author._id}`}>
+            <Grid container alignItems='center'>
+              <Grid item>
+                <Link to={`/profile/${comment.author._id}`}>
+                  <Avatar
+                    src={`/api/image/${comment.author.profilePic}`}
+                    className={classes.commentAvatar}
+                  >
+                    {comment.author.name &&
+                      comment.author.name[0].toUpperCase()}
+                  </Avatar>
+                </Link>
+              </Grid>
+              <Grid item>
+                <Typography className={classes.commentAuthor}>
+                  {comment.author.name}
+                </Typography>
+              </Grid>
+            </Grid>
+          </Link>
+          {comment.author._id === userId && (
+            <IconButton
+              onClick={() => deleteComment(comment._id)}
+              className={classes.deleteBtn}
+              aria-label='delete'
+              style={{ color: 'white' }}
+            >
+              <DeleteIcon />
+            </IconButton>
+          )}
+        </Grid>
+        <Grid item>
+          <Typography className={classes.commentContent}>
+            {comment.content}
+          </Typography>
+        </Grid>
+      </Grid>
     </div>
   );
 };
