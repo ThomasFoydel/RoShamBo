@@ -9,8 +9,10 @@ import {
   Typography,
   Button,
 } from '@material-ui/core';
+import MessageNotification from 'components/MessageNotification/MessageNotification';
 import rps from 'imgs/rps.jpeg';
 import loadingblue from 'imgs/loadingblue.gif';
+const initMessageNotification = { sender: null, content: null, senderId: null };
 
 const useStyles = makeStyles((theme) => ({
   profilePage: { padding: '5rem 0' },
@@ -81,6 +83,7 @@ const Profile = ({
     match: {
       params: { id },
     },
+    socketRef,
   },
 }) => {
   const [appState] = useContext(CTX);
@@ -91,7 +94,9 @@ const Profile = ({
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
   const classes = useStyles();
-
+  const [messageNotification, setMessageNotification] = useState(
+    initMessageNotification
+  );
   useEffect(() => {
     let subscribed = true;
     setLoading(true);
@@ -117,6 +122,28 @@ const Profile = ({
     return () => (subscribed = false);
   }, [appState.user.id, id]);
 
+  useEffect(() => {
+    let subscribed = true;
+    if (socketRef && socketRef.current) {
+      socketRef.current.on('chat-message-notification', (message) => {
+        if (subscribed) {
+          setMessageNotification({
+            sender: message.sender.name,
+            content: message.content,
+            senderId: message.sender._id,
+          });
+        }
+      });
+    }
+    return () => {
+      subscribed = false;
+      if (socketRef && socketRef.current) {
+        setMessageNotification(initMessageNotification);
+        socketRef.current.off('chat-message-notification');
+      }
+    };
+  }, []);
+
   const requestFriend = () => {
     axios
       .post(
@@ -136,6 +163,9 @@ const Profile = ({
       ['left', 'center', 'right'][Math.floor(Math.random() * 3)]
     );
   }, []);
+
+  const closeMessageNotification = () =>
+    setMessageNotification(initMessageNotification);
 
   return (
     <div className={classes.profilePage}>
@@ -186,6 +216,13 @@ const Profile = ({
           )}
         </div>
       </Card>
+      <MessageNotification
+        props={{
+          message: messageNotification,
+          severity: 'info',
+          close: closeMessageNotification,
+        }}
+      />
     </div>
   );
 };

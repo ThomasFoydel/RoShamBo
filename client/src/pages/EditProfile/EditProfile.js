@@ -1,7 +1,5 @@
-import React, { useState, useContext } from 'react';
-import ImageUpload from 'components/ImageUpload/ImageUpload';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { CTX } from 'context/Store';
 import {
   makeStyles,
   Grid,
@@ -12,6 +10,11 @@ import {
   Typography,
 } from '@material-ui/core';
 
+import ImageUpload from 'components/ImageUpload/ImageUpload';
+import MessageNotification from 'components/MessageNotification/MessageNotification';
+import { CTX } from 'context/Store';
+
+const initMessageNotification = { sender: null, content: null, senderId: null };
 const useStyles = makeStyles((theme) => ({
   editProfile: {
     ...theme.centerHorizontal,
@@ -47,13 +50,16 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
-const EditProfile = () => {
+const EditProfile = ({ props: { socketRef } }) => {
   const [appState, updateState] = useContext(CTX);
   const classes = useStyles();
   const { token } = appState.auth;
   const { name, profilePic } = appState.user;
   const [showProfileInput, setShowProfileInput] = useState(false);
   const [profileImage, setProfileImage] = useState([]);
+  const [messageNotification, setMessageNotification] = useState(
+    initMessageNotification
+  );
   const [formData, setFormData] = useState({
     name: '',
     displayEmail: '',
@@ -102,6 +108,28 @@ const EditProfile = () => {
       })
       .catch((err) => console.log(err));
   };
+
+  useEffect(() => {
+    let subscribed = true;
+    socketRef.current.on('chat-message-notification', (message) => {
+      if (subscribed) {
+        setMessageNotification({
+          sender: message.sender.name,
+          content: message.content,
+          senderId: message.sender._id,
+        });
+      }
+    });
+    return () => {
+      subscribed = false;
+      setMessageNotification(initMessageNotification);
+      socketRef.current.off('chat-message-notification');
+    };
+  }, []);
+
+  const closeMessageNotification = () =>
+    setMessageNotification(initMessageNotification);
+
   return (
     <>
       {appState.user && (
@@ -210,6 +238,13 @@ const EditProfile = () => {
           </Grid>
         </Grid>
       )}
+      <MessageNotification
+        props={{
+          message: messageNotification,
+          severity: 'info',
+          close: closeMessageNotification,
+        }}
+      />
     </>
   );
 };
