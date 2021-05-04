@@ -56,6 +56,8 @@ export function reducer(state, action) {
       return { ...state, messages: updatedMessages };
     case 'CURRENT_THREAD':
       return { ...state, currentThread: payload };
+    case 'SET_FRIENDLIST':
+      return { ...state, user: { ...state.user, friends: payload } };
     default:
       console.log('REDUCER ERROR: action: ', action);
       return { ...state };
@@ -67,7 +69,7 @@ export default function Store(props) {
     isLoggedIn: false,
     auth: { token: null },
     authModal: false,
-    user: { name: '', displayEmail: '', id: null },
+    user: { name: '', displayEmail: '', id: null, friends: [] },
     messages: {},
     messageNotification: { sender: null, content: null },
     currentThread: null,

@@ -35,7 +35,7 @@ router.get('/friendrequests', auth, async (req, res) => {
   API.friendship
     .findPending(userId)
     .then((friendRequests) => res.send(friendRequests))
-    .catch((err) => {
+    .catch(() => {
       return res
         .status(500)
         .send({ err: 'Database is down, we are working to fix this' });
@@ -52,10 +52,11 @@ router.post('/accept-fr', auth, async (req, res) => {
         API.friendship
           .accept(id)
           .then(async () => {
-            const remainingFriendRequests = await API.friendship.findPending(
-              userId
-            );
-            res.status(201).send(remainingFriendRequests);
+            const friendRequests = await API.friendship.findPending(userId);
+            const user = await API.user.withFriends(userId);
+            return res
+              .status(201)
+              .send({ friendRequests, friendList: user.friends });
           })
           .catch(() => res.sendStatus(500));
       }
@@ -91,7 +92,7 @@ router.get('/friendships', auth, async ({ tokenUser: { userId } }, res) => {
 
 router.get('/friendlist', auth, async (req, res) => {
   const { userId } = req.tokenUser;
-  const foundUser = await API.user.getFriendList(userId);
+  const foundUser = await API.user.withFriends(userId);
   return res.send(foundUser.friends);
 });
 

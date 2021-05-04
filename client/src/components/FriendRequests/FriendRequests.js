@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 const FriendRequests = () => {
-  const [appState] = useContext(CTX);
+  const [appState, updateState] = useContext(CTX);
   const token = appState.auth.token;
   const [friendRequests, setFriendRequests] = useState([]);
   const classes = useStyles();
@@ -39,8 +39,8 @@ const FriendRequests = () => {
         { headers: { 'x-auth-token': token } }
       )
       .then(({ data }) => {
-        console.log('DATA:::', data);
-        setFriendRequests(data);
+        setFriendRequests(data.friendRequests);
+        updateState({ type: 'SET_FRIENDLIST', payload: data.friendList });
       })
       .catch((err) => console.log({ err }));
   };

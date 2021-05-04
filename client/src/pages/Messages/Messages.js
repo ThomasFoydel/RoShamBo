@@ -88,13 +88,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 const Messages = ({ props: { socketRef } }) => {
-  console.log('messages renderer');
   const socket = socketRef.current;
   const [appState, updateState] = useContext(CTX);
   const classes = useStyles();
   const { token } = appState.auth;
   const userId = appState.user.id;
-  const friends = appState.user.friends || [];
+  const friends = appState.user.friends;
   const currentThread = appState.currentThread;
 
   const handleSelectFriend = (id) => {

@@ -18,7 +18,7 @@ const API = {
         { $set: update },
         { new: true, useFindAndModify: false }
       ),
-    getFriendList: (id) => User.findById(id).populate('friends'),
+    withFriends: (id) => User.findById(id).populate('friends'),
     incExp: (id, exp) => User.findByIdAndUpdate(id, { $inc: { exp } }),
   },
   message: {
