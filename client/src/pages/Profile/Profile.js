@@ -77,6 +77,10 @@ const useStyles = makeStyles((theme) => ({
       background: theme.palette.primary.dark,
     },
   },
+  exp: {
+    padding: '.25rem .5rem',
+    borderRadius: '4px',
+  },
 }));
 const Profile = ({
   props: {
@@ -90,6 +94,7 @@ const Profile = ({
   const isCurrentUser = id === appState.user.id;
   const { isLoggedIn } = appState;
   const [user, setUser] = useState({});
+  const [rank, setRank] = useState(null);
   const [friendshipExists, setFriendshipExists] = useState(true);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
@@ -108,6 +113,7 @@ const Profile = ({
             setUser(user);
             setFriendshipExists(friendshipExists);
             setLoading(false);
+            setRank(getRank(user.exp));
           }, 1200);
         }
       })
@@ -167,6 +173,29 @@ const Profile = ({
   const closeMessageNotification = () =>
     setMessageNotification(initMessageNotification);
 
+  const expStyles = {
+    white: {
+      backgroundColor: 'white',
+      color: 'black',
+    },
+    blue: {
+      backgroundColor: 'blue',
+      color: 'white',
+    },
+    purple: {
+      backgroundColor: 'blue',
+      color: 'white',
+    },
+    brown: {
+      backgroundColor: 'brown',
+      color: 'white',
+    },
+    black: {
+      backgroundColor: 'black',
+      color: 'white',
+    },
+  };
+
   return (
     <div className={classes.profilePage}>
       {backgroundPosition && (
@@ -200,6 +229,11 @@ const Profile = ({
           {user.bio && (
             <Typography className={classes.email}>{user.bio}</Typography>
           )}
+          {rank && (
+            <Typography className={classes.exp} style={expStyles[rank]}>
+              exp: {user.exp}
+            </Typography>
+          )}
           {!isCurrentUser && !friendshipExists && isLoggedIn && (
             <Button className={classes.requestButton} onClick={requestFriend}>
               request friendship
@@ -225,6 +259,23 @@ const Profile = ({
       />
     </div>
   );
+};
+
+const getRank = (exp) => {
+  switch (true) {
+    case exp < 15:
+      return 'white';
+    case exp < 100:
+      return 'blue';
+    case exp < 500:
+      return 'purple';
+    case exp < 1000:
+      return 'brown';
+    case exp < 5000:
+      return 'black';
+    default:
+      return 'white';
+  }
 };
 
 export default Profile;
