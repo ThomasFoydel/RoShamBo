@@ -19,8 +19,8 @@ import Landing from 'pages/Landing/Landing';
 import Home from 'pages/Home/Home';
 import EditProfile from 'pages/EditProfile/EditProfile';
 import Messages from 'pages/Messages/Messages';
+import HowTo from 'pages/HowTo/HowTo';
 import { makeStyles } from '@material-ui/core';
-
 const useStyles = makeStyles(() => ({
   app: {
     minHeight: '100vh',
@@ -183,6 +183,7 @@ const App = () => {
                 )
               }
             />
+            <Route exact path='/howto' component={HowTo} />
             <Route
               path='/forum'
               exact
