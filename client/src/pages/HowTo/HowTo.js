@@ -1,7 +1,8 @@
 import React from 'react';
 import hands from 'imgs/instructions.gif';
 import { makeStyles } from '@material-ui/core';
-const useStyles = makeStyles(() => ({
+
+const useStyles = makeStyles((theme) => ({
   container: {
     marginTop: '6em',
     padding: '0 3em',

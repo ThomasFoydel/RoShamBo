@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
+import { Redirect } from 'react-router-dom';
 import { Modal, makeStyles, Snackbar } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { CTX } from 'context/Store';
@@ -41,6 +42,7 @@ const Auth = () => {
   const [authPage, setAuthPage] = useState('login');
   const [formState, setFormState] = useState(initialState);
   const [err, setErr] = useState(null);
+  const [redirect, setRedirect] = useState(false);
 
   const closeModal = () => updateState({ type: 'AUTH_MODAL', payload: false });
 
@@ -49,6 +51,7 @@ const Auth = () => {
       .post(`/api/auth/${type}`, formState[type])
       .then(({ data }) => {
         const { token, user } = data;
+        if (type === 'register') setRedirect(true);
         updateState({ type: 'LOGIN', payload: { token, user } });
         setFormState(initialState);
       })
@@ -60,7 +63,6 @@ const Auth = () => {
         }) => err && setErr(err)
       );
   };
-
   const ModalBody = (
     <div className={classes.modalBody}>
       {authPage === 'register' ? (
@@ -90,6 +92,7 @@ const Auth = () => {
   return (
     <Modal className={classes.modal} open={authModal} onClose={closeModal}>
       <>
+        {redirect && <Redirect to='/howto' />}
         {ModalBody}
         <Snackbar
           open={err}
