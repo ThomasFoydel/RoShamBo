@@ -1,5 +1,6 @@
 import React from 'react';
 import hands from 'imgs/instructions.gif';
+import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
@@ -14,6 +15,12 @@ const useStyles = makeStyles((theme) => ({
     minWidth: '260px',
     objectFit: 'contain',
     padding: '0 3em',
+  },
+  link: {
+    color: theme.palette.primary.main,
+    '&:hover': {
+      color: theme.palette.primary.light,
+    },
   },
 }));
 const HowTo = () => {
@@ -32,6 +39,32 @@ const HowTo = () => {
       <p>Your opponent will reappear for the outcome</p>
       <p>For best results, use good lighting</p>
       <p>and a background that contrasts with your skin</p>
+      <br />
+      <p>
+        Find new friends in the{' '}
+        <Link to='/forum' className={classes.link}>
+          forum
+        </Link>
+      </p>
+      <p>
+        Start battles on the{' '}
+        <Link to='/battle' className={classes.link}>
+          battle page
+        </Link>
+      </p>
+      <p>
+        Manage your{' '}
+        <Link to='/editprofile' className={classes.link}>
+          profile info
+        </Link>
+      </p>
+      <p>
+        Or{' '}
+        <Link to='/messages' className={classes.link}>
+          message
+        </Link>{' '}
+        your friends
+      </p>
     </center>
   );
 };
