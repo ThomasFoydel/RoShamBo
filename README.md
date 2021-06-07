@@ -12,7 +12,7 @@
 <hr/>
 
 <h2>Description</h2>
-<p align="center">
+<p>
 Built in MERN stack with tensor-flow, WebRTC, socketIO, and Material UI. Users can battle a computer, friends, or random users in a rock paper scissors fight to the death, using their their webcams and hand gestures to select weapons. The Fingerpose package, built on top of Tensorflow's <a href="https://github.com/tensorflow/tfjs-models/tree/master/handpose">Handpose model</a>, is used to determine the user's hand gesture based on snapshots from their webcam stream.  
 While researching tensor-flow I came across a crazy cool <a href="https://www.youtube.com/watch?v=WajtPtLAg-o">video</a> / <a href="https://github.com/nicknochnack/CustomGestureRecognition">demo</a> by Nicholas Renotte which detects hand poses and draws a canvas animation over the user's webcam.</p>
 <p>Inspired by Renotte's project, and using the same technique to detect gestures, I built some of my own handposes, and a social media/video chat/websocket game based around using this as the player's controller.</p>
