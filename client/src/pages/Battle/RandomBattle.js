@@ -76,11 +76,13 @@ const useStyles = makeStyles((theme) => ({
     width: '70%',
     minHeight: '0%',
     minWidth: '70%',
+    opacity: '0.6',
   },
   myChoiceIcon: {
     width: '70%',
     transform: 'scaleX(-1)',
     minHeight: '0%',
+    opacity: '0.6',
   },
   healthbarContainer: {
     ...theme.healthbarContainer,
@@ -569,7 +571,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
                     className={classes.iconLayer}
                     style={{
                       background: randoChoice
-                        ? 'rgba(255,255,255,0.2)'
+                        ? 'rgba(255,255,255,0.125)'
                         : 'rgba(255,255,255,0)',
                     }}
                   >
@@ -680,7 +682,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
                     className={classes.iconLayer}
                     style={{
                       background: myChoice
-                        ? 'rgba(255,255,255,0.2)'
+                        ? 'rgba(255,255,255,0.125)'
                         : 'rgba(255,255,255,0)',
                     }}
                   >

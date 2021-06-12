@@ -76,11 +76,13 @@ const useStyles = makeStyles((theme) => ({
     width: '70%',
     minHeight: '0%',
     minWidth: '70%',
+    opacity: '0.6',
   },
   myChoiceIcon: {
     width: '70%',
     transform: 'scaleX(-1)',
     minHeight: '0%',
+    opacity: '0.6',
   },
 
   healthbarContainer: {
@@ -545,7 +547,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                     className={classes.iconLayer}
                     style={{
                       background: friendChoice
-                        ? 'rgba(255,255,255,0.2)'
+                        ? 'rgba(255,255,255,0.125)'
                         : 'rgba(255,255,255,0)',
                     }}
                   >
@@ -643,13 +645,13 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                     className={classes.iconLayer}
                     style={{
                       background: myChoice
-                        ? 'rgba(255,255,255,0.2)'
+                        ? 'rgba(255,255,255,0.125)'
                         : 'rgba(255,255,255,0)',
                     }}
                   >
                     <img
                       src={weaponImgs[myChoice || 'blank']}
-                      alt='friends choice'
+                      alt='my weapon choice'
                       className={classes.myChoiceIcon}
                     />
                   </div>
