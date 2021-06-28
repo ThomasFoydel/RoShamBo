@@ -369,13 +369,13 @@ export default function Header() {
               onClick={() => {
                 setValue(5);
                 setOpenDrawer(false);
+                  openModal();
               }}
               divider
               button
               className={classes.drawerAuthLink}
             >
-              <ListItemText
-                onClick={openModal}
+                <ListItemText
                 className={classes.drawerItem}
                 disableTypography
               >
@@ -394,7 +394,6 @@ export default function Header() {
       </IconButton>
     </>
   );
-
   return (
     <>
       <ElevationScroll>
