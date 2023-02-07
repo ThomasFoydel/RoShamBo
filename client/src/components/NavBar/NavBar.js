@@ -1,27 +1,27 @@
-import React, { useState, useEffect, useContext } from 'react'
 import {
-  AppBar,
-  Toolbar,
-  Tabs,
   Tab,
-  Button,
-  Menu,
-  MenuItem,
-  useMediaQuery,
-  useTheme,
-  SwipeableDrawer,
-  IconButton,
+  Tabs,
   List,
+  Menu,
+  AppBar,
+  Button,
+  Toolbar,
+  MenuItem,
   ListItem,
+  useTheme,
+  IconButton,
   ListItemText,
+  useMediaQuery,
+  SwipeableDrawer,
 } from '@mui/material'
-import useScrollTrigger from '@mui/material/useScrollTrigger'
-import { Menu as MenuIcon } from '@mui/icons-material'
+import styled from '@emotion/styled'
 import { Link } from 'react-router-dom'
+import { Menu as MenuIcon } from '@mui/icons-material'
+import useScrollTrigger from '@mui/material/useScrollTrigger'
+import React, { useState, useEffect, useContext } from 'react'
+import useClasses from 'customHooks/useClasses'
 import logo from 'imgs/roshambo.svg'
 import { CTX } from 'context/Store'
-import useClasses from 'customHooks/useClasses'
-import styled from '@emotion/styled'
 
 function ElevationScroll({ children }) {
   const trigger = useScrollTrigger({
@@ -191,21 +191,18 @@ const menuOptions = [
 ]
 
 export default function Header() {
-  const classes = useClasses(styles)
-  const theme = useTheme()
-  const [appState, updateState] = useContext(CTX)
-  const {
-    isLoggedIn,
-    user: { id },
-  } = appState
-
-  const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-  const matches = useMediaQuery(theme.breakpoints.down('md'))
-  const [openDrawer, setOpenDrawer] = useState(false)
-  const [currentActiveIndex, setCurrentTabIndex] = useState(0)
+  const [{ isLoggedIn, user }, updateState] = useContext(CTX)
+  const { id } = user
   const [anchorEl, setAnchorEl] = useState(null)
   const [openMenu, setOpenMenu] = useState(false)
+  const [openDrawer, setOpenDrawer] = useState(false)
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const [currentActiveIndex, setCurrentTabIndex] = useState(0)
+
+  const theme = useTheme()
+  const classes = useClasses(styles)
+  const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  const matches = useMediaQuery(theme.breakpoints.down('md'))
 
   const routes = [
     { name: 'Home', link: '/', activeIndex: 0 },
@@ -223,13 +220,9 @@ export default function Header() {
     { name: 'Forum', link: '/forum', activeIndex: isLoggedIn ? 4 : 1 },
   ]
 
-  const handleChange = (e, newValue) => {
-    setCurrentTabIndex(newValue)
-  }
+  const handleChange = (_, newValue) => setCurrentTabIndex(newValue)
 
-  const openModal = () => {
-    updateState({ type: 'AUTH_MODAL', payload: true })
-  }
+  const openModal = () => updateState({ type: 'AUTH_MODAL', payload: true })
 
   useEffect(() => {
     const routeOptions = [...menuOptions, ...routes]
@@ -246,8 +239,8 @@ export default function Header() {
   }, [currentActiveIndex, selectedIndex, routes])
 
   const handleClick = (e) => {
-    setAnchorEl(e.currentTarget)
     setOpenMenu(true)
+    setAnchorEl(e.currentTarget)
   }
 
   const handleClose = () => {
@@ -261,23 +254,25 @@ export default function Header() {
     setSelectedIndex(i)
   }
 
+  const logout = () => updateState({ type: 'LOGOUT' })
+
   const tabs = (
     <>
       <Tabs
-        className={classes.tabContainer}
+        indicatorColor="primary"
         value={currentActiveIndex}
         onChange={handleChange}
-        indicatorColor="primary"
+        className={classes.tabContainer}
       >
         {routes.map((route, index) =>
           route.auth && !isLoggedIn ? null : (
             <Tab
-              tabIndex={route.activeIndex}
-              key={`${route}${index}`}
-              className={classes.tab}
-              component={Link}
               to={route.link}
+              component={Link}
               label={route.name}
+              className={classes.tab}
+              key={`${route}${index}`}
+              tabIndex={route.activeIndex}
               aria-owns={route.ariaOwns && route.ariaOwns(anchorEl)}
               aria-haspopup={route.ariaPopup && route.ariaPopup(anchorEl)}
               onMouseOver={(e) => route.mouseOver && route.mouseOver(e, handleClick)}
@@ -287,13 +282,11 @@ export default function Header() {
       </Tabs>
       {isLoggedIn && (
         <Button
-          variant="contained"
           color="primary"
+          onClick={logout}
+          variant="contained"
           classes={{ root: classes.button }}
           className={`${classes.button} ${classes.logout}`}
-          onClick={() => {
-            updateState({ type: 'LOGOUT' })
-          }}
         >
           Log out
         </Button>
@@ -304,27 +297,27 @@ export default function Header() {
         </NavButton>
       )}
       <Menu
+        keepMounted
+        elevation={0}
         id="simple-menu"
         anchorEl={anchorEl}
-        open={Boolean(openMenu)}
         onClose={handleClose}
+        style={{ zIndex: 1302 }}
+        open={Boolean(openMenu)}
         classes={{ paper: classes.menu }}
         MenuListProps={{ onMouseLeave: handleClose }}
-        elevation={0}
-        style={{ zIndex: 1302 }}
-        keepMounted
       >
         {menuOptions.map((option, i) => (
           <MenuItem
-            key={option.link}
             component={Link}
             to={option.link}
-            classes={{ root: classes.menuItem }}
+            key={option.link}
             onClick={(e) => {
-              handleMenuItemClick(e, i)
-              setCurrentTabIndex(1)
               handleClose()
+              setCurrentTabIndex(1)
+              handleMenuItemClick(e, i)
             }}
+            classes={{ root: classes.menuItem }}
             selected={i === selectedIndex && currentActiveIndex === 1}
           >
             {option.name}
@@ -337,26 +330,26 @@ export default function Header() {
   const drawer = (
     <>
       <SwipeableDrawer
-        disableBackdropTransition={!iOS}
         disableDiscovery={iOS}
         open={openDrawer}
-        onClose={() => setOpenDrawer(false)}
+        disableBackdropTransition={!iOS}
         onOpen={() => setOpenDrawer(true)}
         classes={{ paper: classes.drawer }}
+        onClose={() => setOpenDrawer(false)}
       >
         <ToolBarMargin />
         <List disablePadding>
           {routes.map((route) =>
             route.auth && !isLoggedIn ? null : (
               <ListItem
+                divider
+                to={route.link}
+                component={Link}
                 key={`${route}${route.activeIndex}`}
                 onClick={() => {
                   setOpenDrawer(false)
                   setCurrentTabIndex(route.activeIndex)
                 }}
-                divider
-                component={Link}
-                to={route.link}
                 className={
                   currentActiveIndex === route.activeIndex ? classes.drawerItemSelected : ''
                 }
@@ -368,30 +361,19 @@ export default function Header() {
             )
           )}
           {isLoggedIn ? (
-            <ListItem
-              divider
-              classes={{
-                root: classes.drawerAuthLink,
-              }}
-            >
-              <ListItemText
-                onClick={() => {
-                  updateState({ type: 'LOGOUT' })
-                }}
-                className={classes.drawerItem}
-                disableTypography
-              >
+            <ListItem divider classes={{ root: classes.drawerAuthLink }}>
+              <ListItemText disableTypography className={classes.drawerItem} onClick={logout}>
                 Log out
               </ListItemText>
             </ListItem>
           ) : (
             <ListItem
-              onClick={() => {
-                setCurrentTabIndex(5)
-                setOpenDrawer(false)
-                openModal()
-              }}
               divider
+              onClick={() => {
+                openModal()
+                setOpenDrawer(false)
+                setCurrentTabIndex(5)
+              }}
               className={classes.drawerAuthLink}
             >
               <ListItemText className={classes.drawerItem} disableTypography>
@@ -402,25 +384,26 @@ export default function Header() {
         </List>
       </SwipeableDrawer>
       <IconButton
+        disableRipple
         className={classes.drawerIconContainer}
         onClick={() => setOpenDrawer(!openDrawer)}
-        disableRipple
       >
         <MenuIcon className={classes.drawerIcon} />
       </IconButton>
     </>
   )
+
   return (
     <>
       <ElevationScroll>
         <AppBar className={classes.appbar}>
           <Toolbar disableGutters>
             <Button
-              disableRipple
-              onClick={() => setCurrentTabIndex(0)}
-              component={Link}
               to="/"
+              disableRipple
+              component={Link}
               className={classes.logoContainer}
+              onClick={() => setCurrentTabIndex(0)}
             >
               <img className={classes.logo} src={logo} alt="three hands logo" />
             </Button>
