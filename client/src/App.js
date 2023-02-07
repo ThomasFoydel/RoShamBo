@@ -78,7 +78,7 @@ const App = () => {
       <ThemeProvider theme={theme}>
         <Router>
           <div
-            styles={{
+            style={{
               color: 'white',
               minHeight: '100vh',
               background: '#111',
