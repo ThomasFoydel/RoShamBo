@@ -140,20 +140,29 @@ const styles = (theme) => ({
     width: '200px',
     backgroundColor: theme.palette.common.blue,
   },
-  drawerItem: {
+
+  drawerItemText: {
     ...theme.typography.tab,
     color: 'white',
     paddingLeft: '0',
     textAlign: 'center',
     opacity: 0.7,
+  },
+  drawerItem: {
     '&:hover': {
-      opacity: 1,
+      '.MuiListItemText-root': {
+        opacity: 1,
+      },
     },
   },
   drawerAuthLink: {
+    cursor: 'pointer',
     backgroundColor: theme.palette.secondary.main,
     '&:hover': {
       backgroundColor: theme.palette.secondary.dark,
+      '.MuiListItemText-root': {
+        opacity: 1,
+      },
     },
   },
   drawerItemSelected: {
@@ -355,10 +364,12 @@ export default function Header() {
                   setCurrentTabIndex(route.activeIndex)
                 }}
                 className={
-                  currentActiveIndex === route.activeIndex ? classes.drawerItemSelected : ''
+                  currentActiveIndex === route.activeIndex
+                    ? classes.drawerItemSelected
+                    : classes.drawerItem
                 }
               >
-                <ListItemText className={classes.drawerItem} disableTypography>
+                <ListItemText className={classes.drawerItemText} disableTypography>
                   {route.name}
                 </ListItemText>
               </ListItem>
@@ -366,7 +377,7 @@ export default function Header() {
           )}
           {isLoggedIn ? (
             <ListItem divider classes={{ root: classes.drawerAuthLink }}>
-              <ListItemText disableTypography className={classes.drawerItem} onClick={logout}>
+              <ListItemText disableTypography className={classes.drawerItemText} onClick={logout}>
                 Log out
               </ListItemText>
             </ListItem>
@@ -380,7 +391,7 @@ export default function Header() {
               }}
               className={classes.drawerAuthLink}
             >
-              <ListItemText className={classes.drawerItem} disableTypography>
+              <ListItemText className={classes.drawerItemText} disableTypography>
                 Sign In
               </ListItemText>
             </ListItem>
