@@ -1,64 +1,56 @@
-import React, { useState, useEffect, useContext, useRef } from 'react'
-import io from 'socket.io-client'
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import axios from 'axios'
-// import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles'
-import { StyledEngineProvider } from '@mui/material/styles'
+import io from 'socket.io-client'
 import { ThemeProvider } from '@emotion/react'
-import theme from 'theme/Theme'
-import NavBar from 'components/NavBar/NavBar'
-import { CTX } from 'context/Store'
-import './global.css'
-import Auth from 'components/Auth/Auth'
-import Profile from 'pages/Profile/Profile'
-import Battle from 'pages/Battle/Battle'
+import { StyledEngineProvider } from '@mui/material/styles'
+import React, { useState, useEffect, useContext, useRef } from 'react'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import ComputerBattle from 'pages/Battle/ComputerBattle'
+import EditProfile from 'pages/EditProfile/EditProfile'
 import BattleFriends from 'pages/Battle/BattleFriends'
 import FriendBattle from 'pages/Battle/FriendBattle'
 import RandomBattle from 'pages/Battle/RandomBattle'
-import Forum from 'pages/Forum/Forum'
-import Landing from 'pages/Landing/Landing'
-import Home from 'pages/Home/Home'
-import EditProfile from 'pages/EditProfile/EditProfile'
 import Messages from 'pages/Messages/Messages'
+import NavBar from 'components/NavBar/NavBar'
+import Landing from 'pages/Landing/Landing'
+import Profile from 'pages/Profile/Profile'
+import Battle from 'pages/Battle/Battle'
+import Auth from 'components/Auth/Auth'
+import Forum from 'pages/Forum/Forum'
 import HowTo from 'pages/HowTo/HowTo'
+import { CTX } from 'context/Store'
 import { isDev } from 'utils/utils'
+import Home from 'pages/Home/Home'
+import theme from 'theme/Theme'
+import './global.css'
 
 const App = () => {
-  const [appState, updateState] = useContext(CTX)
-  const [socketLoaded, setSocketLoaded] = useState(false)
+  const [{ isLoggedIn, auth }, updateState] = useContext(CTX)
+  const { token } = auth
 
-  let {
-    isLoggedIn,
-    auth: { token },
-  } = appState
-  let socketRef = useRef(null)
+  const [socketLoaded, setSocketLoaded] = useState(false)
+  const socketRef = useRef(null)
 
   useEffect(() => {
     let subscribed = true
-    let rsbToken = localStorage.getItem('roshambo-token')
-    let checkAuth = async () => {
+    const rsbToken = localStorage.getItem('roshambo-token')
+    const checkAuth = async () => {
       axios
-        .get('/api/auth/', {
-          headers: { 'x-auth-token': rsbToken },
-        })
+        .get('/api/auth/', { headers: { 'x-auth-token': rsbToken } })
         .then(({ data }) => {
           if (subscribed) {
             if (data.err && !isDev()) return updateState({ type: 'LOGOUT' })
             if (data) {
-              updateState({
-                type: 'LOGIN',
-                payload: { user: data.user, token: data.token },
-              })
+              updateState({ type: 'LOGIN', payload: { user: data.user, token: data.token } })
             }
           }
         })
-        // .catch(() => !isDev() && updateState({ type: 'LOGOUT' }))
+        .catch(() => !isDev() && updateState({ type: 'LOGOUT' }))
     }
 
-    let noToken = !rsbToken || rsbToken === 'undefined'
+    const noToken = !rsbToken || rsbToken === 'undefined'
 
-    noToken ? updateState({ type: 'LOGOUT' }) : checkAuth()
+    if (noToken) updateState({ type: 'LOGOUT' })
+    else checkAuth()
 
     return () => {
       if (socketRef.current) socketRef.current.emit('disconnect-room', socketRef.current.id)
@@ -67,20 +59,14 @@ const App = () => {
   }, [updateState])
 
   useEffect(() => {
-    let subscribed = true
     if (token) {
-      const urlBase = !isDev() ? '' : 'http://localhost:8000/'
-      const ENDPOINT = urlBase + `?token=${token}`
-
-      socketRef.current = io(ENDPOINT, {
-        transports: ['websocket', 'polling', 'flashsocket'],
-      })
-
+      const urlBase = isDev() ? 'http://localhost:8000/' : ''
+      const ENDPOINT = `${urlBase}?token=${token}`
+      socketRef.current = io(ENDPOINT, { transports: ['websocket', 'polling', 'flashsocket'] })
       setSocketLoaded(true)
     }
 
     return () => {
-      subscribed = false
       if (socketRef.current) {
         socketRef.current.removeAllListeners()
         socketRef.current.off()
@@ -88,78 +74,71 @@ const App = () => {
     }
   }, [token, updateState])
 
+  const loggedAndLoaded = token && isLoggedIn && socketLoaded
+  const socketOrNotLoggedIn = !isLoggedIn || socketLoaded
+
   return (
     <StyledEngineProvider injectFirst>
-      {/* <MuiThemeProvider theme={theme}> */}
       <ThemeProvider theme={theme}>
         <Router>
           <div
             styles={{
-              fontFamily: 'OpenDyslexic',
-              background: '#111',
-              minHeight: '100vh',
               color: 'white',
+              minHeight: '100vh',
+              background: '#111',
+              fontFamily: 'OpenDyslexic',
             }}
           >
             <NavBar />
             <Routes>
               <Route
+                exact
                 path="/"
-                exact
-                element={isLoggedIn && socketLoaded ? <Home props={{ socketRef }} /> : <Landing />}
+                element={loggedAndLoaded ? <Home props={{ socketRef }} /> : <Landing />}
               />
               <Route
+                exact
                 path="/profile/:id"
-                exact
-                element={!isLoggedIn || socketLoaded ? <Profile props={{ socketRef }} /> : <></>}
+                element={socketOrNotLoggedIn ? <Profile props={{ socketRef }} /> : <></>}
               />
-              <Route path="/battle" exact element={isLoggedIn ? Battle : Landing} />
-              <Route path="/battle/computer" exact element={ComputerBattle} />
+              <Route exact path="/battle" element={isLoggedIn ? Battle : Landing} />
+              <Route exact path="/battle/computer" element={ComputerBattle} />
               <Route
+                exact
                 path="/editprofile"
+                element={loggedAndLoaded ? <EditProfile props={{ socketRef }} /> : <Landing />}
+              />
+              <Route
                 exact
-                element={
-                  isLoggedIn && socketLoaded ? <EditProfile props={{ socketRef }} /> : <Landing />
-                }
-              />
-              <Route
                 path="/messages"
-                element={
-                  isLoggedIn && socketLoaded ? <Messages props={{ socketRef }} /> : <Landing />
-                }
+                element={loggedAndLoaded ? <Messages props={{ socketRef }} /> : <Landing />}
               />
               <Route
+                exact
                 path="/battle/random"
-                element={
-                  isLoggedIn && socketLoaded ? <RandomBattle props={{ socketRef }} /> : <Landing />
-                }
+                element={loggedAndLoaded ? <RandomBattle props={{ socketRef }} /> : <Landing />}
               />
               <Route
+                exact
                 path="/battle/friends"
-                element={isLoggedIn ? <BattleFriends props={{ socketRef }} /> : <Landing />}
+                element={loggedAndLoaded ? <BattleFriends props={{ socketRef }} /> : <Landing />}
               />
               <Route
+                exact
                 path="/friendbattle/:friendshipId"
-                element={
-                  socketLoaded && token && isLoggedIn ? (
-                    <FriendBattle props={{ socketRef }} />
-                  ) : (
-                    <Landing />
-                  )
-                }
+                element={loggedAndLoaded ? <FriendBattle props={{ socketRef }} /> : <Landing />}
               />
               <Route exact path="/howto" element={HowTo} />
               <Route
-                path="/forum"
                 exact
-                element={socketLoaded || !isLoggedIn ? <Forum props={{ socketRef }} /> : null}
+                path="/forum"
+                element={socketOrNotLoggedIn ? <Forum props={{ socketRef }} /> : <></>}
               />
             </Routes>
             <Auth />
           </div>
         </Router>
       </ThemeProvider>
-      {/* </MuiThemeProvider> */}
     </StyledEngineProvider>
   )
 }
