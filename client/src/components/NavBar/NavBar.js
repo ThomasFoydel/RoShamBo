@@ -71,6 +71,10 @@ const styles = (theme) => ({
   },
   tabContainer: {
     marginLeft: 'auto',
+    '.Mui-selected': {
+      color: 'white',
+      opacity: 1,
+    },
   },
   tab: {
     ...theme.typography.tab,
