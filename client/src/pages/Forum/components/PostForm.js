@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { Grid, Button, Input } from '@mui/material';
-import useClasses from 'customHooks/useClasses';
+import axios from 'axios'
+import React, { useState } from 'react'
+import { Stack, Button, Input } from '@mui/material'
+import useClasses from 'customHooks/useClasses'
+
 const styles = (theme) => ({
   form: {
     ...theme.centerHorizontal,
     background: 'linear-gradient(to bottom right, #bbb, #eee)',
     width: '80%',
-    maxWidth: '400px',
     padding: '2em',
+    maxWidth: '400px',
     borderRadius: '4px',
   },
   input: {
@@ -18,72 +19,68 @@ const styles = (theme) => ({
     background: 'white',
   },
   button: {
-    padding: '1em',
     color: 'white',
+    width: '12rem',
+    padding: '1em',
+    marginTop: '1rem',
     backgroundColor: theme.palette.primary.main,
     '&:hover': {
       backgroundColor: theme.palette.primary.dark,
     },
   },
-});
+})
+
+const initialState = { title: '', content: '' }
 
 const PostForm = ({ props: { setPosts, token } }) => {
-  const classes = useClasses(styles);
+  const classes = useClasses(styles)
+  const [form, setForm] = useState(initialState)
 
-  const [form, setForm] = useState({
-    title: '',
-    content: '',
-  });
-  const makePost = () => {
+  const makePost = (e) => {
+    e.preventDefault()
     if (form.content && form.title) {
-      setForm({ title: '', content: '' });
+      setForm(initialState)
       axios
         .post('/api/forum/post', form, { headers: { 'x-auth-token': token } })
         .then(({ data }) => setPosts((posts) => [data, ...posts]))
-        .catch((err) => console.log('new post error ', err));
+        .catch((err) => console.error('new post error ', err))
     }
-  };
-  const handleChange = ({ target: { id, value } }) => {
-    setForm((f) => ({ ...f, [id]: value }));
-  };
+  }
 
-  const handleKeyPress = ({ charCode }) => charCode === 13 && makePost();
+  const handleChange = ({ target: { id, value } }) => {
+    setForm((f) => ({ ...f, [id]: value }))
+  }
 
   return (
-    <Grid
-      container
-      alignItems='center'
-      justify='center'
-      direction='column'
-      className={classes.form}
-    >
-      <Grid item>
+    <form onSubmit={makePost}>
+      <Stack
+        direction="column"
+        alignItems="center"
+        justifyContent="center"
+        className={classes.form}
+      >
         <Input
-          className={classes.input}
-          id='title'
-          onChange={handleChange}
-          onKeyPress={handleKeyPress}
-          placeholder='title'
+          id="title"
           value={form.title}
-        />
-      </Grid>
-      <Grid item>
-        <Input
-          className={classes.input}
-          id='content'
+          placeholder="title"
           onChange={handleChange}
-          onKeyPress={handleKeyPress}
-          placeholder='content'
-          value={form.content}
+          className={classes.input}
         />
-      </Grid>
-      <Grid item>
-        <Button className={classes.button} onClick={makePost}>
+
+        <Input
+          id="content"
+          value={form.content}
+          placeholder="content"
+          onChange={handleChange}
+          className={classes.input}
+        />
+
+        <Button className={classes.button} type="submit">
           submit
         </Button>
-      </Grid>
-    </Grid>
-  );
-};
+      </Stack>
+    </form>
+  )
+}
 
-export default PostForm;
+export default PostForm
