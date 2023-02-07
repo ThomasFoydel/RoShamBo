@@ -36,14 +36,11 @@ function ElevationScroll({ children }) {
 const ToolBarMargin = styled('div')(({ theme }) => ({
   ...theme.mixins.toolbar,
   marginBottom: '3em',
+  [theme.breakpoints.down('lg')]: {
+    marginBottom: '1.5em',
+  },
   [theme.breakpoints.down('md')]: {
-    marginBottom: '2em',
-  },
-  [theme.breakpoints.down('xs')]: {
-    marginBottom: '1.25em',
-  },
-  [theme.breakpoints.down('xs')]: {
-    marginBottom: '.5em',
+    marginBottom: '0.5em',
   },
 }))
 
@@ -51,24 +48,49 @@ const NavButton = styled(Button)(({ theme }) => ({
   ...theme.typography.loginLink,
   fontFamily: 'OpenDyslexic',
   borderRadius: '50px',
-  marginLeft: '50px',
-  marginRight: '25px',
+  whiteSpace: 'nowrap',
+  margin: '10px',
   height: '45px',
 }))
 
-const styles = (theme) => ({
-  logo: {
-    height: '8em',
-    [theme.breakpoints.down('md')]: {
-      height: '7em',
-    },
-    [theme.breakpoints.down('xs')]: {
-      height: '5.5em',
-    },
-    [theme.breakpoints.down('xs')]: {
-      height: '4.5em',
+const NavBarTab = styled(Tab)(({ theme }) => ({
+  ...theme.typography.tab,
+  color: 'white ',
+  minWidth: 10,
+  opacity: 0.8,
+}))
+
+const Logo = styled('img')(({ theme }) => ({
+  height: '7rem',
+  [theme.breakpoints.down('lg')]: {
+    height: '5.5rem',
+  },
+  [theme.breakpoints.down('md')]: {
+    height: '4.5rem',
+  },
+  [theme.breakpoints.down('sm')]: {
+    height: '4.1rem',
+  },
+}))
+
+const BattleMenu = styled(Menu)(({ theme }) => ({
+  '.MuiPaper-root.MuiMenu-paper': {
+    backgroundColor: theme.palette.common.blue,
+    borderColor: theme.palette.primary.dark,
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderTopWidth: '0px',
+    color: 'white',
+    top: '111px !important',
+    borderRadius: 0,
+    [theme.breakpoints.down('xl')]: {},
+    [theme.breakpoints.down('lg')]: {
+      top: '88px !important',
     },
   },
+}))
+
+const styles = (theme) => ({
   tabContainer: {
     marginLeft: 'auto',
     '.Mui-selected': {
@@ -76,18 +98,9 @@ const styles = (theme) => ({
       opacity: 1,
     },
   },
-  tab: {
-    ...theme.typography.tab,
-    minWidth: 10,
-    marginLeft: '25px',
-    color: 'white ',
-    opacity: 0.8,
-  },
   button: {
     ...theme.typography.loginLink,
     borderRadius: '50px',
-    marginLeft: '50px',
-    marginRight: '25px',
     height: '45px',
   },
   authBtn: {
@@ -100,14 +113,6 @@ const styles = (theme) => ({
     padding: 0,
     '&:hover': {
       backgroundColor: 'transparent',
-    },
-  },
-  menu: {
-    backgroundColor: theme.palette.common.blue,
-    color: 'white',
-    borderRadius: 0,
-    '&:Mui-selected': {
-      color: 'red !important',
     },
   },
   menuItem: {
@@ -266,11 +271,10 @@ export default function Header() {
       >
         {routes.map((route, index) =>
           route.auth && !isLoggedIn ? null : (
-            <Tab
+            <NavBarTab
               to={route.link}
               component={Link}
               label={route.name}
-              className={classes.tab}
               key={`${route}${index}`}
               tabIndex={route.activeIndex}
               aria-owns={route.ariaOwns && route.ariaOwns(anchorEl)}
@@ -281,7 +285,7 @@ export default function Header() {
         )}
       </Tabs>
       {isLoggedIn && (
-        <Button
+        <NavButton
           color="primary"
           onClick={logout}
           variant="contained"
@@ -289,14 +293,14 @@ export default function Header() {
           className={`${classes.button} ${classes.logout}`}
         >
           Log out
-        </Button>
+        </NavButton>
       )}
       {!isLoggedIn && (
         <NavButton color="secondary" variant="contained" onClick={openModal}>
           Sign In
         </NavButton>
       )}
-      <Menu
+      <BattleMenu
         keepMounted
         elevation={0}
         id="simple-menu"
@@ -323,7 +327,7 @@ export default function Header() {
             {option.name}
           </MenuItem>
         ))}
-      </Menu>
+      </BattleMenu>
     </>
   )
 
@@ -405,7 +409,7 @@ export default function Header() {
               className={classes.logoContainer}
               onClick={() => setCurrentTabIndex(0)}
             >
-              <img className={classes.logo} src={logo} alt="three hands logo" />
+              <Logo src={logo} alt="three hands logo" />
             </Button>
             {matches ? drawer : tabs}
           </Toolbar>

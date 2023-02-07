@@ -45,4 +45,5 @@ export default createTheme({
     marginLeft: '50%',
     transform: 'translateX(-50%)',
   },
+  
 })
