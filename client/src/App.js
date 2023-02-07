@@ -33,24 +33,20 @@ const App = () => {
   useEffect(() => {
     let subscribed = true
     const rsbToken = localStorage.getItem('roshambo-token')
-    const checkAuth = async () => {
-      axios
-        .get('/api/auth/', { headers: { 'x-auth-token': rsbToken } })
-        .then(({ data }) => {
-          if (subscribed) {
-            if (data.err && !isDev()) return updateState({ type: 'LOGOUT' })
-            if (data) {
-              updateState({ type: 'LOGIN', payload: { user: data.user, token: data.token } })
-            }
-          }
-        })
-        .catch(() => !isDev() && updateState({ type: 'LOGOUT' }))
-    }
-
     const noToken = !rsbToken || rsbToken === 'undefined'
+    if (noToken) return updateState({ type: 'LOGOUT' })
 
-    if (noToken) updateState({ type: 'LOGOUT' })
-    else checkAuth()
+    axios
+      .get('/api/auth/', { headers: { 'x-auth-token': rsbToken } })
+      .then(({ data }) => {
+        if (subscribed) {
+          if (data.err && !isDev()) return updateState({ type: 'LOGOUT' })
+          if (data) {
+            updateState({ type: 'LOGIN', payload: { user: data.user, token: data.token } })
+          }
+        }
+      })
+      .catch(() => !isDev() && updateState({ type: 'LOGOUT' }))
 
     return () => {
       if (socketRef.current) socketRef.current.emit('disconnect-room', socketRef.current.id)
@@ -60,7 +56,7 @@ const App = () => {
 
   useEffect(() => {
     if (token) {
-      const urlBase = isDev() ? 'http://localhost:8000/' : ''
+      const urlBase = isDev() ? 'http://127.0.0.1:8000/' : ''
       const ENDPOINT = `${urlBase}?token=${token}`
       socketRef.current = io(ENDPOINT, { transports: ['websocket', 'polling', 'flashsocket'] })
       setSocketLoaded(true)

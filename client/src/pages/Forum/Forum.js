@@ -100,24 +100,22 @@ const styles = (theme) => ({
 })
 
 const initMessageNotification = { sender: null, content: null, senderId: null }
+
 const Forum = ({ props: { socketRef } }) => {
   const [appState] = useContext(CTX)
   const { token } = appState.auth
   const { isLoggedIn } = appState
   const userId = appState.user.id
-  const [posts, setPosts] = useState([])
   const classes = useClasses(styles)
+  const [posts, setPosts] = useState([])
   const [messageNotification, setMessageNotification] = useState(initMessageNotification)
 
   useEffect(() => {
     axios
       .get('/api/forum/posts')
-      // .then(({ data }) => setPosts(data))
-      .then((res) => console.log(res))
+      .then(({ data }) => setPosts(data))
       .catch((err) => console.log({ err }))
   }, [token])
-
-  console.log({ posts })
 
   useEffect(() => {
     let subscribed = true
@@ -142,7 +140,6 @@ const Forum = ({ props: { socketRef } }) => {
   }, [])
 
   const deletePost = (id) => {
-    console.log({ id })
     axios
       .delete(`/api/forum/post/${id}`, { headers: { 'x-auth-token': token } })
       .then(({ data }) => data && setPosts((posts) => posts.filter((p) => p._id !== data)))

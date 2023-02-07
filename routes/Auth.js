@@ -38,10 +38,10 @@ router.post('/register', async (req, res) => {
     return res.status(400).send({ err: 'Passwords do not match' })
   }
 
-  // const secure = /^(?=.*[\w])(?=.*[\W])[\w\W]{8,}$/;
-  // if (!secure.test(String(password).toLowerCase())) {
-  //   return res.status(400).send({ err: 'Password must be more secure' });
-  // }
+  const secure = /^(?=.*[\w])(?=.*[\W])[\w\W]{8,}$/
+  if (!secure.test(String(password).toLowerCase())) {
+    return res.status(400).send({ err: 'Password must be more secure' })
+  }
 
   API.user
     .create({ email, name, password })
@@ -81,11 +81,10 @@ router.post('/login', async (req, res) => {
             tokenUser: {
               userId: user._id,
               email: user.email,
-              exp: Date.now() + 1000 * 60 * 60 * 24 * 14,
             },
           },
           process.env.SECRET,
-          { expiresIn: '1000hr' }
+          { expiresIn: '1000h' }
         )
         return sendUser(res, user, token)
       } else {
@@ -100,10 +99,10 @@ router.post('/login', async (req, res) => {
 })
 
 router.get('/', auth, async (req, res) => {
-  let { tokenUser } = req
+  const { tokenUser } = req
   const token = req.header('x-auth-token')
   if (tokenUser) {
-    let { userId } = tokenUser
+    const { userId } = tokenUser
     return API.user
       .findById({ _id: userId })
       .then(async (user) => sendUser(res, user, token))
