@@ -1,26 +1,28 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import * as tf from '@tensorflow/tfjs'; // eslint-disable-line
-import axios from 'axios';
-import Peer from 'peerjs';
-import * as handpose from '@tensorflow-models/handpose';
-import * as fp from 'fingerpose';
-import gestures from './gestures';
-import Webcam from 'react-webcam';
-import { makeStyles, Grid } from '@material-ui/core';
-import { Stop, PlayArrow, Mic, MicOff } from '@material-ui/icons';
-import { CTX } from 'context/Store';
-import weaponImgs from 'imgs/weapons';
-import loadingblue from 'imgs/loadingblue.gif';
+import React, { useState, useEffect, useRef, useContext } from 'react'
+import * as tf from '@tensorflow/tfjs' // eslint-disable-line
+import axios from 'axios'
+import Peer from 'peerjs'
+import * as handpose from '@tensorflow-models/handpose'
+import * as fp from 'fingerpose'
+import gestures from './gestures'
+import Webcam from 'react-webcam'
+import { Grid } from '@mui/material'
+import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
+import { CTX } from 'context/Store'
+import weaponImgs from 'imgs/weapons'
+import loadingblue from 'imgs/loadingblue.gif'
 
-import weaponAudio from 'audio/weapons';
-import soundFx from 'audio/fx';
+import weaponAudio from 'audio/weapons'
+import soundFx from 'audio/fx'
+import { useParams } from 'react-router-dom'
+import useClasses from 'customHooks/useClasses'
 
 const playSound = (s) => {
-  s.currentTime = 0;
-  s.play();
-};
+  s.currentTime = 0
+  s.play()
+}
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   playerContainer: {
     height: '100%',
     maxHeight: '100%',
@@ -185,54 +187,54 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: 'OpenDyslexic',
     cursor: 'pointer',
   },
-}));
+})
 
-const FriendBattle = ({ props: { socketRef, match } }) => {
+const FriendBattle = ({ props: { socketRef } }) => {
   const [
     {
       user: { name, id },
       auth: { token },
     },
-  ] = useContext(CTX);
+  ] = useContext(CTX)
 
-  const [displayFriend, setDisplayFriend] = useState(true);
-  const classes = useStyles();
-  const socket = socketRef.current;
+  const [displayFriend, setDisplayFriend] = useState(true)
+  const classes = useClasses(styles)
+  const socket = socketRef.current
 
-  const { friendshipId } = match.params;
-  const myCamRef = useRef();
-  const myStreamRef = useRef();
-  const friendVideoRef = useRef();
-  const [friendStream, setFriendStream] = useState(null);
-  const [friendData, setFriendData] = useState({});
+  const { friendshipId } = useParams()
+  const myCamRef = useRef()
+  const myStreamRef = useRef()
+  const friendVideoRef = useRef()
+  const [friendStream, setFriendStream] = useState(null)
+  const [friendData, setFriendData] = useState({})
 
-  const [chatInput, setChatInput] = useState('');
-  const [messages, setMessages] = useState([]);
-  const scrollRef = useRef();
-  const myPeer = useRef();
-  const [handPoseNet, setHandPoseNet] = useState(null);
-  const [count, setCount] = useState(null);
+  const [chatInput, setChatInput] = useState('')
+  const [messages, setMessages] = useState([])
+  const scrollRef = useRef()
+  const myPeer = useRef()
+  const [handPoseNet, setHandPoseNet] = useState(null)
+  const [count, setCount] = useState(null)
 
-  const [winner, setWinner] = useState(null);
-  const [myHealth, setMyHealth] = useState(100);
-  const [friendHealth, setFriendHealth] = useState(100);
-  const [myChoice, setMyChoice] = useState(null);
-  const [friendChoice, setFriendChoice] = useState(null);
-  const [inputFlowRunning, setInputFlowRunning] = useState(false);
-  const [roundProcessing, setRoundProcessing] = useState(false);
-  const [icons, setIcons] = useState({ video: false, audio: false });
+  const [winner, setWinner] = useState(null)
+  const [myHealth, setMyHealth] = useState(100)
+  const [friendHealth, setFriendHealth] = useState(100)
+  const [myChoice, setMyChoice] = useState(null)
+  const [friendChoice, setFriendChoice] = useState(null)
+  const [inputFlowRunning, setInputFlowRunning] = useState(false)
+  const [roundProcessing, setRoundProcessing] = useState(false)
+  const [icons, setIcons] = useState({ video: false, audio: false })
 
   useEffect(() => {
     return () => {
-      socket.off('user-connected');
-      socket.off('friendbattle-message');
-      socket.off('user-disconnected');
-      socket.off('game-begin');
-      socket.off('round-outcome');
-      socket.off('game-resume');
-      socket.emit('leave-room', friendshipId);
-    };
-  }, []);
+      socket.off('user-connected')
+      socket.off('friendbattle-message')
+      socket.off('user-disconnected')
+      socket.off('game-begin')
+      socket.off('round-outcome')
+      socket.off('game-resume')
+      socket.emit('leave-room', friendshipId)
+    }
+  }, [])
 
   const detect = async (net) => {
     if (
@@ -240,10 +242,10 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
       myCamRef.current !== null &&
       myCamRef.current.video.readyState === 4
     ) {
-      const video = myCamRef.current.video;
+      const video = myCamRef.current.video
       // Detect hand
-      if (!net) return;
-      const hand = await net.estimateHands(video);
+      if (!net) return
+      const hand = await net.estimateHands(video)
       // If there's a hand estimate gesture
       if (hand.length > 0) {
         const GE = new fp.GestureEstimator([
@@ -252,130 +254,125 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
           gestures.paper,
           gestures.bird,
           gestures.tree,
-        ]);
-        const gesture = await GE.estimate(hand[0].landmarks, 4);
+        ])
+        const gesture = await GE.estimate(hand[0].landmarks, 4)
         if (gesture.gestures !== undefined && gesture.gestures.length > 0) {
-          const confidence = gesture.gestures.map(
-            (prediction) => prediction.confidence
-          );
-          const maxConfidence = confidence.indexOf(
-            Math.max.apply(null, confidence)
-          );
-          return gesture.gestures[maxConfidence].name;
+          const confidence = gesture.gestures.map((prediction) => prediction.confidence)
+          const maxConfidence = confidence.indexOf(Math.max.apply(null, confidence))
+          return gesture.gestures[maxConfidence].name
         }
       } else {
-        return null;
+        return null
       }
     }
-  };
+  }
 
   useEffect(() => {
-    if (count === null) return;
+    if (count === null) return
     if (count > 0) {
       const getHandPose = async () => {
-        const myChoice = await detect(handPoseNet);
-        if (myChoice) setMyChoice(myChoice);
-      };
-      getHandPose();
+        const myChoice = await detect(handPoseNet)
+        if (myChoice) setMyChoice(myChoice)
+      }
+      getHandPose()
 
       setTimeout(() => {
-        setCount((c) => c - 1);
-      }, 1000);
+        setCount((c) => c - 1)
+      }, 1000)
     } else {
-      if (!myChoice) return setCount(10);
+      if (!myChoice) return setCount(10)
       socket.emit('user-choice', {
         roomId: friendshipId,
         userId: id,
         userChoice: myChoice,
-      });
-      setCount(null);
+      })
+      setCount(null)
     }
-  }, [count]);
+  }, [count])
 
   const getRoundInput = () => {
-    setFriendChoice(null);
-    setDisplayFriend(false);
-    setCount(10);
-  };
+    setFriendChoice(null)
+    setDisplayFriend(false)
+    setCount(10)
+  }
 
   useEffect(() => {
     return async () => {
-      if (socket) socket.emit('disconnect-room', socket.id);
-      if (myPeer.current) myPeer.current.destroy();
-    };
-  }, [token]);
+      if (socket) socket.emit('disconnect-room', socket.id)
+      if (myPeer.current) myPeer.current.destroy()
+    }
+  }, [token])
   useEffect(() => {
     return () =>
-      myStreamRef.current &&
-      myStreamRef.current.getTracks().forEach((track) => track.stop());
-  }, []);
+      myStreamRef.current && myStreamRef.current.getTracks().forEach((track) => track.stop())
+  }, [])
 
   const playStop = () => {
     if (myStreamRef.current) {
-      let enabled = myStreamRef.current.getVideoTracks()[0].enabled;
-      setIcons({ ...icons, video: !icons.video });
-      if (enabled) myStreamRef.current.getVideoTracks()[0].enabled = false;
-      else myStreamRef.current.getVideoTracks()[0].enabled = true;
+      let enabled = myStreamRef.current.getVideoTracks()[0].enabled
+      setIcons({ ...icons, video: !icons.video })
+      if (enabled) myStreamRef.current.getVideoTracks()[0].enabled = false
+      else myStreamRef.current.getVideoTracks()[0].enabled = true
     }
-  };
+  }
 
   const toggleMute = () => {
     if (myStreamRef.current) {
-      if (myStreamRef.current.getAudioTracks().length === 0) return;
-      const enabled = myStreamRef.current.getAudioTracks()[0].enabled;
-      setIcons({ ...icons, audio: !icons.audio });
-      if (enabled) myStreamRef.current.getAudioTracks()[0].enabled = false;
-      else myStreamRef.current.getAudioTracks()[0].enabled = true;
+      if (myStreamRef.current.getAudioTracks().length === 0) return
+      const enabled = myStreamRef.current.getAudioTracks()[0].enabled
+      setIcons({ ...icons, audio: !icons.audio })
+      if (enabled) myStreamRef.current.getAudioTracks()[0].enabled = false
+      else myStreamRef.current.getAudioTracks()[0].enabled = true
     }
-  };
+  }
 
   const handleSubmit = () => {
-    if (!chatInput) return;
+    if (!chatInput) return
     socket.emit('friendbattle-message', {
       content: chatInput,
       name,
       roomId: friendshipId,
-    });
-    setChatInput('');
-  };
+    })
+    setChatInput('')
+  }
   const handleChatInput = (e) => {
-    let { value } = e.target;
-    setChatInput(value);
-  };
+    let { value } = e.target
+    setChatInput(value)
+  }
   const handleKeyDown = (e) => {
     if (e.charCode === 13) {
-      handleSubmit();
+      handleSubmit()
     }
-  };
+  }
 
   function scrollToBottom() {
     scrollRef.current.scrollIntoView({
       behavior: 'smooth',
       block: 'nearest',
       inline: 'start',
-    });
+    })
   }
 
   useEffect(() => {
     if (messages && scrollRef.current) {
-      scrollToBottom();
+      scrollToBottom()
     }
-  }, [messages]);
+  }, [messages])
 
   const handleUserMedia = (stream) => {
     async function loadHandPose() {
-      const net = await handpose.load();
-      setHandPoseNet(net);
+      const net = await handpose.load()
+      setHandPoseNet(net)
     }
-    loadHandPose();
+    loadHandPose()
 
     axios
       .get(`/api/battle/connect/${friendshipId}`, {
         headers: { 'x-auth-token': token },
       })
       .then(async ({ data }) => {
-        myPeer.current = new Peer();
-        for (let user of data.users) user._id !== id && setFriendData(user);
+        myPeer.current = new Peer()
+        for (let user of data.users) user._id !== id && setFriendData(user)
 
         myPeer.current.on('open', (peerId) => {
           socket.emit('join-room', {
@@ -383,92 +380,84 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
             mySocketId: socket.id,
             roomId: data.roomId,
             token: token,
-          });
-        });
+          })
+        })
 
-        myStreamRef.current = stream;
+        myStreamRef.current = stream
 
         myPeer.current.on('call', function (call) {
-          call.answer(stream, { metadata: socket.id });
+          call.answer(stream, { metadata: socket.id })
           call.on('stream', function (callStream) {
-            setFriendStream(callStream);
-          });
-        });
+            setFriendStream(callStream)
+          })
+        })
 
         socket.on('user-connected', ({ userId, mySocketId }) => {
-          if (userId) connectToNewUser(userId, stream, mySocketId);
-        });
+          if (userId) connectToNewUser(userId, stream, mySocketId)
+        })
 
         socket.on('friendbattle-message', (message) =>
           setMessages((messages) => [...messages, message])
-        );
+        )
 
         socket.on('user-disconnected', () => {
-          if (friendVideoRef.current) friendVideoRef.current.close();
-          friendVideoRef.current = null;
-          setFriendStream(null);
-        });
+          if (friendVideoRef.current) friendVideoRef.current.close()
+          friendVideoRef.current = null
+          setFriendStream(null)
+        })
 
         const loadState = (gameState) => {
-          const { gameRunning, round, choices, ...health } = gameState;
+          const { gameRunning, round, choices, ...health } = gameState
           for (let key in health) {
-            if (key === id) setMyHealth(health[key]);
+            if (key === id) setMyHealth(health[key])
             else {
-              setFriendHealth(health[key]);
+              setFriendHealth(health[key])
             }
           }
-        };
+        }
 
         socket.on('game-resume', (gameState) => {
           if (!inputFlowRunning) {
-            setWinner(null);
-            setInputFlowRunning(true);
-            loadState(gameState);
-            getRoundInput();
+            setWinner(null)
+            setInputFlowRunning(true)
+            loadState(gameState)
+            getRoundInput()
           }
-        });
+        })
 
         socket.on('game-begin', () => {
           if (!inputFlowRunning) {
-            setWinner(null);
-            setFriendHealth(100);
-            setMyHealth(100);
-            setMyChoice(null);
-            setFriendChoice(null);
-            setInputFlowRunning(true);
+            setWinner(null)
+            setFriendHealth(100)
+            setMyHealth(100)
+            setMyChoice(null)
+            setFriendChoice(null)
+            setInputFlowRunning(true)
             setTimeout(() => {
-              getRoundInput();
-            }, 4000);
+              getRoundInput()
+            }, 4000)
           }
-        });
+        })
 
         socket.on('round-outcome', (outcome) => {
           if (!roundProcessing) {
-            setRoundProcessing(true);
+            setRoundProcessing(true)
 
-            const {
-              tie,
-              winner,
-              loser,
-              newState,
-              gameOver,
-              tieWeapon,
-              ...roundChoices
-            } = outcome;
+            const { tie, winner, loser, newState, gameOver, tieWeapon, ...roundChoices } = outcome
 
-            setDisplayFriend(true);
+            setDisplayFriend(true)
             if (tie) {
-              playSound(soundFx.tie);
-              setFriendChoice(tieWeapon);
+              playSound(soundFx.tie)
+              setFriendChoice(tieWeapon)
             } else {
-              const winningWeapon = weaponAudio[outcome[outcome.winner]];
-              [winningWeapon, soundFx.fightShort].forEach((s) => playSound(s));
-              const { gameRunning, round, choices, ...health } = newState;
+              const winningWeapon = weaponAudio[outcome[outcome.winner]]
+              ;[winningWeapon, soundFx.fightShort].forEach((s) => playSound(s))
+              const { gameRunning, round, choices, ...health } = newState
               for (let key in health) {
-                if (key === id) setMyHealth(health[key]);
+                if (key === id) setMyHealth(health[key])
                 else {
-                  setFriendChoice(roundChoices[key]);
-                  setFriendHealth(health[key]);
+                  setFriendChoice(roundChoices[key])
+                  setFriendHealth(health[key])
                 }
               }
             }
@@ -476,79 +465,67 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
             if (gameOver) {
               setTimeout(() => {
                 if (winner === id) {
-                  playSound(soundFx.win);
+                  playSound(soundFx.win)
                 } else {
-                  playSound(soundFx.lose);
+                  playSound(soundFx.lose)
                 }
-                setWinner(winner);
+                setWinner(winner)
 
                 setTimeout(() => {
-                  setInputFlowRunning(false);
-                }, 3000);
-              }, 4000);
+                  setInputFlowRunning(false)
+                }, 3000)
+              }, 4000)
             } else {
               setTimeout(() => {
-                setRoundProcessing(false);
-                getRoundInput();
-              }, 10000);
+                setRoundProcessing(false)
+                getRoundInput()
+              }, 10000)
             }
           }
-        });
+        })
 
         function connectToNewUser(userId, stream, userSocketId) {
           const call = myPeer.current.call(userId, stream, {
             metadata: userSocketId,
-          });
+          })
           if (call) {
-            call.on('stream', (userVideoStream) =>
-              setFriendStream(userVideoStream)
-            );
+            call.on('stream', (userVideoStream) => setFriendStream(userVideoStream))
             call.on('close', () => {
-              call.removeAllListeners();
-              call.close();
-              friendVideoRef.current.close();
-              friendVideoRef.current.removeAllListeners();
-            });
+              call.removeAllListeners()
+              call.close()
+              friendVideoRef.current.close()
+              friendVideoRef.current.removeAllListeners()
+            })
 
-            friendVideoRef.current = call;
+            friendVideoRef.current = call
           }
         }
-      });
-  };
+      })
+  }
 
   const playAgain = () => {
-    setWinner(null);
-    socket.emit('play-again', friendshipId);
-  };
+    setWinner(null)
+    socket.emit('play-again', friendshipId)
+  }
 
   return (
     <div className={classes.friendBattle}>
-      <Grid container direction='column'>
+      <Grid container direction="column">
         <Grid item>
-          <Grid container alignContent='stretch' direction='row'>
+          <Grid container alignContent="stretch" direction="row">
             <Grid item xs={12} sm={12} md={5} lg={5}>
-              <Grid
-                container
-                direction='column'
-                className={classes.playerContainer}
-              >
+              <Grid container direction="column" className={classes.playerContainer}>
                 <Grid item className={classes.videoContainer}>
                   {friendStream && friendStream.active ? (
                     <Video stream={friendStream} display={displayFriend} />
                   ) : (
-                    <img
-                      className={classes.friendVideo}
-                      src={loadingblue}
-                      alt='friends webcam'
-                    />
+                    <img className={classes.friendVideo} src={loadingblue} alt="friends webcam" />
                   )}
 
                   <div
                     className={classes.iconLayer}
                     style={{
-                      background: friendChoice
-                        ? 'rgba(255,255,255,0.125)'
-                        : 'rgba(255,255,255,0)',
+                      background: friendChoice ? 'rgba(255,255,255,0.125)' : 'rgba(255,255,255,0)',
                     }}
                   >
                     <img
@@ -558,32 +535,20 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                     />
                   </div>
                   {!displayFriend && (
-                    <div className={classes.chooseMessage}>
-                      choose your weapon
-                    </div>
+                    <div className={classes.chooseMessage}>choose your weapon</div>
                   )}
                 </Grid>
                 <Grid item className={classes.healthbarContainer}>
-                  <div
-                    className={classes.healthbar}
-                    style={{ width: `${friendHealth}%` }}
-                  ></div>
+                  <div className={classes.healthbar} style={{ width: `${friendHealth}%` }}></div>
                   <div className={classes.playerName}>{friendData.name}</div>
                 </Grid>
               </Grid>
             </Grid>
-            <Grid
-              item
-              xs={12}
-              md={2}
-              sm={6}
-              lg={2}
-              className={classes.dialogSection}
-            >
+            <Grid item xs={12} md={2} sm={6} lg={2} className={classes.dialogSection}>
               <Grid
                 container
-                direction='column'
-                justifycontent='space-between'
+                direction="column"
+                justifycontent="space-between"
                 className={classes.dialog}
               >
                 <Grid item className={classes.dialogTitle}>
@@ -593,13 +558,8 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                 <Grid item className={classes.results}>
                   {winner && (
                     <>
-                      <div>
-                        winner: {winner === id ? name : friendData.name}
-                      </div>
-                      <button
-                        className={classes.playAgainBtn}
-                        onClick={playAgain}
-                      >
+                      <div>winner: {winner === id ? name : friendData.name}</div>
+                      <button className={classes.playAgainBtn} onClick={playAgain}>
                         play again
                       </button>
                     </>
@@ -621,19 +581,15 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                     onKeyPress={handleKeyDown}
                     onChange={handleChatInput}
                     value={chatInput}
-                    type='text'
-                    placeholder='message...'
+                    type="text"
+                    placeholder="message..."
                   />
                 </Grid>
               </Grid>
             </Grid>
 
             <Grid item xs={12} sm={6} md={5} lg={5}>
-              <Grid
-                container
-                direction='column'
-                className={classes.playerContainer}
-              >
+              <Grid container direction="column" className={classes.playerContainer}>
                 <Grid item className={classes.videoContainer}>
                   <Webcam
                     className={classes.myVideo}
@@ -644,14 +600,12 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                   <div
                     className={classes.iconLayer}
                     style={{
-                      background: myChoice
-                        ? 'rgba(255,255,255,0.125)'
-                        : 'rgba(255,255,255,0)',
+                      background: myChoice ? 'rgba(255,255,255,0.125)' : 'rgba(255,255,255,0)',
                     }}
                   >
                     <img
                       src={weaponImgs[myChoice || 'blank']}
-                      alt='my weapon choice'
+                      alt="my weapon choice"
                       className={classes.myChoiceIcon}
                     />
                   </div>
@@ -669,10 +623,7 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
                 </Grid>
 
                 <Grid item className={classes.healthbarContainer}>
-                  <div
-                    className={classes.healthbar}
-                    style={{ width: `${myHealth}%` }}
-                  ></div>
+                  <div className={classes.healthbar} style={{ width: `${myHealth}%` }}></div>
                   <div className={classes.playerName}>{name}</div>
                 </Grid>
               </Grid>
@@ -681,15 +632,15 @@ const FriendBattle = ({ props: { socketRef, match } }) => {
         </Grid>
       </Grid>
     </div>
-  );
-};
+  )
+}
 
 const Video = ({ stream, display }) => {
-  const classes = useStyles();
-  const ref = useRef();
+  const classes = useClasses(styles)
+  const ref = useRef()
   useEffect(() => {
-    if (stream) ref.current.srcObject = stream;
-  }, [stream]);
+    if (stream) ref.current.srcObject = stream
+  }, [stream])
   return (
     <video
       playsInline
@@ -698,7 +649,7 @@ const Video = ({ stream, display }) => {
       className={classes.friendVideo}
       style={{ opacity: display ? 1 : 0 }}
     />
-  );
-};
+  )
+}
 
-export default FriendBattle;
+export default FriendBattle

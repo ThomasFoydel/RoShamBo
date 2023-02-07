@@ -1,13 +1,14 @@
 import axios from 'axios'
-import Alert from '@material-ui/lab/Alert'
-import { Redirect } from 'react-router-dom'
+import { Alert } from '@mui/lab'
+import { Navigate } from 'react-router-dom'
 import React, { useState, useContext } from 'react'
-import { Modal, makeStyles, Snackbar } from '@material-ui/core'
+import { Modal, Snackbar } from '@mui/material'
 import { CTX } from 'context/Store'
 import Register from './Register'
 import Login from './Login'
+import useClasses from 'customHooks/useClasses'
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   modalBody: {
     transform: `translate(-50%, -50%)`,
     backgroundColor: theme.palette.background.paper,
@@ -18,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
     top: '50%',
   },
   modal: { zIndex: '9000 !important' },
-}))
+})
 
 const initialState = {
   register: {
@@ -39,7 +40,7 @@ const Auth = () => {
   const [authPage, setAuthPage] = useState('login')
   const [redirect, setRedirect] = useState(false)
   const [err, setErr] = useState(null)
-  const classes = useStyles()
+  const classes = useClasses(styles)
 
   const closeModal = () => updateState({ type: 'AUTH_MODAL', payload: false })
 
@@ -68,7 +69,7 @@ const Auth = () => {
   return (
     <Modal className={classes.modal} open={authModal} onClose={closeModal}>
       <>
-        {redirect && <Redirect to="/howto" />}
+        {redirect && <Navigate to="/howto" />}
         {ModalBody}
         <Snackbar
           open={err}

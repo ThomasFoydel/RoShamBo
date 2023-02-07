@@ -1,21 +1,21 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import {
-  makeStyles,
   Grid,
   Card,
   Avatar,
   Input,
   Button,
   Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 
 import ImageUpload from 'components/ImageUpload/ImageUpload';
 import MessageNotification from 'components/MessageNotification/MessageNotification';
 import { CTX } from 'context/Store';
+import useClasses from 'customHooks/useClasses';
 
 const initMessageNotification = { sender: null, content: null, senderId: null };
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   editProfile: {
     ...theme.centerHorizontal,
     width: '95vw',
@@ -49,10 +49,11 @@ const useStyles = makeStyles((theme) => ({
       background: theme.palette.primary.dark,
     },
   },
-}));
+});
+
 const EditProfile = ({ props: { socketRef } }) => {
   const [appState, updateState] = useContext(CTX);
-  const classes = useStyles();
+  const classes = useClasses(styles);
   const { token } = appState.auth;
   const { name, profilePic } = appState.user;
   const [showProfileInput, setShowProfileInput] = useState(false);

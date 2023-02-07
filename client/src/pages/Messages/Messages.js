@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  makeStyles,
   Avatar,
   Typography,
   Input,
   Button,
   Grid,
-} from '@material-ui/core';
+} from '@mui/material';
 import { CTX } from 'context/Store';
 import axios from 'axios';
-const useStyles = makeStyles((theme) => ({
+import useClasses from 'customHooks/useClasses';
+
+const styles = (theme) => ({
   messages: {
     ...theme.centerHorizontal,
     marginTop: '5em',
@@ -86,11 +87,12 @@ const useStyles = makeStyles((theme) => ({
       background: theme.palette.primary.dark,
     },
   },
-}));
+});
+
 const Messages = ({ props: { socketRef } }) => {
   const socket = socketRef.current;
   const [appState, updateState] = useContext(CTX);
-  const classes = useStyles();
+  const classes = useClasses(styles);
   const { token } = appState.auth;
   const userId = appState.user.id;
   const friends = appState.user.friends;
@@ -128,7 +130,7 @@ const Messages = ({ props: { socketRef } }) => {
 };
 
 const Friend = ({ props: { friend, handleSelectFriend } }) => {
-  const classes = useStyles();
+  const classes = useClasses(styles);
   return (
     <Grid
       container
@@ -150,7 +152,7 @@ const Friend = ({ props: { friend, handleSelectFriend } }) => {
 
 const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
   const [thread, setThread] = useState([]);
-  const classes = useStyles();
+  const classes = useClasses(styles);
   const scrollRef = useRef();
 
   const handleNewMessage = (message) => {
@@ -204,7 +206,7 @@ const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
 };
 
 const Message = ({ props: { message, userId } }) => {
-  const classes = useStyles();
+  const classes = useClasses(styles);
   const mine = message.sender._id === userId;
   return (
     <Grid
@@ -245,7 +247,7 @@ const Message = ({ props: { message, userId } }) => {
 };
 
 const ChatBox = ({ props: { token, currentThread } }) => {
-  const classes = useStyles();
+  const classes = useClasses(styles);
   const [inputValue, setInputValue] = useState('');
   const sendMessage = () => {
     if (token && inputValue) {

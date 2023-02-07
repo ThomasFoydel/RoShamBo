@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
 import axios from 'axios';
-import { makeStyles, Grid, Input, Button } from '@material-ui/core';
-const useStyles = makeStyles((theme) => ({
+import { Grid, Input, Button } from '@mui/material';
+import useClasses from 'customHooks/useClasses';
+const styles = (theme) => ({
   form: {
     ...theme.centerHorizontal,
     width: '80%',
@@ -28,9 +29,10 @@ const useStyles = makeStyles((theme) => ({
       marginRight: '.4em',
     },
   },
-}));
+});
+
 const CommentForm = ({ props: { postId, setPosts, token } }) => {
-  const classes = useStyles();
+  const classes = useClasses(styles);
   const [commentInput, setCommentInput] = useState('');
   const makeComment = () => {
     if (commentInput.length > 0 && commentInput.length <= 100) {

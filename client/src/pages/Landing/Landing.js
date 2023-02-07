@@ -1,8 +1,9 @@
-import React, { useContext } from 'react';
-import { makeStyles, Typography, Button } from '@material-ui/core';
-import weaponSystem from 'imgs/weaponsystem.png';
-import { CTX } from 'context/Store';
-const useStyles = makeStyles((theme) => ({
+import React, { useContext } from 'react'
+import { Typography, Button } from '@mui/material'
+import weaponSystem from 'imgs/weaponsystem.png'
+import { CTX } from 'context/Store'
+import useClasses from 'customHooks/useClasses'
+const styles = (theme) => ({
   container: {
     background: 'white',
   },
@@ -39,8 +40,7 @@ const useStyles = makeStyles((theme) => ({
     transform: 'translateX(-50%) translateY(-50%)',
     padding: '.5rem 2.5rem',
     fontSize: '5rem',
-    boxShadow:
-      '.5rem .5rem 1rem rgba(0,0,0,0.2), -.5rem -.5rem 1.5rem rgba(255,255,255,0.15)',
+    boxShadow: '.5rem .5rem 1rem rgba(0,0,0,0.2), -.5rem -.5rem 1.5rem rgba(255,255,255,0.15)',
     backdropFilter: 'blur(2px)',
     transition: 'all 0.45s ease',
     whiteSpace: 'nowrap',
@@ -59,19 +59,21 @@ const useStyles = makeStyles((theme) => ({
       padding: '.2rem 1rem',
     },
   },
-}));
-const Landing = () => {
-  const [, updateState] = useContext(CTX);
+})
 
-  const classes = useStyles();
-  const openModal = () => updateState({ type: 'AUTH_MODAL', payload: true });
+const Landing = () => {
+  const [, updateState] = useContext(CTX)
+
+  const classes = useClasses(styles)
+  const openModal = () => updateState({ type: 'AUTH_MODAL', payload: true })
+
   return (
     <>
       <div style={{ position: 'relative' }}>
         <img
           className={classes.weaponSystem}
           src={weaponSystem}
-          alt='weapons system: scisscors beats bird and paper. paper beats tree and rock. rock beats bird and scissors. tree beats rock and scissors. '
+          alt="weapons system: scisscors beats bird and paper. paper beats tree and rock. rock beats bird and scissors. tree beats rock and scissors. "
         />
         <Button onClick={openModal} className={classes.startBtn}>
           Get Started
@@ -81,7 +83,7 @@ const Landing = () => {
         <Typography className={classes.title}>ROSHAMBO</Typography>
       </div>
     </>
-  );
-};
+  )
+}
 
-export default Landing;
+export default Landing

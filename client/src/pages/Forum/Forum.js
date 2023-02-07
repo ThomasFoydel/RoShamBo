@@ -1,20 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import PostForm from './components/PostForm';
-import CommentForm from './components/CommentForm';
-import { Link } from 'react-router-dom';
-import { CTX } from 'context/Store';
-import MessageNotification from 'components/MessageNotification/MessageNotification';
-import {
-  makeStyles,
-  Card,
-  Typography,
-  Avatar,
-  Grid,
-  IconButton,
-} from '@material-ui/core';
-import { Delete as DeleteIcon } from '@material-ui/icons';
-const useStyles = makeStyles((theme) => ({
+import React, { useState, useEffect, useContext } from 'react'
+import axios from 'axios'
+import PostForm from './components/PostForm'
+import CommentForm from './components/CommentForm'
+import { Link } from 'react-router-dom'
+import { CTX } from 'context/Store'
+import MessageNotification from 'components/MessageNotification/MessageNotification'
+import { Card, Typography, Avatar, Grid, IconButton } from '@mui/material'
+import { Delete as DeleteIcon } from '@mui/icons-material'
+import useClasses from 'customHooks/useClasses'
+
+const styles = (theme) => ({
   forum: {
     marginTop: '5rem',
     paddingBottom: '5rem',
@@ -102,28 +97,27 @@ const useStyles = makeStyles((theme) => ({
     top: 0,
     right: 0,
   },
-}));
-const initMessageNotification = { sender: null, content: null, senderId: null };
+})
+
+const initMessageNotification = { sender: null, content: null, senderId: null }
 const Forum = ({ props: { socketRef } }) => {
-  const [appState] = useContext(CTX);
-  const { token } = appState.auth;
-  const { isLoggedIn } = appState;
-  const userId = appState.user.id;
-  const [posts, setPosts] = useState([]);
-  const classes = useStyles();
-  const [messageNotification, setMessageNotification] = useState(
-    initMessageNotification
-  );
+  const [appState] = useContext(CTX)
+  const { token } = appState.auth
+  const { isLoggedIn } = appState
+  const userId = appState.user.id
+  const [posts, setPosts] = useState([])
+  const classes = useClasses(styles)
+  const [messageNotification, setMessageNotification] = useState(initMessageNotification)
 
   useEffect(() => {
     axios
       .get('/api/forum/posts')
       .then(({ data }) => setPosts(data))
-      .catch((err) => console.log({ err }));
-  }, [token]);
+      .catch((err) => console.log({ err }))
+  }, [token])
 
   useEffect(() => {
-    let subscribed = true;
+    let subscribed = true
     if (socketRef && socketRef.current) {
       socketRef.current.on('chat-message-notification', (message) => {
         if (subscribed) {
@@ -131,29 +125,26 @@ const Forum = ({ props: { socketRef } }) => {
             sender: message.sender.name,
             content: message.content,
             senderId: message.sender._id,
-          });
+          })
         }
-      });
+      })
     }
     return () => {
-      subscribed = false;
+      subscribed = false
       if (socketRef && socketRef.current) {
-        setMessageNotification(initMessageNotification);
-        socketRef.current.off('chat-message-notification');
+        setMessageNotification(initMessageNotification)
+        socketRef.current.off('chat-message-notification')
       }
-    };
-  }, []);
+    }
+  }, [])
 
   const deletePost = (id) => {
-    console.log({ id });
+    console.log({ id })
     axios
       .delete(`/api/forum/post/${id}`, { headers: { 'x-auth-token': token } })
-      .then(
-        ({ data }) =>
-          data && setPosts((posts) => posts.filter((p) => p._id !== data))
-      )
-      .catch((err) => console.log(err));
-  };
+      .then(({ data }) => data && setPosts((posts) => posts.filter((p) => p._id !== data)))
+      .catch((err) => console.log(err))
+  }
   const deleteComment = (id) => {
     axios
       .delete(`/api/forum/comment/${id}`, {
@@ -164,17 +155,16 @@ const Forum = ({ props: { socketRef } }) => {
           data &&
           data._id &&
           setPosts((posts) => {
-            const copy = [...posts];
-            const post = copy.find((p) => p._id === data._id);
-            Object.assign(post, data);
-            return copy;
+            const copy = [...posts]
+            const post = copy.find((p) => p._id === data._id)
+            Object.assign(post, data)
+            return copy
           })
       )
-      .catch((err) => console.log(err));
-  };
+      .catch((err) => console.log(err))
+  }
 
-  const closeMessageNotification = () =>
-    setMessageNotification(initMessageNotification);
+  const closeMessageNotification = () => setMessageNotification(initMessageNotification)
 
   return (
     <div className={classes.forum}>
@@ -201,33 +191,22 @@ const Forum = ({ props: { socketRef } }) => {
         }}
       />
     </div>
-  );
-};
+  )
+}
 
 const Post = ({
-  props: {
-    post,
-    setPosts,
-    token,
-    userId,
-    deletePost,
-    deleteComment,
-    isLoggedIn,
-  },
+  props: { post, setPosts, token, userId, deletePost, deleteComment, isLoggedIn },
 }) => {
-  const classes = useStyles();
+  const classes = useClasses(styles)
 
   return (
     <Card className={classes.post}>
-      <Grid container direction='column'>
+      <Grid container direction="column">
         <Grid item>
-          <Grid container alignItems='center'>
+          <Grid container alignItems="center">
             <Grid item>
               <Link to={`/profile/${post.author._id}`}>
-                <Avatar
-                  src={`/api/image/${post.author.profilePic}`}
-                  className={classes.postAvatar}
-                >
+                <Avatar src={`/api/image/${post.author.profilePic}`} className={classes.postAvatar}>
                   {post.author.name && post.author.name[0].toUpperCase()}
                 </Avatar>
               </Link>
@@ -245,7 +224,7 @@ const Post = ({
               <IconButton
                 onClick={() => deletePost(post._id)}
                 className={classes.deleteBtn}
-                aria-label='delete'
+                aria-label="delete"
               >
                 <DeleteIcon />
               </IconButton>
@@ -257,51 +236,41 @@ const Post = ({
           <Typography className={classes.postTitle}>{post.title}</Typography>
         </Grid>
         <Grid item>
-          <Typography className={classes.postContent}>
-            {post.content}
-          </Typography>
+          <Typography className={classes.postContent}>{post.content}</Typography>
         </Grid>
         <Grid item className={classes.comments}>
           {post.comments.map((comment) => (
-            <Comment
-              key={comment._id}
-              props={{ comment, userId, deleteComment }}
-            />
+            <Comment key={comment._id} props={{ comment, userId, deleteComment }} />
           ))}
         </Grid>
         <Grid item>
-          {isLoggedIn && (
-            <CommentForm props={{ postId: post._id, setPosts, token }} />
-          )}
+          {isLoggedIn && <CommentForm props={{ postId: post._id, setPosts, token }} />}
         </Grid>
       </Grid>
     </Card>
-  );
-};
+  )
+}
 
 const Comment = ({ props: { comment, userId, deleteComment } }) => {
-  const classes = useStyles();
+  const classes = useClasses(styles)
   return (
     <div className={classes.comment}>
-      <Grid container direction='column'>
+      <Grid container direction="column">
         <Grid item style={{ position: 'relative' }}>
           <Link to={`/profile/${comment.author._id}`}>
-            <Grid container alignItems='center'>
+            <Grid container alignItems="center">
               <Grid item>
                 <Link to={`/profile/${comment.author._id}`}>
                   <Avatar
                     src={`/api/image/${comment.author.profilePic}`}
                     className={classes.commentAvatar}
                   >
-                    {comment.author.name &&
-                      comment.author.name[0].toUpperCase()}
+                    {comment.author.name && comment.author.name[0].toUpperCase()}
                   </Avatar>
                 </Link>
               </Grid>
               <Grid item>
-                <Typography className={classes.commentAuthor}>
-                  {comment.author.name}
-                </Typography>
+                <Typography className={classes.commentAuthor}>{comment.author.name}</Typography>
               </Grid>
             </Grid>
           </Link>
@@ -309,7 +278,7 @@ const Comment = ({ props: { comment, userId, deleteComment } }) => {
             <IconButton
               onClick={() => deleteComment(comment._id)}
               className={classes.deleteBtn}
-              aria-label='delete'
+              aria-label="delete"
               style={{ color: 'white' }}
             >
               <DeleteIcon />
@@ -317,13 +286,11 @@ const Comment = ({ props: { comment, userId, deleteComment } }) => {
           )}
         </Grid>
         <Grid item>
-          <Typography className={classes.commentContent}>
-            {comment.content}
-          </Typography>
+          <Typography className={classes.commentContent}>{comment.content}</Typography>
         </Grid>
       </Grid>
     </div>
-  );
-};
+  )
+}
 
-export default Forum;
+export default Forum

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CTX } from 'context/Store';
-import { makeStyles, Button } from '@material-ui/core';
-const useStyles = makeStyles((theme) => ({
+import { Button } from '@mui/material';
+import useClasses from 'customHooks/useClasses';
+
+const styles = (theme) => ({
   friendRequests: {
     ...theme.centerHorizontal,
     fontFamily: 'OpenDyslexic',
@@ -17,12 +19,14 @@ const useStyles = makeStyles((theme) => ({
       background: theme.palette.primary.dark,
     },
   },
-}));
+});
+
 const FriendRequests = () => {
   const [appState, updateState] = useContext(CTX);
   const token = appState.auth.token;
   const [friendRequests, setFriendRequests] = useState([]);
-  const classes = useStyles();
+  const classes = useClasses(styles);
+  
   useEffect(() => {
     let subscribed = true;
     axios

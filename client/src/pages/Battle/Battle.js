@@ -1,11 +1,10 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { makeStyles, Grid, Typography } from '@material-ui/core';
-import PeopleIcon from '@material-ui/icons/People';
-import ComputerIcon from '@material-ui/icons/Computer';
-import CasinoIcon from '@material-ui/icons/Casino';
+import React from 'react'
+import { Link } from 'react-router-dom'
+import { Grid, Typography } from '@mui/material'
+import { People, Casino, Computer } from '@mui/icons-material'
+import useClasses from 'customHooks/useClasses'
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   battlePage: {
     ...theme.centerHorizontal,
     background: 'linear-gradient(#ccc, #ddd)',
@@ -42,29 +41,26 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
     color: theme.palette.primary.dark,
   },
-}));
+})
+
 const options = [
-  { link: 'friends', text: 'Friends', icon: PeopleIcon },
-  { link: 'computer', text: 'Computer', icon: ComputerIcon },
-  { link: 'random', text: 'Random User', icon: CasinoIcon },
-];
+  { link: 'friends', text: 'Friends', icon: People },
+  { link: 'computer', text: 'Computer', icon: Computer },
+  { link: 'random', text: 'Random User', icon: Casino },
+]
 const Battle = () => {
-  const classes = useStyles();
+  const classes = useClasses(styles)
+  
   return (
-    <Grid
-      container
-      direction='row'
-      justify='space-around'
-      className={classes.battlePage}
-    >
+    <Grid container direction="row" justify="space-around" className={classes.battlePage}>
       {options.map((option) => {
-        const Icon = option.icon;
+        const Icon = option.icon
         return (
           <Grid key={option.link} item className={classes.battleLink}>
             <Grid
               container
-              direction='column'
-              alignItems='center'
+              direction="column"
+              alignItems="center"
               component={Link}
               to={`/battle/${option.link}`}
               className={classes.link}
@@ -73,10 +69,10 @@ const Battle = () => {
               <Typography className={classes.text}>{option.text}</Typography>
             </Grid>
           </Grid>
-        );
+        )
       })}
     </Grid>
-  );
-};
+  )
+}
 
-export default Battle;
+export default Battle

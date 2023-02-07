@@ -1,10 +1,10 @@
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@mui/material/styles'
 
-const blue = '#0078FE';
+const blue = '#0078FE'
 // const magenta = '#CC0AC3';
-const magenta = '#cc0a6d';
+const magenta = '#cc0a6d'
 
-export default createMuiTheme({
+export default createTheme({
   palette: {
     common: {
       blue: `${blue}`,
@@ -45,4 +45,4 @@ export default createMuiTheme({
     marginLeft: '50%',
     transform: 'translateX(-50%)',
   },
-});
+})

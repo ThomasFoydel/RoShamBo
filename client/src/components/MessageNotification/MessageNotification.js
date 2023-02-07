@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
-import { Snackbar } from '@material-ui/core';
-import Alert from '@material-ui/lab/Alert';
+import { Snackbar } from '@mui/material';
+import { Alert } from '@mui/lab';
 import { Link } from 'react-router-dom';
 import { CTX } from 'context/Store';
 const MessageNotification = ({

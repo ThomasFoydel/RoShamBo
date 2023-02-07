@@ -5,12 +5,13 @@ import * as fp from 'fingerpose';
 import gestures from './gestures';
 import Webcam from 'react-webcam';
 import robot from 'imgs/robot.svg';
-import { Grid, makeStyles } from '@material-ui/core';
+import { Grid } from '@mui/material';
 import weaponImgs from 'imgs/weapons';
 
 import weaponAudio from 'audio/weapons';
 import soundFx from 'audio/fx';
 import themeAudio from 'audio/themes';
+import useClasses from 'customHooks/useClasses';
 
 const weapons = {
   rock: { beats: ['scissors', 'bird'] },
@@ -20,7 +21,7 @@ const weapons = {
   tree: { beats: ['rock', 'scissors'] },
 };
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   gameGrid: {
     backgroundColor: 'black',
     padding: '3rem',
@@ -192,9 +193,10 @@ const useStyles = makeStyles((theme) => ({
       background: 'white',
     },
   },
-}));
+});
+
 function ComputerBattle() {
-  const classes = useStyles();
+  const classes = useClasses(styles);
   const webcamRef = useRef(null);
   const [muted, setMuted] = useState(false);
   const [gameRunning, setGameRunning] = useState(false);

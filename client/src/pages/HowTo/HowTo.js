@@ -1,9 +1,9 @@
 import React from 'react';
 import hands from 'imgs/instructions.gif';
 import { Link } from 'react-router-dom';
-import { makeStyles } from '@material-ui/core';
+import useClasses from 'customHooks/useClasses';
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   container: {
     marginTop: '6em',
     padding: '0 3em',
@@ -22,9 +22,10 @@ const useStyles = makeStyles((theme) => ({
       color: theme.palette.primary.light,
     },
   },
-}));
+})
+
 const HowTo = () => {
-  const classes = useStyles();
+  const classes = useClasses(styles);
   return (
     <center className={classes.container}>
       <h3>Instructions</h3>

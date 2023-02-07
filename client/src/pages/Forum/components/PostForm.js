@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { makeStyles, Grid, Button, Input } from '@material-ui/core';
-const useStyles = makeStyles((theme) => ({
+import { Grid, Button, Input } from '@mui/material';
+import useClasses from 'customHooks/useClasses';
+const styles = (theme) => ({
   form: {
     ...theme.centerHorizontal,
     background: 'linear-gradient(to bottom right, #bbb, #eee)',
@@ -24,9 +25,10 @@ const useStyles = makeStyles((theme) => ({
       backgroundColor: theme.palette.primary.dark,
     },
   },
-}));
+});
+
 const PostForm = ({ props: { setPosts, token } }) => {
-  const classes = useStyles();
+  const classes = useClasses(styles);
 
   const [form, setForm] = useState({
     title: '',

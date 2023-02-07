@@ -1,11 +1,13 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import App from './App';
-import Store from 'context/Store';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import Store from 'context/Store'
+import App from './App'
 
-ReactDOM.render(
-  <Store>
-    <App />
-  </Store>,
-  document.getElementById('root')
-);
+const root = ReactDOM.createRoot(document.getElementById('root'))
+root.render(
+  <React.StrictMode>
+    <Store>
+      <App />
+    </Store>
+  </React.StrictMode>
+)

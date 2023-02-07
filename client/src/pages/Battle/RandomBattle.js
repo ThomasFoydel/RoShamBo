@@ -5,8 +5,8 @@ import * as handpose from '@tensorflow-models/handpose';
 import * as fp from 'fingerpose';
 import gestures from './gestures';
 import Webcam from 'react-webcam';
-import { makeStyles, Grid } from '@material-ui/core';
-import { Stop, PlayArrow, Mic, MicOff } from '@material-ui/icons';
+import { Grid } from '@mui/material';
+import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
 import { CTX } from 'context/Store';
 import weaponImgs from 'imgs/weapons';
 import loadingblue from 'imgs/loadingblue.gif';
@@ -14,13 +14,14 @@ import loadingblue from 'imgs/loadingblue.gif';
 import weaponAudio from 'audio/weapons';
 import soundFx from 'audio/fx';
 import axios from 'axios';
+import useClasses from 'customHooks/useClasses';
 
 const playSound = (s) => {
   s.currentTime = 0;
   s.play();
 };
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   playerContainer: {
     height: '100%',
     maxHeight: '100%',
@@ -192,7 +193,7 @@ const useStyles = makeStyles((theme) => ({
     fontFamily: 'OpenDyslexic',
     cursor: 'pointer',
   },
-}));
+});
 
 const RandomBattle = ({ props: { socketRef } }) => {
   const socket = socketRef.current;
@@ -207,7 +208,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const randoVideoRef = useRef();
   const [userMediaLoaded, setUserMediaLoaded] = useState(false);
   const [handPoseNet, setHandPoseNet] = useState(null);
-  const classes = useStyles();
+  const classes = useClasses(styles);
   const [roomId, setRoomId] = useState(null);
   const [randoStream, setRandoStream] = useState(null);
   const [randoData, setRandoData] = useState({ name: '', userId: null });
@@ -721,7 +722,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
 };
 
 const Video = ({ stream, display }) => {
-  const classes = useStyles();
+  const classes = useClasses(styles);
   const ref = useRef();
   useEffect(() => {
     if (stream) ref.current.srcObject = stream;

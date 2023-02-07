@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react'
 import {
   AppBar,
   Toolbar,
@@ -9,43 +9,54 @@ import {
   MenuItem,
   useMediaQuery,
   useTheme,
-  makeStyles,
   SwipeableDrawer,
   IconButton,
   List,
   ListItem,
   ListItemText,
-} from '@material-ui/core';
-import { Menu as MenuIcon } from '@material-ui/icons';
-import useScrollTrigger from '@material-ui/core/useScrollTrigger';
-import { Link } from 'react-router-dom';
-import logo from 'imgs/roshambo.svg';
-import { CTX } from 'context/Store';
+} from '@mui/material'
+import useScrollTrigger from '@mui/material/useScrollTrigger'
+import { Menu as MenuIcon } from '@mui/icons-material'
+import { Link } from 'react-router-dom'
+import logo from 'imgs/roshambo.svg'
+import { CTX } from 'context/Store'
+import useClasses from 'customHooks/useClasses'
+import styled from '@emotion/styled'
 
 function ElevationScroll({ children }) {
   const trigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 0,
-  });
+  })
   return React.cloneElement(children, {
     elevation: trigger ? 4 : 0,
-  });
+  })
 }
 
-const useStyles = makeStyles((theme) => ({
-  toolbarMargin: {
-    ...theme.mixins.toolbar,
-    marginBottom: '3em',
-    [theme.breakpoints.down('md')]: {
-      marginBottom: '2em',
-    },
-    [theme.breakpoints.down('xs')]: {
-      marginBottom: '1.25em',
-    },
-    [theme.breakpoints.down('xs')]: {
-      marginBottom: '.5em',
-    },
+const ToolBarMargin = styled('div')(({ theme }) => ({
+  ...theme.mixins.toolbar,
+  marginBottom: '3em',
+  [theme.breakpoints.down('md')]: {
+    marginBottom: '2em',
   },
+  [theme.breakpoints.down('xs')]: {
+    marginBottom: '1.25em',
+  },
+  [theme.breakpoints.down('xs')]: {
+    marginBottom: '.5em',
+  },
+}))
+
+const NavButton = styled(Button)(({ theme }) => ({
+  ...theme.typography.loginLink,
+  fontFamily: 'OpenDyslexic',
+  borderRadius: '50px',
+  marginLeft: '50px',
+  marginRight: '25px',
+  height: '45px',
+}))
+
+const styles = (theme) => ({
   logo: {
     height: '8em',
     [theme.breakpoints.down('md')]: {
@@ -65,6 +76,8 @@ const useStyles = makeStyles((theme) => ({
     ...theme.typography.tab,
     minWidth: 10,
     marginLeft: '25px',
+    color: 'white ',
+    opacity: 0.8,
   },
   button: {
     ...theme.typography.loginLink,
@@ -89,6 +102,9 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.common.blue,
     color: 'white',
     borderRadius: 0,
+    '&:Mui-selected': {
+      color: 'red !important',
+    },
   },
   menuItem: {
     ...theme.typography.tab,
@@ -112,13 +128,18 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   drawer: {
+    width: '200px',
     backgroundColor: theme.palette.common.blue,
   },
   drawerItem: {
     ...theme.typography.tab,
     color: 'white',
-    padding: '0 1.5rem',
+    paddingLeft: '0',
+    textAlign: 'center',
     opacity: 0.7,
+    '&:hover': {
+      opacity: 1,
+    },
   },
   drawerAuthLink: {
     backgroundColor: theme.palette.secondary.main,
@@ -127,6 +148,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   drawerItemSelected: {
+    background: theme.palette.primary.dark,
     '& .MuiListItemText-root': {
       opacity: 1,
     },
@@ -140,7 +162,7 @@ const useStyles = makeStyles((theme) => ({
       opacity: '1',
     },
   },
-}));
+})
 
 const menuOptions = [
   { name: 'Battle', link: '/battle', activeIndex: 1, selectedIndex: 0 },
@@ -162,24 +184,24 @@ const menuOptions = [
     activeIndex: 1,
     selectedIndex: 3,
   },
-];
+]
 
 export default function Header() {
-  const classes = useStyles();
-  const theme = useTheme();
-  const [appState, updateState] = useContext(CTX);
+  const classes = useClasses(styles)
+  const theme = useTheme()
+  const [appState, updateState] = useContext(CTX)
   const {
     isLoggedIn,
     user: { id },
-  } = appState;
+  } = appState
 
-  const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const matches = useMediaQuery(theme.breakpoints.down('md'));
-  const [openDrawer, setOpenDrawer] = useState(false);
-  const [value, setValue] = useState(0);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [openMenu, setOpenMenu] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  const matches = useMediaQuery(theme.breakpoints.down('md'))
+  const [openDrawer, setOpenDrawer] = useState(false)
+  const [currentActiveIndex, setCurrentTabIndex] = useState(0)
+  const [anchorEl, setAnchorEl] = useState(null)
+  const [openMenu, setOpenMenu] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(0)
 
   const routes = [
     { name: 'Home', link: '/', activeIndex: 0 },
@@ -192,60 +214,61 @@ export default function Header() {
       mouseOver: (event, handleClick) => handleClick(event),
       auth: true,
     },
-
     { name: 'Profile', link: `/profile/${id}`, activeIndex: 2, auth: true },
     { name: 'Messages', link: '/messages', activeIndex: 3, auth: true },
-    { name: 'Forum', link: '/forum', activeIndex: 4 },
-  ];
+    { name: 'Forum', link: '/forum', activeIndex: isLoggedIn ? 4 : 1 },
+  ]
 
   const handleChange = (e, newValue) => {
-    setValue(newValue);
-  };
+    setCurrentTabIndex(newValue)
+  }
 
   const openModal = () => {
-    updateState({ type: 'AUTH_MODAL', payload: true });
-  };
+    updateState({ type: 'AUTH_MODAL', payload: true })
+  }
 
   useEffect(() => {
-    [...menuOptions, ...routes].forEach((route) => {
+    const routeOptions = [...menuOptions, ...routes]
+    routeOptions.forEach((route) => {
       if (window.location.pathname === route.link) {
-        if (value !== route.activeIndex) {
-          setValue(route.activeIndex);
+        if (currentActiveIndex !== route.activeIndex) {
+          setCurrentTabIndex(route.activeIndex)
           if (route.selectedIndex && route.selectedIndex !== selectedIndex) {
-            setSelectedIndex(route.selectedIndex);
+            setSelectedIndex(route.selectedIndex)
           }
         }
       }
-    });
-  }, [value, selectedIndex, routes]);
+    })
+  }, [currentActiveIndex, selectedIndex, routes])
 
   const handleClick = (e) => {
-    setAnchorEl(e.currentTarget);
-    setOpenMenu(true);
-  };
+    setAnchorEl(e.currentTarget)
+    setOpenMenu(true)
+  }
 
   const handleClose = () => {
-    setAnchorEl(null);
-    setOpenMenu(false);
-  };
+    setAnchorEl(null)
+    setOpenMenu(false)
+  }
 
   const handleMenuItemClick = (e, i) => {
-    setAnchorEl(null);
-    setOpenMenu(false);
-    setSelectedIndex(i);
-  };
+    setAnchorEl(null)
+    setOpenMenu(false)
+    setSelectedIndex(i)
+  }
 
   const tabs = (
     <>
       <Tabs
         className={classes.tabContainer}
-        value={value}
+        value={currentActiveIndex}
         onChange={handleChange}
-        indicatorColor='primary'
+        indicatorColor="primary"
       >
         {routes.map((route, index) =>
           route.auth && !isLoggedIn ? null : (
             <Tab
+              tabIndex={route.activeIndex}
               key={`${route}${index}`}
               className={classes.tab}
               component={Link}
@@ -253,37 +276,31 @@ export default function Header() {
               label={route.name}
               aria-owns={route.ariaOwns && route.ariaOwns(anchorEl)}
               aria-haspopup={route.ariaPopup && route.ariaPopup(anchorEl)}
-              onMouseOver={(e) =>
-                route.mouseOver && route.mouseOver(e, handleClick)
-              }
+              onMouseOver={(e) => route.mouseOver && route.mouseOver(e, handleClick)}
             />
           )
         )}
       </Tabs>
       {isLoggedIn && (
         <Button
-          variant='contained'
-          color='primary'
+          variant="contained"
+          color="primary"
+          classes={{ root: classes.button }}
           className={`${classes.button} ${classes.logout}`}
           onClick={() => {
-            updateState({ type: 'LOGOUT' });
+            updateState({ type: 'LOGOUT' })
           }}
         >
           Log out
         </Button>
       )}
       {!isLoggedIn && (
-        <Button
-          color='secondary'
-          variant='contained'
-          onClick={openModal}
-          className={classes.button}
-        >
+        <NavButton color="secondary" variant="contained" onClick={openModal}>
           Sign In
-        </Button>
+        </NavButton>
       )}
       <Menu
-        id='simple-menu'
+        id="simple-menu"
         anchorEl={anchorEl}
         open={Boolean(openMenu)}
         onClose={handleClose}
@@ -300,18 +317,18 @@ export default function Header() {
             to={option.link}
             classes={{ root: classes.menuItem }}
             onClick={(e) => {
-              handleMenuItemClick(e, i);
-              setValue(1);
-              handleClose();
+              handleMenuItemClick(e, i)
+              setCurrentTabIndex(1)
+              handleClose()
             }}
-            selected={i === selectedIndex && value === 1}
+            selected={i === selectedIndex && currentActiveIndex === 1}
           >
             {option.name}
           </MenuItem>
         ))}
       </Menu>
     </>
-  );
+  )
 
   const drawer = (
     <>
@@ -323,22 +340,22 @@ export default function Header() {
         onOpen={() => setOpenDrawer(true)}
         classes={{ paper: classes.drawer }}
       >
-        <div className={classes.toolbarMargin} />
+        <ToolBarMargin />
         <List disablePadding>
           {routes.map((route) =>
             route.auth && !isLoggedIn ? null : (
               <ListItem
                 key={`${route}${route.activeIndex}`}
                 onClick={() => {
-                  setOpenDrawer(false);
-                  setValue(route.activeIndex);
+                  setOpenDrawer(false)
+                  setCurrentTabIndex(route.activeIndex)
                 }}
                 divider
-                button
                 component={Link}
                 to={route.link}
-                selected={value === route.activeIndex}
-                classes={{ selected: classes.drawerItemSelected }}
+                className={
+                  currentActiveIndex === route.activeIndex ? classes.drawerItemSelected : ''
+                }
               >
                 <ListItemText className={classes.drawerItem} disableTypography>
                   {route.name}
@@ -349,14 +366,13 @@ export default function Header() {
           {isLoggedIn ? (
             <ListItem
               divider
-              button
               classes={{
                 root: classes.drawerAuthLink,
               }}
             >
               <ListItemText
                 onClick={() => {
-                  updateState({ type: 'LOGOUT' });
+                  updateState({ type: 'LOGOUT' })
                 }}
                 className={classes.drawerItem}
                 disableTypography
@@ -367,18 +383,14 @@ export default function Header() {
           ) : (
             <ListItem
               onClick={() => {
-                setValue(5);
-                setOpenDrawer(false);
-                  openModal();
+                setCurrentTabIndex(5)
+                setOpenDrawer(false)
+                openModal()
               }}
               divider
-              button
               className={classes.drawerAuthLink}
             >
-                <ListItemText
-                className={classes.drawerItem}
-                disableTypography
-              >
+              <ListItemText className={classes.drawerItem} disableTypography>
                 Sign In
               </ListItemText>
             </ListItem>
@@ -393,7 +405,7 @@ export default function Header() {
         <MenuIcon className={classes.drawerIcon} />
       </IconButton>
     </>
-  );
+  )
   return (
     <>
       <ElevationScroll>
@@ -401,18 +413,18 @@ export default function Header() {
           <Toolbar disableGutters>
             <Button
               disableRipple
-              onClick={() => setValue(0)}
+              onClick={() => setCurrentTabIndex(0)}
               component={Link}
-              to='/'
+              to="/"
               className={classes.logoContainer}
             >
-              <img className={classes.logo} src={logo} alt='three hands logo' />
+              <img className={classes.logo} src={logo} alt="three hands logo" />
             </Button>
             {matches ? drawer : tabs}
           </Toolbar>
         </AppBar>
       </ElevationScroll>
-      <div className={classes.toolbarMargin} />
+      <ToolBarMargin />
     </>
-  );
+  )
 }

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import FriendRequests from 'components/FriendRequests/FriendRequests';
 import hands from 'imgs/hands.gif';
-import { makeStyles } from '@material-ui/core';
 import MessageNotification from 'components/MessageNotification/MessageNotification';
+import useClasses from 'customHooks/useClasses';
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   hands: {
     ...theme.centerHorizontal,
     width: '100vw',
@@ -12,10 +12,11 @@ const useStyles = makeStyles((theme) => ({
     bottom: '0',
     position: 'absolute',
   },
-}));
+});
+
 const initMessageNotification = { sender: null, content: null, senderId: null };
 const Home = ({ props: { socketRef } }) => {
-  const classes = useStyles();
+  const classes = useClasses(styles);
   const [messageNotification, setMessageNotification] = useState(
     initMessageNotification
   );

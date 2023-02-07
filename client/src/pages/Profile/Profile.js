@@ -1,20 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import { CTX } from 'context/Store';
-import { Link } from 'react-router-dom';
-import {
-  Avatar,
-  makeStyles,
-  Card,
-  Typography,
-  Button,
-} from '@material-ui/core';
-import MessageNotification from 'components/MessageNotification/MessageNotification';
-import rps from 'imgs/rps.jpeg';
-import loadingblue from 'imgs/loadingblue.gif';
-const initMessageNotification = { sender: null, content: null, senderId: null };
+import React, { useState, useEffect, useContext } from 'react'
+import axios from 'axios'
+import { CTX } from 'context/Store'
+import { Link, useParams } from 'react-router-dom'
+import { Avatar, Card, Typography, Button } from '@mui/material'
+import MessageNotification from 'components/MessageNotification/MessageNotification'
+import rps from 'imgs/rps.jpeg'
+import loadingblue from 'imgs/loadingblue.gif'
+import useClasses from 'customHooks/useClasses'
+const initMessageNotification = { sender: null, content: null, senderId: null }
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   profilePage: { padding: '5rem 0' },
   profilePic: {
     width: '15rem',
@@ -22,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: '4.8rem',
     backgroundColor: theme.palette.primary.light,
     zIndex: 200,
-    position: 'absolute',
+    position: 'absolute !important',
     left: '50%',
     transition: 'all 0.8s ease',
     transform: 'translateX(-50%) translateY(-15.5rem)',
@@ -81,55 +76,48 @@ const useStyles = makeStyles((theme) => ({
     padding: '.25rem .5rem',
     borderRadius: '4px',
   },
-}));
-const Profile = ({
-  props: {
-    match: {
-      params: { id },
-    },
-    socketRef,
-  },
-}) => {
-  const [appState] = useContext(CTX);
-  const isCurrentUser = id === appState.user.id;
-  const { isLoggedIn } = appState;
-  const [user, setUser] = useState({});
-  const [rank, setRank] = useState(null);
-  const [friendshipExists, setFriendshipExists] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState('');
-  const classes = useStyles();
-  const [messageNotification, setMessageNotification] = useState(
-    initMessageNotification
-  );
+})
+
+const Profile = ({ props: { socketRef } }) => {
+  const [appState] = useContext(CTX)
+  const { id } = useParams()
+  const isCurrentUser = id === appState.user.id
+  const { isLoggedIn } = appState
+  const [user, setUser] = useState({})
+  const [rank, setRank] = useState(null)
+  const [friendshipExists, setFriendshipExists] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [err, setErr] = useState('')
+  const classes = useClasses(styles)
+  const [messageNotification, setMessageNotification] = useState(initMessageNotification)
   useEffect(() => {
-    let subscribed = true;
-    setLoading(true);
+    let subscribed = true
+    setLoading(true)
     axios
       .get(`/api/user/profile/${id}`, { headers: { userId: appState.user.id } })
       .then(({ data: { user, friendshipExists } }) => {
         if (subscribed) {
           setTimeout(() => {
-            setUser(user);
-            setFriendshipExists(friendshipExists);
-            setLoading(false);
-            setRank(getRank(user.exp));
-          }, 1200);
+            setUser(user)
+            setFriendshipExists(friendshipExists)
+            setLoading(false)
+            setRank(getRank(user.exp))
+          }, 1200)
         }
       })
       .catch(() => {
         if (subscribed) {
           setTimeout(() => {
-            setErr('No user found');
-            setLoading(false);
-          }, 1200);
+            setErr('No user found')
+            setLoading(false)
+          }, 1200)
         }
-      });
-    return () => (subscribed = false);
-  }, [appState.user.id, id]);
+      })
+    return () => (subscribed = false)
+  }, [appState.user.id, id])
 
   useEffect(() => {
-    let subscribed = true;
+    let subscribed = true
     if (socketRef && socketRef.current) {
       socketRef.current.on('chat-message-notification', (message) => {
         if (subscribed) {
@@ -137,18 +125,18 @@ const Profile = ({
             sender: message.sender.name,
             content: message.content,
             senderId: message.sender._id,
-          });
+          })
         }
-      });
+      })
     }
     return () => {
-      subscribed = false;
+      subscribed = false
       if (socketRef && socketRef.current) {
-        setMessageNotification(initMessageNotification);
-        socketRef.current.off('chat-message-notification');
+        setMessageNotification(initMessageNotification)
+        socketRef.current.off('chat-message-notification')
       }
-    };
-  }, []);
+    }
+  }, [])
 
   const requestFriend = () => {
     axios
@@ -159,19 +147,16 @@ const Profile = ({
       )
       .then(() => setFriendshipExists(true))
       .catch(() => {
-        setErr('Something went wrong, friend request not created');
-      });
-  };
+        setErr('Something went wrong, friend request not created')
+      })
+  }
 
-  const [backgroundPosition, setBackgroundPosition] = useState(null);
+  const [backgroundPosition, setBackgroundPosition] = useState(null)
   useEffect(() => {
-    setBackgroundPosition(
-      ['left', 'center', 'right'][Math.floor(Math.random() * 3)]
-    );
-  }, []);
+    setBackgroundPosition(['left', 'center', 'right'][Math.floor(Math.random() * 3)])
+  }, [])
 
-  const closeMessageNotification = () =>
-    setMessageNotification(initMessageNotification);
+  const closeMessageNotification = () => setMessageNotification(initMessageNotification)
 
   const expStyles = {
     white: {
@@ -194,7 +179,7 @@ const Profile = ({
       backgroundColor: 'black',
       color: 'white',
     },
-  };
+  }
 
   return (
     <div className={classes.profilePage}>
@@ -206,29 +191,19 @@ const Profile = ({
       )}
       <Card className={`${classes.card} `}>
         <Avatar
-          className={classes.profilePic}
+          classes={{ root: classes.profilePic }}
           alt={user.name || 'loading'}
-          src={
-            loading || !user.name
-              ? loadingblue
-              : `/api/image/${user.profilePic}`
-          }
+          src={loading || !user.name ? loadingblue : `/api/image/${user.profilePic}`}
         >
           {!user.profilePic && user.name && user.name[0].toUpperCase()}
         </Avatar>
         <div className={classes.infoSection}>
-          <Typography className={classes.username}>
-            {user.name || 'loading'}
-          </Typography>
+          <Typography className={classes.username}>{user.name || 'loading'}</Typography>
 
           {user.displayEmail && (
-            <Typography className={classes.email}>
-              {user.displayEmail}
-            </Typography>
+            <Typography className={classes.email}>{user.displayEmail}</Typography>
           )}
-          {user.bio && (
-            <Typography className={classes.email}>{user.bio}</Typography>
-          )}
+          {user.bio && <Typography className={classes.email}>{user.bio}</Typography>}
           {rank && (
             <Typography className={classes.exp} style={expStyles[rank]}>
               exp: {user.exp}
@@ -240,11 +215,7 @@ const Profile = ({
             </Button>
           )}
           {isCurrentUser && !loading && (
-            <Typography
-              className={classes.editLink}
-              component={Link}
-              to='/editprofile'
-            >
+            <Typography className={classes.editLink} component={Link} to="/editprofile">
               edit profile
             </Typography>
           )}
@@ -258,24 +229,24 @@ const Profile = ({
         }}
       />
     </div>
-  );
-};
+  )
+}
 
 const getRank = (exp) => {
   switch (true) {
     case exp < 15:
-      return 'white';
+      return 'white'
     case exp < 100:
-      return 'blue';
+      return 'blue'
     case exp < 500:
-      return 'purple';
+      return 'purple'
     case exp < 1000:
-      return 'brown';
+      return 'brown'
     case exp < 5000:
-      return 'black';
+      return 'black'
     default:
-      return 'white';
+      return 'white'
   }
-};
+}
 
-export default Profile;
+export default Profile

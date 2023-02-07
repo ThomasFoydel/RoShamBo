@@ -2,9 +2,10 @@ import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { CTX } from 'context/Store';
 import { Link } from 'react-router-dom';
-import { makeStyles, Avatar, Typography, Grid } from '@material-ui/core';
+import { Avatar, Typography, Grid } from '@mui/material';
+import useClasses from 'customHooks/useClasses';
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   battleFriends: {
     background: 'linear-gradient(#ccc, #ddd)',
     padding: '2em',
@@ -36,9 +37,11 @@ const useStyles = makeStyles((theme) => ({
   friendPic: {
     background: theme.palette.primary.main,
   },
-}));
+})
+
 const BattleFriends = () => {
-  const classes = useStyles();
+  const classes = useClasses(styles);
+
   const [appState] = useContext(CTX);
   const { token } = appState.auth;
   const { id } = appState.user;
@@ -65,7 +68,7 @@ const BattleFriends = () => {
 };
 
 const Friend = ({ props: { friend, _id } }) => {
-  const classes = useStyles();
+  const classes = useClasses(styles);
   return (
     <Grid
       container
