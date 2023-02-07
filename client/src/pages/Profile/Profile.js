@@ -1,25 +1,29 @@
-import React, { useState, useEffect, useContext } from 'react'
 import axios from 'axios'
-import { CTX } from 'context/Store'
 import { Link, useParams } from 'react-router-dom'
+import React, { useState, useEffect, useContext } from 'react'
 import { Avatar, Card, Typography, Button } from '@mui/material'
 import MessageNotification from 'components/MessageNotification/MessageNotification'
-import rps from 'imgs/rps.jpeg'
-import loadingblue from 'imgs/loadingblue.gif'
 import useClasses from 'customHooks/useClasses'
+import loadingblue from 'imgs/loadingblue.gif'
+import { CTX } from 'context/Store'
+import rps from 'imgs/rps.jpeg'
+
 const initMessageNotification = { sender: null, content: null, senderId: null }
 
 const styles = (theme) => ({
-  profilePage: { padding: '5rem 0' },
+  profilePage: {
+    padding: '5rem 0',
+  },
   profilePic: {
+    left: '50%',
+    zIndex: 200,
     width: '15rem',
     height: '15rem',
     fontSize: '4.8rem',
-    backgroundColor: theme.palette.primary.light,
-    zIndex: 200,
-    position: 'absolute !important',
-    left: '50%',
+    border: '4px solid #ddd',
     transition: 'all 0.8s ease',
+    position: 'absolute !important',
+    backgroundColor: theme.palette.primary.light,
     transform: 'translateX(-50%) translateY(-15.5rem)',
     [theme.breakpoints.down('sm')]: {
       width: '12rem',
@@ -27,43 +31,48 @@ const styles = (theme) => ({
     },
   },
   background: {
-    background: `linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.9) 60%), url(${rps})`,
-    bacgkroundSize: 'contain',
-    backgroundRepeat: 'no-repeat',
     top: 0,
     left: 0,
+    position: 'fixed',
     minWidth: '100vw',
     minHeight: '100vh',
-    position: 'fixed',
+    transform: 'scale(1.5)',
+    bacgkroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    background: `linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 40%, rgba(0,0,0,0.9) 60%), url(${rps})`,
   },
   card: {
     ...theme.centerHorizontal,
+    width: '90vw',
+    display: 'flex',
+    marginTop: '8rem',
+    padding: '8rem 0',
+    minHeight: '25rem',
     background: '#ddd',
     overflow: 'visible',
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '8rem 0',
     alignItems: 'center',
-    width: '90vw',
-    marginTop: '8rem',
-    minHeight: '25rem',
+    flexDirection: 'column',
   },
   infoSection: {
     width: '100%',
     display: 'flex',
-    justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'column',
+    justifyContent: 'center',
   },
   username: {
-    textAlign: 'center',
     width: '100%',
     fontSize: '3rem',
+    textAlign: 'center',
     [theme.breakpoints.down('sm')]: {
       fontSize: '2rem',
     },
   },
-  editLink: { textAlign: 'center', minWidth: '100%' },
+  editLink: {
+    minWidth: '100%',
+    marginTop: '1em',
+    textAlign: 'center',
+  },
   email: {},
   requestButton: {
     color: 'white',
@@ -73,32 +82,37 @@ const styles = (theme) => ({
     },
   },
   exp: {
-    padding: '.25rem .5rem',
     borderRadius: '4px',
+    padding: '.25rem .5rem',
   },
 })
 
 const Profile = ({ props: { socketRef } }) => {
-  const [appState] = useContext(CTX)
   const { id } = useParams()
-  const isCurrentUser = id === appState.user.id
-  const { isLoggedIn } = appState
-  const [user, setUser] = useState({})
-  const [rank, setRank] = useState(null)
+  const isCurrentUser = id === user.id
+  const [{ user, auth, isLoggedIn }] = useContext(CTX)
+  const [messageNotification, setMessageNotification] = useState(initMessageNotification)
+  const [backgroundPosition, setBackgroundPosition] = useState(null)
   const [friendshipExists, setFriendshipExists] = useState(true)
+  const [userInput, setUserInput] = useState({})
   const [loading, setLoading] = useState(false)
+  const [rank, setRank] = useState(null)
   const [err, setErr] = useState('')
   const classes = useClasses(styles)
-  const [messageNotification, setMessageNotification] = useState(initMessageNotification)
+
+  useEffect(() => {
+    setBackgroundPosition(['left', 'center', 'right'][Math.floor(Math.random() * 3)])
+  }, [])
+
   useEffect(() => {
     let subscribed = true
     setLoading(true)
     axios
-      .get(`/api/user/profile/${id}`, { headers: { userId: appState.user.id } })
+      .get(`/api/user/profile/${id}`, { headers: { userId: user.id } })
       .then(({ data: { user, friendshipExists } }) => {
         if (subscribed) {
           setTimeout(() => {
-            setUser(user)
+            setUserInput(user)
             setFriendshipExists(friendshipExists)
             setLoading(false)
             setRank(getRank(user.exp))
@@ -114,7 +128,7 @@ const Profile = ({ props: { socketRef } }) => {
         }
       })
     return () => (subscribed = false)
-  }, [appState.user.id, id])
+  }, [user.id, id])
 
   useEffect(() => {
     let subscribed = true
@@ -140,21 +154,10 @@ const Profile = ({ props: { socketRef } }) => {
 
   const requestFriend = () => {
     axios
-      .post(
-        '/api/user/friendrequest/',
-        { id },
-        { headers: { 'x-auth-token': appState.auth.token } }
-      )
+      .post('/api/user/friendrequest/', { id }, { headers: { 'x-auth-token': auth.token } })
       .then(() => setFriendshipExists(true))
-      .catch(() => {
-        setErr('Something went wrong, friend request not created')
-      })
+      .catch(() => setErr('Something went wrong, friend request not created'))
   }
-
-  const [backgroundPosition, setBackgroundPosition] = useState(null)
-  useEffect(() => {
-    setBackgroundPosition(['left', 'center', 'right'][Math.floor(Math.random() * 3)])
-  }, [])
 
   const closeMessageNotification = () => setMessageNotification(initMessageNotification)
 
@@ -186,27 +189,27 @@ const Profile = ({ props: { socketRef } }) => {
       {backgroundPosition && (
         <div
           className={classes.background}
-          style={{ backgroundPosition: `${backgroundPosition} bottom` }}
-        ></div>
+          style={{ backgroundPosition: `${backgroundPosition} center` }}
+        />
       )}
       <Card className={`${classes.card} `}>
         <Avatar
           classes={{ root: classes.profilePic }}
-          alt={user.name || 'loading'}
-          src={loading || !user.name ? loadingblue : `/api/image/${user.profilePic}`}
+          alt={userInput.name || 'loading'}
+          src={loading || !userInput.name ? loadingblue : `/api/image/${userInput.profilePic}`}
         >
-          {!user.profilePic && user.name && user.name[0].toUpperCase()}
+          {!userInput.profilePic && userInput.name && userInput.name[0].toUpperCase()}
         </Avatar>
         <div className={classes.infoSection}>
-          <Typography className={classes.username}>{user.name || 'loading'}</Typography>
+          <Typography className={classes.username}>{userInput.name || 'loading'}</Typography>
 
-          {user.displayEmail && (
-            <Typography className={classes.email}>{user.displayEmail}</Typography>
+          {userInput.displayEmail && (
+            <Typography className={classes.email}>{userInput.displayEmail}</Typography>
           )}
-          {user.bio && <Typography className={classes.email}>{user.bio}</Typography>}
+          {userInput.bio && <Typography className={classes.email}>{userInput.bio}</Typography>}
           {rank && (
             <Typography className={classes.exp} style={expStyles[rank]}>
-              exp: {user.exp}
+              exp: {userInput.exp}
             </Typography>
           )}
           {!isCurrentUser && !friendshipExists && isLoggedIn && (
