@@ -53,7 +53,7 @@ const App = () => {
             }
           }
         })
-        .catch(() => !isDev() && updateState({ type: 'LOGOUT' }))
+        // .catch(() => !isDev() && updateState({ type: 'LOGOUT' }))
     }
 
     let noToken = !rsbToken || rsbToken === 'undefined'

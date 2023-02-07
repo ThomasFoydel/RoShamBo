@@ -112,9 +112,12 @@ const Forum = ({ props: { socketRef } }) => {
   useEffect(() => {
     axios
       .get('/api/forum/posts')
-      .then(({ data }) => setPosts(data))
+      // .then(({ data }) => setPosts(data))
+      .then((res) => console.log(res))
       .catch((err) => console.log({ err }))
   }, [token])
+
+  console.log({ posts })
 
   useEffect(() => {
     let subscribed = true

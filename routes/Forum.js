@@ -18,7 +18,7 @@ router.post('/post', auth, async (req, res) => {
 
 router.get('/posts', async (req, res) => {
   API.post
-    .findAll(req.body.skip, req.body.limit)
+    .findAll()
     .then((posts) => res.status(201).send(posts))
     .catch(() =>
       res

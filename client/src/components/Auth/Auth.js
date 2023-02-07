@@ -53,7 +53,9 @@ const Auth = () => {
         updateState({ type: 'LOGIN', payload: { token, user } })
         setFormState(initialState)
       })
-      .catch((err) => setErr(err.data.err))
+      
+      .catch((err) => console.log(err.message))
+      // .catch((err) => setErr(err.data.err))
   }
 
   const props = { formState, handleAuth, setAuthPage, setFormState }
