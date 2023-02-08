@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { Delete as DeleteIcon } from '@mui/icons-material'
 import { Card, Typography, Avatar, Grid, IconButton } from '@mui/material'

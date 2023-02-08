@@ -1,6 +1,5 @@
-import React from 'react';
-
-const CTX = React.createContext();
+import React, { createContext, useReducer } from 'react'
+const CTX = createContext();
 export { CTX };
 
 export function reducer(state, action) {
@@ -65,7 +64,7 @@ export function reducer(state, action) {
 }
 
 export default function Store(props) {
-  const stateHook = React.useReducer(reducer, {
+  const stateHook = useReducer(reducer, {
     isLoggedIn: false,
     auth: { token: null },
     authModal: false,

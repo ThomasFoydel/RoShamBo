@@ -3,22 +3,24 @@ import { Alert } from '@mui/lab'
 import { Navigate } from 'react-router-dom'
 import React, { useState, useContext } from 'react'
 import { Modal, Snackbar } from '@mui/material'
+import useClasses from 'customHooks/useClasses'
 import { CTX } from 'context/Store'
 import Register from './Register'
 import Login from './Login'
-import useClasses from 'customHooks/useClasses'
 
 const styles = (theme) => ({
   modalBody: {
+    top: '50%',
+    left: '50%',
+    position: 'absolute',
+    boxShadow: theme.shadows[5],
     transform: `translate(-50%, -50%)`,
     backgroundColor: theme.palette.background.paper,
     border: `2px solid ${theme.palette.common.blue}`,
-    boxShadow: theme.shadows[5],
-    position: 'absolute',
-    left: '50%',
-    top: '50%',
   },
-  modal: { zIndex: '9000 !important' },
+  modal: {
+    zIndex: '9000 !important',
+  },
 })
 
 const initialState = {
@@ -53,9 +55,7 @@ const Auth = () => {
         updateState({ type: 'LOGIN', payload: { token, user } })
         setFormState(initialState)
       })
-      
-      .catch((err) => console.log(err.message))
-      // .catch((err) => setErr(err.data.err))
+      .catch((err) => setErr(err.data.err))
   }
 
   const props = { formState, handleAuth, setAuthPage, setFormState }
