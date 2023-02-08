@@ -1,7 +1,7 @@
 import { Avatar, Grid, Typography } from '@mui/material'
 import useClasses from 'customHooks/useClasses'
 
-const styles = ({ theme }) => ({
+const styles = (theme) => ({
   friend: {
     padding: '.3em',
     background: '#111',

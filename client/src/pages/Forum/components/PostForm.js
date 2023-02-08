@@ -33,8 +33,8 @@ const styles = (theme) => ({
 const initialState = { title: '', content: '' }
 
 const PostForm = ({ props: { setPosts, token } }) => {
-  const classes = useClasses(styles)
   const [form, setForm] = useState(initialState)
+  const classes = useClasses(styles)
 
   const makePost = (e) => {
     e.preventDefault()

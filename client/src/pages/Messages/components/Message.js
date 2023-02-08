@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Grid, Avatar, Typography } from '@mui/material'
 import useClasses from 'customHooks/useClasses'
 
-const styles = ({ theme }) => ({
+const styles = (theme) => ({
   message: {
     padding: '.5em',
     margin: '.5em 0',

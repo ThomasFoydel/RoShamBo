@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { Grid, Input, Button } from '@mui/material'
 import useClasses from 'customHooks/useClasses'
 
-const styles = ({ theme }) => ({
+const styles = (theme) => ({
   chatbox: { padding: '.5em' },
   input: {
     color: 'white',
