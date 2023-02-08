@@ -1,17 +1,8 @@
-import { Button } from '@mui/material';
-import { DropzoneDialog } from 'mui-file-dropzone';
+import { Button } from '@mui/material'
+import { DropzoneDialog } from 'mui-file-dropzone'
 
 const ImageUpload = ({
-  props: {
-    toggle,
-    text,
-    show,
-    handleFile,
-    handleDelete,
-    buttonText,
-    handleSubmit,
-    btnClass,
-  },
+  props: { text, show, toggle, btnClass, buttonText, handleFile, handleDelete, handleSubmit },
 }) => {
   return (
     <div>
@@ -20,24 +11,24 @@ const ImageUpload = ({
       </Button>
       <DropzoneDialog
         open={show}
-        onChange={handleFile}
-        onClose={toggle}
-        onDelete={handleDelete}
-        acceptedFiles={['image/jpeg', 'image/png']}
-        maxFileSize={5000000}
         filesLimit={1}
-        showFileNamesInPreview={false}
-        showFileNames={false}
+        onClose={toggle}
         dropzoneText={text}
-        getFileAddedMessage={() => 'file added!'}
-        getFileRemovedMessage={() => 'file removed!'}
-        onAlert={(alert) => console.log({ alert })}
-        getFileLimitExceedMessage={() => 'file is too big'}
-        getDropRejectMessage={() => 'invalid file type'}
+        maxFileSize={5000000}
+        onChange={handleFile}
         onSave={handleSubmit}
+        showFileNames={false}
+        onDelete={handleDelete}
+        showFileNamesInPreview={false}
+        getFileAddedMessage={() => 'file added!'}
+        acceptedFiles={['image/jpeg', 'image/png']}
+        onAlert={(alert) => console.log({ alert })}
+        getFileRemovedMessage={() => 'file removed!'}
+        getDropRejectMessage={() => 'invalid file type'}
+        getFileLimitExceedMessage={() => 'file is too big'}
       />
     </div>
-  );
-};
+  )
+}
 
-export default ImageUpload;
+export default ImageUpload
