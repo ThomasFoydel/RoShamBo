@@ -1,7 +1,7 @@
-import React from 'react';
-import hands from 'imgs/instructions.gif';
-import { Link } from 'react-router-dom';
-import useClasses from 'customHooks/useClasses';
+import React from 'react'
+import { Link } from 'react-router-dom'
+import useClasses from 'customHooks/useClasses'
+import hands from 'imgs/instructions.gif'
 
 const styles = (theme) => ({
   container: {
@@ -11,10 +11,10 @@ const styles = (theme) => ({
   },
   hands: {
     width: '85%',
-    maxWidth: '600px',
-    minWidth: '260px',
-    objectFit: 'contain',
     padding: '0 3em',
+    minWidth: '260px',
+    maxWidth: '600px',
+    objectFit: 'contain',
   },
   link: {
     color: theme.palette.primary.main,
@@ -25,15 +25,11 @@ const styles = (theme) => ({
 })
 
 const HowTo = () => {
-  const classes = useClasses(styles);
+  const classes = useClasses(styles)
   return (
     <center className={classes.container}>
       <h3>Instructions</h3>
-      <img
-        src={hands}
-        className={classes.hands}
-        alt='rock paper scissors bird and tree gestures'
-      />
+      <img src={hands} className={classes.hands} alt="rock paper scissors bird and tree gestures" />
       <p>When a battle starts your opponent will disappear</p>
       <p>You must throw one of these hand gestures</p>
       <p>After a few moments, your weapon will be selected</p>
@@ -43,31 +39,31 @@ const HowTo = () => {
       <br />
       <p>
         Find new friends in the{' '}
-        <Link to='/forum' className={classes.link}>
+        <Link to="/forum" className={classes.link}>
           forum
         </Link>
       </p>
       <p>
         Start battles on the{' '}
-        <Link to='/battle' className={classes.link}>
+        <Link to="/battle" className={classes.link}>
           battle page
         </Link>
       </p>
       <p>
         Manage your{' '}
-        <Link to='/profile/edit' className={classes.link}>
+        <Link to="/profile/edit" className={classes.link}>
           profile info
         </Link>
       </p>
       <p>
         Or{' '}
-        <Link to='/messages' className={classes.link}>
+        <Link to="/messages" className={classes.link}>
           message
         </Link>{' '}
         your friends
       </p>
     </center>
-  );
-};
+  )
+}
 
-export default HowTo;
+export default HowTo
