@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import { CTX } from 'context/Store';
-import { Button } from '@mui/material';
-import useClasses from 'customHooks/useClasses';
+import axios from 'axios'
+import React, { useState, useEffect, useContext } from 'react'
+import FriendRequest from './components/FriendRequest'
+import useClasses from 'customHooks/useClasses'
+import { CTX } from 'context/Store'
 
 const styles = (theme) => ({
   friendRequests: {
-    ...theme.centerHorizontal,
-    fontFamily: 'OpenDyslexic',
     qidth: '100%',
     textAlign: 'center',
+    ...theme.centerHorizontal,
+    fontFamily: 'OpenDyslexic',
   },
   btn: {
     color: 'white',
@@ -19,74 +19,51 @@ const styles = (theme) => ({
       background: theme.palette.primary.dark,
     },
   },
-});
+})
 
 const FriendRequests = () => {
-  const [appState, updateState] = useContext(CTX);
-  const token = appState.auth.token;
-  const [friendRequests, setFriendRequests] = useState([]);
-  const classes = useClasses(styles);
-  
+  const [appState, updateState] = useContext(CTX)
+  const token = appState.auth.token
+  const [friendRequests, setFriendRequests] = useState([])
+  const classes = useClasses(styles)
+
   useEffect(() => {
-    let subscribed = true;
+    let subscribed = true
     axios
       .get('/api/user/friendrequests', { headers: { 'x-auth-token': token } })
       .then(({ data }) => subscribed && setFriendRequests(data))
-      .catch((err) => console.log({ err }));
-    return () => (subscribed = false);
-  }, []);
+      .catch((err) => console.error(err))
+    return () => (subscribed = false)
+  }, [])
+
   const accept = (id) => {
     axios
-      .post(
-        '/api/user/accept-fr',
-        { id },
-        { headers: { 'x-auth-token': token } }
-      )
+      .post('/api/user/accept-fr', { id }, { headers: { 'x-auth-token': token } })
       .then(({ data }) => {
-        setFriendRequests(data.friendRequests);
-        updateState({ type: 'SET_FRIENDLIST', payload: data.friendList });
+        setFriendRequests(data.friendRequests)
+        updateState({ type: 'SET_FRIENDLIST', payload: data.friendList })
       })
-      .catch((err) => console.log({ err }));
-  };
+      .catch((err) => console.error(err))
+  }
+
   const reject = (id) => {
     axios
-      .post(
-        '/api/user/reject-fr',
-        { id },
-        { headers: { 'x-auth-token': token } }
-      )
+      .post('/api/user/reject-fr', { id }, { headers: { 'x-auth-token': token } })
       .then(({ data }) => setFriendRequests(data))
-      .catch((err) => console.log({ err }));
-  };
+      .catch((err) => console.error(err))
+  }
+
   return (
     <div className={classes.friendRequests}>
-      <h3>
-        {friendRequests.length === 0
-          ? 'No Pending Frend Requests'
-          : 'Friend Requests: '}
-      </h3>
+      <h3>{friendRequests.length === 0 ? 'No Pending Frend Requests' : 'Friend Requests: '}</h3>
       {friendRequests.map((request) => (
         <FriendRequest
           key={request._id}
-          props={{ request, reject, accept, classes }}
+          props={{ request, reject, accept, btnClass: classes.btn }}
         />
       ))}
     </div>
-  );
-};
+  )
+}
 
-const FriendRequest = ({ props: { request, reject, accept, classes } }) => {
-  const { _id } = request;
-  return (
-    <>
-      <div>{request.sender.name}</div>
-      <Button className={classes.btn} onClick={() => accept(_id)}>
-        accept
-      </Button>
-      <Button className={classes.btn} onClick={() => reject(_id)}>
-        reject
-      </Button>
-    </>
-  );
-};
-export default FriendRequests;
+export default FriendRequests
