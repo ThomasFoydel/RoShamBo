@@ -82,6 +82,7 @@ const App = () => {
               color: 'white',
               minHeight: '100vh',
               background: '#111',
+              paddingBottom: '3rem',
               fontFamily: 'OpenDyslexic',
             }}
           >
@@ -94,16 +95,16 @@ const App = () => {
               />
               <Route
                 exact
+                path="/profile/edit"
+                element={loggedAndLoaded ? <EditProfile props={{ socketRef }} /> : <Landing />}
+              />
+              <Route
+                exact
                 path="/profile/:id"
                 element={socketOrNotLoggedIn ? <Profile props={{ socketRef }} /> : <></>}
               />
               <Route exact path="/battle" element={isLoggedIn ? Battle : Landing} />
               <Route exact path="/battle/computer" element={ComputerBattle} />
-              <Route
-                exact
-                path="/editprofile"
-                element={loggedAndLoaded ? <EditProfile props={{ socketRef }} /> : <Landing />}
-              />
               <Route
                 exact
                 path="/messages"

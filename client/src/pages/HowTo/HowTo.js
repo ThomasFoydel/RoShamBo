@@ -55,7 +55,7 @@ const HowTo = () => {
       </p>
       <p>
         Manage your{' '}
-        <Link to='/editprofile' className={classes.link}>
+        <Link to='/profile/edit' className={classes.link}>
           profile info
         </Link>
       </p>

@@ -76,6 +76,10 @@ const styles = (theme) => ({
     minWidth: '100%',
     marginTop: '.5em',
     textAlign: 'center',
+    color: theme.palette.primary.main,
+    '&:hover': {
+      color: theme.palette.primary.dark,
+    },
   },
   email: {},
   bio: {
@@ -226,7 +230,7 @@ const Profile = ({ props: { socketRef } }) => {
             </Button>
           )}
           {isCurrentUser && !loading && (
-            <Typography className={classes.editLink} component={Link} to="/editprofile">
+            <Typography className={classes.editLink} component={Link} to="/profile/edit">
               edit profile
             </Typography>
           )}
