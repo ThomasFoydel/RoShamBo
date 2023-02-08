@@ -21,13 +21,14 @@ const styles = (theme) => ({
     height: '15rem',
     fontSize: '4.8rem',
     border: '4px solid #ddd',
-    transition: 'all 0.8s ease',
     position: 'absolute !important',
     backgroundColor: theme.palette.primary.light,
     transform: 'translateX(-50%) translateY(-15.5rem)',
+    transition: 'background 0.8s ease, color 0.8s ease',
     [theme.breakpoints.down('sm')]: {
       width: '12rem',
       height: '12rem',
+      transform: 'translateX(-50%) translateY(-14rem)',
     },
   },
   background: {
@@ -59,6 +60,9 @@ const styles = (theme) => ({
     alignItems: 'center',
     flexDirection: 'column',
     justifyContent: 'center',
+    [theme.breakpoints.down('sm')]: {
+      marginTop: '-2rem',
+    },
   },
   username: {
     width: '100%',
@@ -70,10 +74,13 @@ const styles = (theme) => ({
   },
   editLink: {
     minWidth: '100%',
-    marginTop: '1em',
+    marginTop: '.5em',
     textAlign: 'center',
   },
   email: {},
+  bio: {
+    marginBottom: '.5em',
+  },
   requestButton: {
     color: 'white',
     background: theme.palette.primary.main,
@@ -89,7 +96,6 @@ const styles = (theme) => ({
 
 const Profile = ({ props: { socketRef } }) => {
   const { id } = useParams()
-  const isCurrentUser = id === user.id
   const [{ user, auth, isLoggedIn }] = useContext(CTX)
   const [messageNotification, setMessageNotification] = useState(initMessageNotification)
   const [backgroundPosition, setBackgroundPosition] = useState(null)
@@ -99,6 +105,8 @@ const Profile = ({ props: { socketRef } }) => {
   const [rank, setRank] = useState(null)
   const [err, setErr] = useState('')
   const classes = useClasses(styles)
+
+  const isCurrentUser = id === user.id
 
   useEffect(() => {
     setBackgroundPosition(['left', 'center', 'right'][Math.floor(Math.random() * 3)])
@@ -112,18 +120,18 @@ const Profile = ({ props: { socketRef } }) => {
       .then(({ data: { user, friendshipExists } }) => {
         if (subscribed) {
           setTimeout(() => {
-            setUserInput(user)
-            setFriendshipExists(friendshipExists)
             setLoading(false)
+            setUserInput(user)
             setRank(getRank(user.exp))
+            setFriendshipExists(friendshipExists)
           }, 1200)
         }
       })
       .catch(() => {
         if (subscribed) {
           setTimeout(() => {
-            setErr('No user found')
             setLoading(false)
+            setErr('No user found')
           }, 1200)
         }
       })
@@ -136,8 +144,8 @@ const Profile = ({ props: { socketRef } }) => {
       socketRef.current.on('chat-message-notification', (message) => {
         if (subscribed) {
           setMessageNotification({
-            sender: message.sender.name,
             content: message.content,
+            sender: message.sender.name,
             senderId: message.sender._id,
           })
         }
@@ -163,24 +171,24 @@ const Profile = ({ props: { socketRef } }) => {
 
   const expStyles = {
     white: {
-      backgroundColor: 'white',
       color: 'black',
+      backgroundColor: 'white',
     },
     blue: {
-      backgroundColor: 'blue',
       color: 'white',
+      backgroundColor: 'blue',
     },
     purple: {
-      backgroundColor: 'blue',
       color: 'white',
+      backgroundColor: 'blue',
     },
     brown: {
-      backgroundColor: 'brown',
       color: 'white',
+      backgroundColor: 'brown',
     },
     black: {
-      backgroundColor: 'black',
       color: 'white',
+      backgroundColor: 'black',
     },
   }
 
@@ -194,8 +202,8 @@ const Profile = ({ props: { socketRef } }) => {
       )}
       <Card className={`${classes.card} `}>
         <Avatar
-          classes={{ root: classes.profilePic }}
           alt={userInput.name || 'loading'}
+          classes={{ root: classes.profilePic }}
           src={loading || !userInput.name ? loadingblue : `/api/image/${userInput.profilePic}`}
         >
           {!userInput.profilePic && userInput.name && userInput.name[0].toUpperCase()}
@@ -206,7 +214,7 @@ const Profile = ({ props: { socketRef } }) => {
           {userInput.displayEmail && (
             <Typography className={classes.email}>{userInput.displayEmail}</Typography>
           )}
-          {userInput.bio && <Typography className={classes.email}>{userInput.bio}</Typography>}
+          {userInput.bio && <Typography className={classes.bio}>{userInput.bio}</Typography>}
           {rank && (
             <Typography className={classes.exp} style={expStyles[rank]}>
               exp: {userInput.exp}
@@ -226,8 +234,8 @@ const Profile = ({ props: { socketRef } }) => {
       </Card>
       <MessageNotification
         props={{
-          message: messageNotification,
           severity: 'info',
+          message: messageNotification,
           close: closeMessageNotification,
         }}
       />
