@@ -46,18 +46,18 @@ const ToolBarMargin = styled('div')(({ theme }) => ({
 
 const NavButton = styled(Button)(({ theme }) => ({
   ...theme.typography.loginLink,
-  fontFamily: 'OpenDyslexic',
-  borderRadius: '50px',
-  whiteSpace: 'nowrap',
   margin: '10px',
   height: '45px',
+  whiteSpace: 'nowrap',
+  borderRadius: '50px',
+  fontFamily: 'OpenDyslexic',
 }))
 
 const NavBarTab = styled(Tab)(({ theme }) => ({
   ...theme.typography.tab,
-  color: 'white ',
   minWidth: 10,
   opacity: 0.8,
+  color: 'white',
 }))
 
 const Logo = styled('img')(({ theme }) => ({
@@ -75,14 +75,14 @@ const Logo = styled('img')(({ theme }) => ({
 
 const BattleMenu = styled(Menu)(({ theme }) => ({
   '.MuiPaper-root.MuiMenu-paper': {
-    backgroundColor: theme.palette.common.blue,
-    borderColor: theme.palette.primary.dark,
+    color: 'white',
+    borderRadius: 0,
     borderWidth: '1px',
     borderStyle: 'solid',
     borderTopWidth: '0px',
-    color: 'white',
     top: '111px !important',
-    borderRadius: 0,
+    borderColor: theme.palette.primary.dark,
+    backgroundColor: theme.palette.common.blue,
     [theme.breakpoints.down('xl')]: {},
     [theme.breakpoints.down('lg')]: {
       top: '88px !important',
@@ -94,14 +94,14 @@ const styles = (theme) => ({
   tabContainer: {
     marginLeft: 'auto',
     '.Mui-selected': {
-      color: 'white',
       opacity: 1,
+      color: 'white',
     },
   },
   button: {
     ...theme.typography.loginLink,
-    borderRadius: '50px',
     height: '45px',
+    borderRadius: '50px',
   },
   authBtn: {
     background: theme.palette.secondary.main,
@@ -129,11 +129,11 @@ const styles = (theme) => ({
     },
   },
   drawerIcon: {
-    height: '50px',
     width: '50px',
+    height: '50px',
     [theme.breakpoints.down('xs')]: {
-      height: '35px',
       width: '35px',
+      height: '35px',
     },
   },
   drawer: {
@@ -143,10 +143,10 @@ const styles = (theme) => ({
 
   drawerItemText: {
     ...theme.typography.tab,
+    opacity: 0.7,
     color: 'white',
     paddingLeft: '0',
     textAlign: 'center',
-    opacity: 0.7,
   },
   drawerItem: {
     '&:hover': {
@@ -185,22 +185,22 @@ const styles = (theme) => ({
 const menuOptions = [
   { name: 'Battle', link: '/battle', activeIndex: 1, selectedIndex: 0 },
   {
+    activeIndex: 1,
     name: 'Friends',
-    link: '/battle/friends',
-    activeIndex: 1,
     selectedIndex: 1,
+    link: '/battle/friends',
   },
   {
+    activeIndex: 1,
     name: 'Random',
-    link: '/battle/random',
-    activeIndex: 1,
     selectedIndex: 2,
+    link: '/battle/random',
   },
   {
-    name: 'Computer',
-    link: '/battle/computer',
     activeIndex: 1,
+    name: 'Computer',
     selectedIndex: 3,
+    link: '/battle/computer',
   },
 ]
 
