@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const API = require('../controller/API')
 const auth = require('../middleware/auth')
+
 const router = express.Router()
 
 const sendUser = (res, user, token) => {
@@ -12,7 +13,6 @@ const sendUser = (res, user, token) => {
 
 router.post('/register', async (req, res) => {
   let { email, name, password, confirmpassword } = req.body || {}
-  console.log(req.body)
   let allFieldsExist = email && name && password && confirmpassword
   if (!allFieldsExist) {
     return res.status(400).send({ err: 'All fields required' })
@@ -25,7 +25,6 @@ router.post('/register', async (req, res) => {
   }
 
   const existingUser = await API.user.findByEmail(email)
-  console.log(existingUser)
   if (existingUser) {
     return res.status(400).send({ err: 'Account with this email already exists' })
   }
@@ -58,9 +57,7 @@ router.post('/register', async (req, res) => {
       )
       return sendUser(res, user, token)
     })
-    .catch(() => {
-      res.status(500).send({ err: 'Database is down, we are working to fix this' })
-    })
+    .catch(() => res.status(500).send({ err: 'Database is down, we are working to fix this' }))
 })
 
 router.post('/login', async (req, res) => {
@@ -91,11 +88,7 @@ router.post('/login', async (req, res) => {
         return res.status(401).send({ err: 'Incorrect auth info' })
       }
     })
-    .catch(() =>
-      res.status(500).send({
-        err: 'Database is down, we are working to fix this',
-      })
-    )
+    .catch(() => res.status(500).send({ err: 'Database is down, we are working to fix this' }))
 })
 
 router.get('/', auth, async (req, res) => {
@@ -106,9 +99,7 @@ router.get('/', auth, async (req, res) => {
     return API.user
       .findById({ _id: userId })
       .then(async (user) => sendUser(res, user, token))
-      .catch(() => {
-        res.status(500).send({ err: 'database error' })
-      })
+      .catch(() => res.status(500).send({ err: 'database error' }))
   }
   return res.status(401).send({ err: 'no token' })
 })
