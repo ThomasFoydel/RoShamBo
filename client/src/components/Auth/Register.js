@@ -1,14 +1,5 @@
-import {
-  Typography,
-  Grid,
-  Paper,
-  Avatar,
-  TextField,
-  FormControlLabel,
-  Checkbox,
-  Button,
-} from '@mui/material'
 import { Lock } from '@mui/icons-material'
+import { Typography, Grid, Paper, Avatar, TextField, Button } from '@mui/material'
 import useClasses from 'customHooks/useClasses'
 
 const styles = (theme) => ({
@@ -37,20 +28,14 @@ const styles = (theme) => ({
 })
 
 const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) => {
-  const classes = useClasses(styles)
   const { name, email, password, confirmpassword } = formState.register
+  const classes = useClasses(styles)
 
   const handleChange = ({ target: { value, id } }) => {
     setFormState((formState) => ({
       ...formState,
       register: { ...formState.register, [id]: value },
     }))
-  }
-
-  const handleKeyDown = ({ charCode }) => {
-    if (charCode === 13) {
-      handleAuth('register')
-    }
   }
 
   const handleSubmit = (e) => {
@@ -68,61 +53,53 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
       </Grid>
       <form onSubmit={handleSubmit}>
         <TextField
-          label="Email"
-          placeholder="Enter email"
+          required
           fullWidth
           id="email"
-          required
           value={email}
-          onChange={handleChange}
-          onKeyPress={handleKeyDown}
+          label="Email"
           autoComplete="email"
-        />
-        <TextField
-          label="Name"
-          placeholder="Enter name"
-          fullWidth
-          id="name"
-          required
-          value={name}
           onChange={handleChange}
-          onKeyPress={handleKeyDown}
-          autoComplete="username"
+          placeholder="Enter email"
         />
         <TextField
-          label="Confirm password"
-          placeholder="Enter password"
-          id="confirmpassword"
-          type="password"
-          fullWidth
           required
+          id="name"
+          fullWidth
+          value={name}
+          label="Name"
+          onChange={handleChange}
+          autoComplete="username"
+          placeholder="Enter name"
+        />
+        <TextField
+          required
+          fullWidth
+          type="password"
+          id="confirmpassword"
           value={confirmpassword}
           onChange={handleChange}
-          onKeyPress={handleKeyDown}
+          label="Confirm password"
           autoComplete="new-password"
+          placeholder="Enter password"
         />
         <TextField
-          label="Password"
-          placeholder="Enter password"
+          required
+          fullWidth
           id="password"
           type="password"
-          fullWidth
-          required
           value={password}
+          label="Password"
           onChange={handleChange}
-          onKeyPress={handleKeyDown}
           autoComplete="new-password"
-        />
-        <FormControlLabel
-          control={<Checkbox name="checkedB" color="primary" />}
-          label="Remember me"
+          placeholder="Enter password"
         />
         <Button
-          className={classes.button}
+          fullWidth
           type="submit"
           color="primary"
           variant="contained"
-          fullWidth
+          className={classes.button}
         >
           Sign up
         </Button>

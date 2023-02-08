@@ -19,9 +19,15 @@ const styles = (theme) => ({
     padding: '2rem 4rem',
     [theme.breakpoints.down('xs')]: { padding: '2rem 2rem' },
   },
-  avatar: { backgroundColor: theme.palette.primary.main },
-  button: { margin: '8px 0' },
-  header: { fontFamily: 'OpenDyslexic' },
+  avatar: {
+    backgroundColor: theme.palette.primary.main,
+  },
+  button: {
+    margin: '8px 0',
+  },
+  header: {
+    fontFamily: 'OpenDyslexic',
+  },
   registerLink: {
     cursor: 'pointer',
     color: theme.palette.primary.dark,
@@ -36,18 +42,13 @@ const styles = (theme) => ({
 })
 
 const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) => {
-  const classes = useClasses(styles)
   const { email, password } = formState.login
+  const classes = useClasses(styles)
 
   const handleChange = ({ target: { value, id } }) => {
     setFormState((formState) => ({ ...formState, login: { ...formState.login, [id]: value } }))
   }
 
-  const handleKeyDown = ({ charCode }) => {
-    if (charCode === 13) {
-      handleAuth('login')
-    }
-  }
   const handleSubmit = (e) => {
     e.preventDefault()
     handleAuth('login')
@@ -63,38 +64,36 @@ const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) 
       </Grid>
       <form onSubmit={handleSubmit}>
         <TextField
-          label="Email"
-          placeholder="Enter email"
+          required
           fullWidth
           id="email"
-          required
           value={email}
-          onChange={handleChange}
-          onKeyPress={handleKeyDown}
+          label="Email"
           autoComplete="email"
+          onChange={handleChange}
+          placeholder="Enter email"
         />
         <TextField
-          label="Password"
-          placeholder="Enter password"
+          required
+          fullWidth
           id="password"
           type="password"
-          fullWidth
-          required
           value={password}
+          label="Password"
           onChange={handleChange}
-          onKeyPress={handleKeyDown}
+          placeholder="Enter password"
           autoComplete="current-password"
         />
         <FormControlLabel
-          control={<Checkbox name="checkedB" color="primary" />}
           label="Remember me"
+          control={<Checkbox name="checkedB" color="primary" />}
         />
         <Button
-          className={classes.button}
+          fullWidth
           type="submit"
           color="primary"
           variant="contained"
-          fullWidth
+          className={classes.button}
         >
           Sign in
         </Button>
