@@ -1,54 +1,55 @@
 import React, { useContext } from 'react'
 import { Typography, Button } from '@mui/material'
 import weaponSystem from 'imgs/weaponsystem.png'
-import { CTX } from 'context/Store'
 import useClasses from 'customHooks/useClasses'
+import { CTX } from 'context/Store'
+
 const styles = (theme) => ({
   container: {
     background: 'white',
   },
   title: {
-    textAlign: 'center',
     fontSize: '6rem',
-    letterSpacing: '1rem',
     marginLeft: '1rem',
-    backgroundImage: `linear-gradient(to bottom right, ${theme.palette.secondary.light}, ${theme.palette.primary.main})`,
+    textAlign: 'center',
+    letterSpacing: '1rem',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
+    backgroundImage: `linear-gradient(to bottom right, ${theme.palette.secondary.light}, ${theme.palette.primary.main})`,
     [theme.breakpoints.down('sm')]: {
       fontSize: '3.5rem',
-      letterSpacing: '.3rem',
       marginLeft: '.3rem',
+      letterSpacing: '.3rem',
     },
     [theme.breakpoints.down('xs')]: {
       fontSize: '2.5rem',
-      letterSpacing: '.2rem',
       marginLeft: '.2rem',
+      letterSpacing: '.2rem',
     },
   },
   weaponSystem: {
-    border: '8px solid black',
     padding: '5%',
-    borderBottom: 'none',
-    background: `radial-gradient(${theme.palette.secondary.dark}, ${theme.palette.primary.main})`,
     width: '100%',
+    borderBottom: 'none',
+    border: '8px solid black',
+    background: `radial-gradient(${theme.palette.secondary.dark}, ${theme.palette.primary.main})`,
   },
   startBtn: {
-    position: 'fixed',
     top: '50vh',
     left: '50%',
-    transform: 'translateX(-50%) translateY(-50%)',
-    padding: '.5rem 2.5rem',
+    color: '#ddd',
     fontSize: '5rem',
-    boxShadow: '.5rem .5rem 1rem rgba(0,0,0,0.2), -.5rem -.5rem 1.5rem rgba(255,255,255,0.15)',
+    position: 'fixed',
+    whiteSpace: 'nowrap',
+    padding: '.5rem 2.5rem',
     backdropFilter: 'blur(2px)',
     transition: 'all 0.45s ease',
-    whiteSpace: 'nowrap',
     background: theme.palette.secondary.main,
-    color: '#ddd',
+    transform: 'translateX(-50%) translateY(-50%)',
+    boxShadow: '.5rem .5rem 1rem rgba(0,0,0,0.2), -.5rem -.5rem 1.5rem rgba(255,255,255,0.15)',
     '&:hover': {
-      background: 'rgba(255,255,255,0.15)',
       color: '#fff',
+      background: 'rgba(255,255,255,0.15)',
     },
     [theme.breakpoints.down('sm')]: {
       fontSize: '2rem',
@@ -65,15 +66,16 @@ const Landing = () => {
   const [, updateState] = useContext(CTX)
 
   const classes = useClasses(styles)
+
   const openModal = () => updateState({ type: 'AUTH_MODAL', payload: true })
 
   return (
     <>
       <div style={{ position: 'relative' }}>
         <img
-          className={classes.weaponSystem}
           src={weaponSystem}
-          alt="weapons system: scisscors beats bird and paper. paper beats tree and rock. rock beats bird and scissors. tree beats rock and scissors. "
+          className={classes.weaponSystem}
+          alt="weapons system: scissors beats bird and paper. paper beats tree and rock. rock beats bird and scissors. tree beats rock and scissors. "
         />
         <Button onClick={openModal} className={classes.startBtn}>
           Get Started
