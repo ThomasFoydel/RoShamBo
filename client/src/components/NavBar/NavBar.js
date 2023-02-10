@@ -58,6 +58,9 @@ const NavBarTab = styled(Tab)(({ theme }) => ({
   minWidth: 10,
   opacity: 0.8,
   color: 'white',
+  '&:hover': {
+    opacity: 1,
+  },
 }))
 
 const Logo = styled('img')(({ theme }) => ({
