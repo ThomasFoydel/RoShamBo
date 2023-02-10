@@ -107,8 +107,8 @@ const App = () => {
                 path="/profile/:id"
                 element={socketOrNotLoggedIn ? <Profile props={{ socketRef }} /> : <></>}
               />
-              <Route exact path="/battle" element={isLoggedIn ? Battle : Landing} />
-              <Route exact path="/battle/computer" element={ComputerBattle} />
+              <Route exact path="/battle" element={isLoggedIn ? <Battle /> : <Landing />} />
+              <Route exact path="/battle/computer" element={<ComputerBattle />} />
               <Route
                 exact
                 path="/messages"
@@ -129,7 +129,7 @@ const App = () => {
                 path="/friendbattle/:friendshipId"
                 element={loggedAndLoaded ? <FriendBattle props={{ socketRef }} /> : <Landing />}
               />
-              <Route exact path="/howto" element={HowTo} />
+              <Route exact path="/howto" element={<HowTo />} />
               <Route
                 exact
                 path="/forum"
