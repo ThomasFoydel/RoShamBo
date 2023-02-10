@@ -47,7 +47,6 @@ const Auth = () => {
   const closeModal = () => updateState({ type: 'AUTH_MODAL', payload: false })
 
   const handleAuth = (type, remember) => {
-    console.log('handleAuth: ', { type, remember })
     axios
       .post(`/api/auth/${type}`, formState[type])
       .then(({ data }) => {
