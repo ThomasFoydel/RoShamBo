@@ -18,7 +18,7 @@ import styled from '@emotion/styled'
 import { Link } from 'react-router-dom'
 import { Menu as MenuIcon } from '@mui/icons-material'
 import useScrollTrigger from '@mui/material/useScrollTrigger'
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, useMemo } from 'react'
 import useClasses from 'customHooks/useClasses'
 import logo from 'imgs/roshambo.svg'
 import { CTX } from 'context/Store'
@@ -218,21 +218,24 @@ export default function Header() {
   const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
   const matches = useMediaQuery(theme.breakpoints.down('md'))
 
-  const routes = [
-    { name: 'Home', link: '/', activeIndex: 0 },
-    {
-      name: 'Battle',
-      link: '/battle',
-      activeIndex: 1,
-      ariaOwns: (anchorEl) => (anchorEl ? 'simple-menu' : undefined),
-      ariaPopup: (anchorEl) => (anchorEl ? true : undefined),
-      mouseOver: (event, handleClick) => handleClick(event),
-      auth: true,
-    },
-    { name: 'Profile', link: `/profile/${id}`, activeIndex: 2, auth: true },
-    { name: 'Messages', link: '/messages', activeIndex: 3, auth: true },
-    { name: 'Forum', link: '/forum', activeIndex: isLoggedIn ? 4 : 1 },
-  ]
+  const routes = useMemo(
+    () => [
+      { name: 'Home', link: '/', activeIndex: 0 },
+      {
+        name: 'Battle',
+        link: '/battle',
+        activeIndex: 1,
+        ariaOwns: (anchorEl) => (anchorEl ? 'simple-menu' : undefined),
+        ariaPopup: (anchorEl) => (anchorEl ? true : undefined),
+        mouseOver: (event, handleClick) => handleClick(event),
+        auth: true,
+      },
+      { name: 'Profile', link: `/profile/${id}`, activeIndex: 2, auth: true },
+      { name: 'Messages', link: '/messages', activeIndex: 3, auth: true },
+      { name: 'Forum', link: '/forum', activeIndex: isLoggedIn ? 4 : 1 },
+    ],
+    [id, isLoggedIn]
+  )
 
   const handleChange = (_, newValue) => setCurrentTabIndex(newValue)
 
