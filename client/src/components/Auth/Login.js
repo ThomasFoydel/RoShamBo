@@ -8,6 +8,7 @@ import {
   Typography,
   FormControlLabel,
 } from '@mui/material'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Lock } from '@mui/icons-material'
 import useClasses from 'customHooks/useClasses'
@@ -45,14 +46,18 @@ const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) 
   const { email, password } = formState.login
   const classes = useClasses(styles)
 
+  const [remember, setRemember] = useState(true)
+
   const handleChange = ({ target: { value, id } }) => {
     setFormState((formState) => ({ ...formState, login: { ...formState.login, [id]: value } }))
   }
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    handleAuth('login')
+    handleAuth('login', remember)
   }
+
+  const handleRemember = (e) => setRemember(e.target.checked)
 
   return (
     <Paper elevation={10} className={classes.login}>
@@ -86,7 +91,14 @@ const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) 
         />
         <FormControlLabel
           label="Remember me"
-          control={<Checkbox name="checkedB" color="primary" />}
+          control={
+            <Checkbox
+              name="Remember me"
+              color="primary"
+              checked={remember}
+              onChange={handleRemember}
+            />
+          }
         />
         <Button
           fullWidth

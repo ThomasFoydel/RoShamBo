@@ -1,13 +1,14 @@
 import React, { createContext, useReducer } from 'react'
-const CTX = createContext();
-export { CTX };
+const CTX = createContext()
+export { CTX }
 
 export function reducer(state, action) {
-  let { payload } = action;
-  let { user, token, profilePic, message, update } = payload || {};
+  let { payload } = action
+  let { user, token, profilePic, message, update, remember } = payload || {}
   switch (action.type) {
     case 'LOGIN':
-      localStorage.setItem('roshambo-token', token);
+      localStorage.setItem('roshambo-token', token)
+      localStorage.setItem('remember', !!remember)
       return {
         ...state,
         isLoggedIn: true,
@@ -22,10 +23,10 @@ export function reducer(state, action) {
         auth: { token },
         messages: user.messages,
         authModal: false,
-      };
+      }
     case 'LOGOUT':
-      localStorage.removeItem('roshambo-token');
-      if (window.FB) window.FB.logout();
+      localStorage.removeItem('roshambo-token')
+      if (window.FB) window.FB.logout()
       return {
         ...state,
         isLoggedIn: false,
@@ -33,33 +34,33 @@ export function reducer(state, action) {
           token: null,
         },
         user: { name: '', displayEmail: '' },
-      };
+      }
     case 'AUTH_MODAL':
-      return { ...state, authModal: payload };
+      return { ...state, authModal: payload }
     case 'CHANGE_PROFILE_PIC':
       return {
         ...state,
         user: { ...state.user, profilePic },
-      };
+      }
     case 'UPDATE_USER_INFO':
       return {
         ...state,
         user: { ...state.user, ...update },
-      };
+      }
     case 'NEW_MESSAGE':
-      let copy = { ...state.messages };
-      let other = message.participants.filter((p) => p !== state.user.id)[0];
-      let thread = copy[other];
-      let updatedThread = thread ? [...thread, message] : [message];
-      let updatedMessages = { ...copy, [other]: updatedThread };
-      return { ...state, messages: updatedMessages };
+      let copy = { ...state.messages }
+      let other = message.participants.filter((p) => p !== state.user.id)[0]
+      let thread = copy[other]
+      let updatedThread = thread ? [...thread, message] : [message]
+      let updatedMessages = { ...copy, [other]: updatedThread }
+      return { ...state, messages: updatedMessages }
     case 'CURRENT_THREAD':
-      return { ...state, currentThread: payload };
+      return { ...state, currentThread: payload }
     case 'SET_FRIENDLIST':
-      return { ...state, user: { ...state.user, friends: payload } };
+      return { ...state, user: { ...state.user, friends: payload } }
     default:
-      console.log('REDUCER ERROR: action: ', action);
-      return { ...state };
+      console.log('REDUCER ERROR: action: ', action)
+      return { ...state }
   }
 }
 
@@ -72,7 +73,7 @@ export default function Store(props) {
     messages: {},
     messageNotification: { sender: null, content: null },
     currentThread: null,
-  });
+  })
 
-  return <CTX.Provider value={stateHook}>{props.children}</CTX.Provider>;
+  return <CTX.Provider value={stateHook}>{props.children}</CTX.Provider>
 }

@@ -32,9 +32,10 @@ const App = () => {
 
   useEffect(() => {
     let subscribed = true
+    const remember = localStorage.getItem('remember')
     const rsbToken = localStorage.getItem('roshambo-token')
     const noToken = !rsbToken || rsbToken === 'undefined'
-    if (noToken) return updateState({ type: 'LOGOUT' })
+    if (noToken || remember === 'false') return updateState({ type: 'LOGOUT' })
 
     axios
       .get('/api/auth/', { headers: { 'x-auth-token': rsbToken } })
@@ -42,7 +43,10 @@ const App = () => {
         if (subscribed) {
           if (data.err && !isDev()) return updateState({ type: 'LOGOUT' })
           if (data) {
-            updateState({ type: 'LOGIN', payload: { user: data.user, token: data.token } })
+            updateState({
+              type: 'LOGIN',
+              payload: { user: data.user, token: data.token, remember },
+            })
           }
         }
       })

@@ -46,14 +46,17 @@ const Auth = () => {
 
   const closeModal = () => updateState({ type: 'AUTH_MODAL', payload: false })
 
-  const handleAuth = (type) => {
+  const handleAuth = (type, remember) => {
+    console.log('handleAuth: ', { type, remember })
     axios
       .post(`/api/auth/${type}`, formState[type])
       .then(({ data }) => {
         const { token, user } = data
         if (type === 'register') setRedirect(true)
-        updateState({ type: 'LOGIN', payload: { token, user } })
-        setFormState(initialState)
+        else {
+          updateState({ type: 'LOGIN', payload: { token, user, remember } })
+          setFormState(initialState)
+        }
       })
       .catch((err) => setErr(err.data.err))
   }
