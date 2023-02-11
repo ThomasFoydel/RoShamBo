@@ -1,9 +1,8 @@
 import axios from 'axios'
-import { Alert } from '@mui/lab'
+import { Dialog } from '@mui/material'
 import { toast } from 'react-toastify'
-import { Navigate } from 'react-router-dom'
-import { Dialog, Snackbar } from '@mui/material'
-import React, { useState, useContext } from 'react'
+import { Navigate, useLocation } from 'react-router-dom'
+import React, { useState, useContext, useEffect } from 'react'
 import useClasses from 'customHooks/useClasses'
 import { CTX } from 'context/Store'
 import Register from './Register'
@@ -66,8 +65,8 @@ const Auth = () => {
   const [formState, setFormState] = useState(initialState)
   const [authPage, setAuthPage] = useState('login')
   const [redirect, setRedirect] = useState(false)
-  const [err, setErr] = useState(null)
   const classes = useClasses(styles)
+  const { path } = useLocation()
 
   const closeModal = () => updateState({ type: 'AUTH_MODAL', payload: false })
 
@@ -76,35 +75,24 @@ const Auth = () => {
       .post(`/api/auth/${type}`, formState[type])
       .then(({ data }) => {
         const { token, user } = data
-        if (type === 'register') setRedirect(true)
-        else {
-          updateState({ type: 'LOGIN', payload: { token, user, remember } })
-          setFormState(initialState)
-        }
+        updateState({ type: 'LOGIN', payload: { token, user, remember } })
+        setFormState(initialState)
+        setRedirect(true)
+        closeModal()
       })
       .catch(({ response }) => toast.error(response?.data?.message || type + ' failed'))
   }
 
+  useEffect(() => {
+    if (path === 'howto') setRedirect(false)
+  }, [path])
+
   const props = { formState, handleAuth, setAuthPage, setFormState, classes }
 
-  const closeErr = () => setErr(null)
-
   return (
-    <Dialog open={authModal} onClose={closeModal}>
-      {redirect && <Navigate to="/howto" />}
-      <div className={classes.modalBody}>
-        {authPage === 'register' ? <Register props={props} /> : <Login props={props} />}
-      </div>
-      <Snackbar
-        open={err}
-        onClose={closeErr}
-        autoHideDuration={5000}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-      >
-        <Alert onClose={closeErr} severity="error">
-          {err}
-        </Alert>
-      </Snackbar>
+    <Dialog open={authModal} onClose={closeModal} PaperProps={{ className: classes.modalBody }}>
+      {redirect && path !== 'howto' && <Navigate to="/howto" />}
+      {authPage === 'register' ? <Register props={props} /> : <Login props={props} />}
     </Dialog>
   )
 }
