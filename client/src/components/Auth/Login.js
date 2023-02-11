@@ -40,6 +40,9 @@ const styles = (theme) => ({
     color: theme.palette.primary.dark,
     '&:hover': { color: theme.palette.primary.main },
   },
+  input: {
+    margin: '.4rem 0',
+  },
 })
 
 const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) => {
@@ -76,6 +79,7 @@ const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) 
           label="Email"
           autoComplete="email"
           onChange={handleChange}
+          className={classes.input}
           placeholder="Enter email"
         />
         <TextField
@@ -86,6 +90,7 @@ const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) 
           value={password}
           label="Password"
           onChange={handleChange}
+          className={classes.input}
           placeholder="Enter password"
           autoComplete="current-password"
         />

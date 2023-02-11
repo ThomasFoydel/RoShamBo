@@ -25,6 +25,9 @@ const styles = (theme) => ({
       color: theme.palette.primary.main,
     },
   },
+  input: {
+    margin: '.4rem 0',
+  },
 })
 
 const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) => {
@@ -61,6 +64,7 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
           autoComplete="email"
           onChange={handleChange}
           placeholder="Enter email"
+          className={classes.input}
         />
         <TextField
           required
@@ -71,6 +75,7 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
           onChange={handleChange}
           autoComplete="username"
           placeholder="Enter name"
+          className={classes.input}
         />
         <TextField
           required
@@ -80,6 +85,7 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
           value={confirmpassword}
           onChange={handleChange}
           label="Confirm password"
+          className={classes.input}
           autoComplete="new-password"
           placeholder="Enter password"
         />
@@ -91,6 +97,7 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
           value={password}
           label="Password"
           onChange={handleChange}
+          className={classes.input}
           autoComplete="new-password"
           placeholder="Enter password"
         />
@@ -105,7 +112,7 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
         </Button>
 
         <Typography>
-          Already have an account?
+          Already have an account?{' '}
           <span className={classes.loginLink} onClick={() => setAuthPage('login')}>
             Sign In
           </span>
