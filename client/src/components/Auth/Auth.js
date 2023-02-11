@@ -1,8 +1,9 @@
 import axios from 'axios'
 import { Alert } from '@mui/lab'
+import { toast } from 'react-toastify'
 import { Navigate } from 'react-router-dom'
+import { Dialog, Snackbar } from '@mui/material'
 import React, { useState, useContext } from 'react'
-import { Modal, Snackbar } from '@mui/material'
 import useClasses from 'customHooks/useClasses'
 import { CTX } from 'context/Store'
 import Register from './Register'
@@ -10,16 +11,40 @@ import Login from './Login'
 
 const styles = (theme) => ({
   modalBody: {
-    top: '50%',
-    left: '50%',
-    position: 'absolute',
     boxShadow: theme.shadows[5],
-    transform: `translate(-50%, -50%)`,
     backgroundColor: theme.palette.background.paper,
     border: `2px solid ${theme.palette.common.blue}`,
   },
-  modal: {
-    zIndex: '9000 !important',
+  authPaper: {
+    maxWidth: '500px',
+    minWidth: '275px',
+    padding: '2rem 4rem',
+    [theme.breakpoints.down('xs')]: {
+      padding: '2rem 2rem',
+    },
+  },
+  avatar: {
+    backgroundColor: theme.palette.primary.main,
+  },
+  button: {
+    marginTop: '1rem',
+    marginBottom: '.5rem',
+  },
+  switch: {
+    border: 'none',
+    fontSize: '1rem',
+    background: 'none',
+    color: theme.palette.primary.dark,
+    '&:hover': {
+      color: theme.palette.primary.main,
+    },
+  },
+  forgotPw: {
+    color: theme.palette.primary.dark,
+    '&:hover': { color: theme.palette.primary.main },
+  },
+  input: {
+    margin: '.2rem 0',
   },
 })
 
@@ -57,10 +82,10 @@ const Auth = () => {
           setFormState(initialState)
         }
       })
-      .catch((err) => setErr(err.data.err))
+      .catch(({ response }) => toast.error(response?.data?.message))
   }
 
-  const props = { formState, handleAuth, setAuthPage, setFormState }
+  const props = { formState, handleAuth, setAuthPage, setFormState, classes }
 
   const ModalBody = (
     <div className={classes.modalBody}>
@@ -71,22 +96,20 @@ const Auth = () => {
   const closeErr = () => setErr(null)
 
   return (
-    <Modal className={classes.modal} open={authModal} onClose={closeModal}>
-      <>
-        {redirect && <Navigate to="/howto" />}
-        {ModalBody}
-        <Snackbar
-          open={err}
-          onClose={closeErr}
-          autoHideDuration={5000}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        >
-          <Alert onClose={closeErr} severity="error">
-            {err}
-          </Alert>
-        </Snackbar>
-      </>
-    </Modal>
+    <Dialog open={authModal} onClose={closeModal}>
+      {redirect && <Navigate to="/howto" />}
+      {ModalBody}
+      <Snackbar
+        open={err}
+        onClose={closeErr}
+        autoHideDuration={5000}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Alert onClose={closeErr} severity="error">
+          {err}
+        </Alert>
+      </Snackbar>
+    </Dialog>
   )
 }
 

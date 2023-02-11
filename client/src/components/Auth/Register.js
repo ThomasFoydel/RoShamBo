@@ -1,38 +1,8 @@
 import { Lock } from '@mui/icons-material'
 import { Typography, Grid, Paper, Avatar, TextField, Button } from '@mui/material'
-import useClasses from 'customHooks/useClasses'
 
-const styles = (theme) => ({
-  register: {
-    maxWidth: '500px',
-    minWidth: '275px',
-    padding: '2rem 4rem',
-    [theme.breakpoints.down('xs')]: {
-      padding: '2rem 2rem',
-    },
-  },
-  avatar: {
-    backgroundColor: theme.palette.common.blue,
-  },
-  button: {
-    margin: '8px 0',
-  },
-  header: { fontFamily: 'OpenDyslexic' },
-  loginLink: {
-    color: theme.palette.primary.dark,
-    cursor: 'pointer',
-    '&:hover': {
-      color: theme.palette.primary.main,
-    },
-  },
-  input: {
-    margin: '.4rem 0',
-  },
-})
-
-const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) => {
+const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState, classes } }) => {
   const { name, email, password, confirmpassword } = formState.register
-  const classes = useClasses(styles)
 
   const handleChange = ({ target: { value, id } }) => {
     setFormState((formState) => ({
@@ -47,12 +17,12 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
   }
 
   return (
-    <Paper elevation={10} className={classes.register}>
+    <Paper elevation={10} className={classes.authPaper}>
       <Grid align="center">
         <Avatar className={classes.avatar}>
           <Lock />
         </Avatar>
-        <h2 className={classes.header}>Register</h2>
+        <h2>Register</h2>
       </Grid>
       <form onSubmit={handleSubmit}>
         <TextField
@@ -61,6 +31,7 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
           id="email"
           value={email}
           label="Email"
+          variant="standard"
           autoComplete="email"
           onChange={handleChange}
           placeholder="Enter email"
@@ -72,6 +43,7 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
           fullWidth
           value={name}
           label="Name"
+          variant="standard"
           onChange={handleChange}
           autoComplete="username"
           placeholder="Enter name"
@@ -81,6 +53,7 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
           required
           fullWidth
           type="password"
+          variant="standard"
           id="confirmpassword"
           value={confirmpassword}
           onChange={handleChange}
@@ -96,6 +69,7 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
           type="password"
           value={password}
           label="Password"
+          variant="standard"
           onChange={handleChange}
           className={classes.input}
           autoComplete="new-password"
@@ -113,9 +87,9 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState } 
 
         <Typography>
           Already have an account?{' '}
-          <span className={classes.loginLink} onClick={() => setAuthPage('login')}>
+          <button className={classes.switch} onClick={() => setAuthPage('login')}>
             Sign In
-          </span>
+          </button>
         </Typography>
       </form>
     </Paper>

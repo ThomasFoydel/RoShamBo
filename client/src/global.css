@@ -18,6 +18,16 @@
   src: local('OpenDyslexic'), url(./fonts/OpenDyslexic-Bold.otf) format('opentype');
 }
 
+* {
+  font-family: 'OpenDyslexic';
+}
+
 a {
   text-decoration: none;
+}
+
+a,
+button,
+input {
+  cursor: pointer;
 }

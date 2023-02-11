@@ -11,43 +11,9 @@ import {
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Lock } from '@mui/icons-material'
-import useClasses from 'customHooks/useClasses'
 
-const styles = (theme) => ({
-  login: {
-    maxWidth: '500px',
-    minWidth: '275px',
-    padding: '2rem 4rem',
-    [theme.breakpoints.down('xs')]: { padding: '2rem 2rem' },
-  },
-  avatar: {
-    backgroundColor: theme.palette.primary.main,
-  },
-  button: {
-    margin: '8px 0',
-  },
-  header: {
-    fontFamily: 'OpenDyslexic',
-  },
-  registerLink: {
-    cursor: 'pointer',
-    color: theme.palette.primary.dark,
-    '&:hover': {
-      color: theme.palette.primary.main,
-    },
-  },
-  forgotPw: {
-    color: theme.palette.primary.dark,
-    '&:hover': { color: theme.palette.primary.main },
-  },
-  input: {
-    margin: '.4rem 0',
-  },
-})
-
-const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) => {
+const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState, classes } }) => {
   const { email, password } = formState.login
-  const classes = useClasses(styles)
 
   const [remember, setRemember] = useState(true)
 
@@ -63,12 +29,12 @@ const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) 
   const handleRemember = (e) => setRemember(e.target.checked)
 
   return (
-    <Paper elevation={10} className={classes.login}>
+    <Paper elevation={10} className={classes.authPaper}>
       <Grid align="center">
         <Avatar className={classes.avatar}>
           <Lock />
         </Avatar>
-        <h2 className={classes.header}>Sign In</h2>
+        <h2>Sign In</h2>
       </Grid>
       <form onSubmit={handleSubmit}>
         <TextField
@@ -77,6 +43,7 @@ const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) 
           id="email"
           value={email}
           label="Email"
+          variant="standard"
           autoComplete="email"
           onChange={handleChange}
           className={classes.input}
@@ -89,6 +56,7 @@ const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) 
           type="password"
           value={password}
           label="Password"
+          variant="standard"
           onChange={handleChange}
           className={classes.input}
           placeholder="Enter password"
@@ -121,9 +89,9 @@ const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState } }) 
         </Typography>
         <Typography>
           Need an account?{' '}
-          <span className={classes.registerLink} onClick={() => setAuthPage('register')}>
+          <button className={classes.switch} onClick={() => setAuthPage('register')}>
             Sign Up
-          </span>
+          </button>
         </Typography>
       </form>
     </Paper>

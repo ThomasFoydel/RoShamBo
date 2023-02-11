@@ -6,40 +6,44 @@ const auth = require('../middleware/auth')
 
 const router = express.Router()
 
-const sendUser = (res, user, token) => {
+const sendUser = (res, user, token, message) => {
   const { password, email, ...userInfo } = user._doc
-  return res.send({ user: userInfo, token })
+  return res.status(200).send({ status: 'success', message, user: userInfo, token })
 }
 
 router.post('/register', async (req, res) => {
-  let { email, name, password, confirmpassword } = req.body || {}
-  let allFieldsExist = email && name && password && confirmpassword
+  const { email, name, password, confirmpassword } = req.body || {}
+  const allFieldsExist = email && name && password && confirmpassword
   if (!allFieldsExist) {
-    return res.status(400).send({ err: 'All fields required' })
+    return res.status(400).send({ status: 'error', message: 'All fields required' })
   }
 
   const re =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
   if (!re.test(String(email).toLowerCase())) {
-    return res.status(400).send({ err: 'Valid email required' })
+    return res.status(400).send({ status: 'error', message: 'Valid email required' })
   }
 
   const existingUser = await API.user.findByEmail(email)
   if (existingUser) {
-    return res.status(400).send({ err: 'Account with this email already exists' })
+    return res
+      .status(400)
+      .send({ status: 'error', message: 'Account with this email already exists' })
   }
 
   if (name.length < 5 || name.length > 10) {
-    return res.status(400).send({ err: 'Name must be between 5 and 10 characters' })
+    return res
+      .status(400)
+      .send({ status: 'error', message: 'Name must be between 5 and 10 characters' })
   }
 
   if (password !== confirmpassword) {
-    return res.status(400).send({ err: 'Passwords do not match' })
+    return res.status(400).send({ status: 'error', message: 'Passwords do not match' })
   }
 
   const secure = /^(?=.*[\w])(?=.*[\W])[\w\W]{8,}$/
   if (!secure.test(String(password).toLowerCase())) {
-    return res.status(400).send({ err: 'Password must be more secure' })
+    return res.status(400).send({ status: 'error', message: 'Password must be more secure' })
   }
 
   API.user
@@ -55,20 +59,24 @@ router.post('/register', async (req, res) => {
         process.env.SECRET,
         { expiresIn: '1000hr' }
       )
-      return sendUser(res, user, token)
+      return sendUser(res, user, token, 'Registration successful')
     })
-    .catch(() => res.status(500).send({ err: 'Database is down, we are working to fix this' }))
+    .catch(() =>
+      res
+        .status(500)
+        .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+    )
 })
 
 router.post('/login', async (req, res) => {
   if (!req.body.email || !req.body.password) {
-    return res.status(400).send({ err: 'All fields required' })
+    return res.status(400).send({ status: 'error', message: 'All fields required' })
   }
   API.user
     .findByEmail(req.body.email)
     .then(async (user) => {
       if (!user) {
-        return res.status(400).send({ err: 'Incorrect auth info' })
+        return res.status(400).send({ status: 'error', message: 'Incorrect auth info' })
       }
       const passwordsMatch = await bcrypt.compare(req.body.password, user.password)
 
@@ -83,12 +91,16 @@ router.post('/login', async (req, res) => {
           process.env.SECRET,
           { expiresIn: '1000h' }
         )
-        return sendUser(res, user, token)
+        return sendUser(res, user, token, 'Login successful')
       } else {
-        return res.status(401).send({ err: 'Incorrect auth info' })
+        return res.status(401).send({ status: 'error', message: 'Incorrect auth info' })
       }
     })
-    .catch(() => res.status(500).send({ err: 'Database is down, we are working to fix this' }))
+    .catch(() =>
+      res
+        .status(500)
+        .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+    )
 })
 
 router.get('/', auth, async (req, res) => {
@@ -98,10 +110,10 @@ router.get('/', auth, async (req, res) => {
     const { userId } = tokenUser
     return API.user
       .findById({ _id: userId })
-      .then(async (user) => sendUser(res, user, token))
-      .catch(() => res.status(500).send({ err: 'database error' }))
+      .then(async (user) => sendUser(res, user, token, 'User found'))
+      .catch(() => res.status(500).send({ status: 'error', message: 'Database error' }))
   }
-  return res.status(401).send({ err: 'no token' })
+  return res.status(401).send({ status: 'error', message: 'No token' })
 })
 
 module.exports = router

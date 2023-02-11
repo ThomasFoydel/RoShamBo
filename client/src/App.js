@@ -22,6 +22,7 @@ import { isDev } from 'utils/utils'
 import Home from 'pages/Home/Home'
 import theme from 'theme/Theme'
 import './global.css'
+import { ToastContainer } from 'react-toastify'
 
 const App = () => {
   const [{ isLoggedIn, auth }, updateState] = useContext(CTX)
@@ -138,6 +139,7 @@ const App = () => {
             </Routes>
             <Auth />
           </div>
+          <ToastContainer position="bottom-right" />
         </Router>
       </ThemeProvider>
     </StyledEngineProvider>
