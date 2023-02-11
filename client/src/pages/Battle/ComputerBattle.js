@@ -1,4 +1,3 @@
-import * as fp from 'fingerpose'
 import { Grid, Stack } from '@mui/material'
 import * as handpose from '@tensorflow-models/handpose'
 import React, { useRef, useState, useEffect } from 'react'
@@ -8,15 +7,15 @@ import weaponImgs from 'imgs/weapons'
 import themeAudio from 'audio/themes'
 import robot from 'imgs/robot.svg'
 import Webcam from 'react-webcam'
-import gestures from './gestures'
+import { detect } from './utils'
 import soundFx from 'audio/fx'
 
 const weapons = {
-  rock: { beats: ['scissors', 'bird'] },
   paper: { beats: ['tree', 'rock'] },
-  scissors: { beats: ['bird', 'paper'] },
   bird: { beats: ['paper', 'tree'] },
+  rock: { beats: ['scissors', 'bird'] },
   tree: { beats: ['rock', 'scissors'] },
+  scissors: { beats: ['bird', 'paper'] },
 }
 
 const styles = (theme) => ({
@@ -207,39 +206,6 @@ const styles = (theme) => ({
   },
 })
 
-const GE = new fp.GestureEstimator([
-  gestures.scissors,
-  gestures.rock,
-  gestures.paper,
-  gestures.bird,
-  gestures.tree,
-])
-
-const detect = async (net, webcamRef) => {
-  if (
-    typeof webcamRef.current !== 'undefined' &&
-    webcamRef.current !== null &&
-    webcamRef.current.video.readyState === 4
-  ) {
-    const video = webcamRef.current.video
-    const videoWidth = webcamRef.current.video.videoWidth
-    const videoHeight = webcamRef.current.video.videoHeight
-    webcamRef.current.video.width = videoWidth
-    webcamRef.current.video.height = videoHeight
-
-    const gestureEstimates = await net.estimateHands(video)
-
-    if (gestureEstimates.length > 0) {
-      const gesture = await GE.estimate(gestureEstimates[0].landmarks, 4)
-      if (gesture.gestures !== undefined && gesture.gestures.length > 0) {
-        const confidence = gesture.gestures.map((prediction) => prediction.confidence)
-        const maxConfidence = confidence.indexOf(Math.max.apply(null, confidence))
-        return gesture.gestures[maxConfidence].name
-      }
-    } else return null
-  }
-}
-
 const recursiveAttempt = async (handPoseNet, webcamRef) => {
   let attempts = 0
   const recurse = async () => {
@@ -405,7 +371,7 @@ function ComputerBattle() {
               <img src={robot} alt="robot opponent" className={classes.robotImg} />
             </div>
             <div className={classes.healthbarContainer}>
-              <div className={classes.healthbar} style={{ width: `${computerHealth}%` }}></div>
+              <div className={classes.healthbar} style={{ width: `${computerHealth}%` }} />
             </div>
           </Stack>
         </Grid>
@@ -446,7 +412,7 @@ function ComputerBattle() {
               <p className={classes.countDown}>{timer}</p>
             </div>
             <div className={classes.healthbarContainer}>
-              <div className={classes.healthbar} style={{ width: `${userHealth}%` }}></div>
+              <div className={classes.healthbar} style={{ width: `${userHealth}%` }} />
             </div>
           </Stack>
         </Grid>
