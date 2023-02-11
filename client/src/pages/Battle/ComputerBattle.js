@@ -240,6 +240,20 @@ const detect = async (net, webcamRef) => {
   }
 }
 
+const recursiveAttempt = async (handPoseNet, webcamRef) => {
+  let attempts = 0
+  const recurse = async () => {
+    if (attempts < 50) {
+      const userChoice = await detect(handPoseNet, webcamRef)
+      if (userChoice) return userChoice
+      attempts++
+      return recurse()
+    }
+    return null
+  }
+  return recurse()
+}
+
 function ComputerBattle() {
   const [gameRunning, setGameRunning] = useState(false)
   const [timer, setTimer] = useState(null)
@@ -287,7 +301,7 @@ function ComputerBattle() {
         soundFx.fight.play()
 
         const runHandpose = async () => {
-          const userChoice = await detect(handPoseNet, webcamRef)
+          const userChoice = await recursiveAttempt(handPoseNet, webcamRef)
           if (!soundFx.fight.paused) setTimeout(() => soundFx.fight.pause(), 0)
           if (!userChoice) {
             setMessage('I couldnt see what you were throwing!')
