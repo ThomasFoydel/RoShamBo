@@ -17,13 +17,13 @@ const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState, clas
 
   const [remember, setRemember] = useState(true)
 
-  const handleChange = ({ target: { value, id } }) => {
-    setFormState((formState) => ({ ...formState, login: { ...formState.login, [id]: value } }))
-  }
-
   const handleSubmit = (e) => {
     e.preventDefault()
     handleAuth('login', remember)
+  }
+
+  const handleChange = ({ target: { value, id } }) => {
+    setFormState((formState) => ({ ...formState, login: { ...formState.login, [id]: value } }))
   }
 
   const handleRemember = (e) => setRemember(e.target.checked)

@@ -1,8 +1,24 @@
+import {
+  Grid,
+  Paper,
+  Avatar,
+  Button,
+  Checkbox,
+  TextField,
+  Typography,
+  FormControlLabel,
+} from '@mui/material'
+import { useState } from 'react'
 import { Lock } from '@mui/icons-material'
-import { Typography, Grid, Paper, Avatar, TextField, Button } from '@mui/material'
 
 const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState, classes } }) => {
   const { name, email, password, confirmpassword } = formState.register
+  const [remember, setRemember] = useState(true)
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    handleAuth('register', remember)
+  }
 
   const handleChange = ({ target: { value, id } }) => {
     setFormState((formState) => ({
@@ -11,10 +27,7 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState, c
     }))
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    handleAuth('register')
-  }
+  const handleRemember = (e) => setRemember(e.target.checked)
 
   return (
     <Paper elevation={10} className={classes.authPaper}>
@@ -74,6 +87,17 @@ const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState, c
           className={classes.input}
           autoComplete="new-password"
           placeholder="Enter password"
+        />
+        <FormControlLabel
+          label="Remember me"
+          control={
+            <Checkbox
+              name="Remember me"
+              color="primary"
+              checked={remember}
+              onChange={handleRemember}
+            />
+          }
         />
         <Button
           fullWidth
