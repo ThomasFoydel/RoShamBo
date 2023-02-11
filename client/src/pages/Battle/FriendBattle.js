@@ -79,8 +79,8 @@ const styles = (theme) => ({
   },
   myChoiceIcon: {
     width: '70%',
-    minHeight: '0%',
     opacity: '0.6',
+    minHeight: '0%',
     transform: 'scaleX(-1)',
   },
 
@@ -191,6 +191,7 @@ const styles = (theme) => ({
 })
 
 const FriendBattle = ({ props: { socketRef } }) => {
+  const { friendshipId } = useParams()
   const [{ user, auth }] = useContext(CTX)
   const { name, id } = user
   const { token } = auth
@@ -199,27 +200,26 @@ const FriendBattle = ({ props: { socketRef } }) => {
   const classes = useClasses(styles)
   const socket = socketRef.current
 
-  const { friendshipId } = useParams()
+  const myPeer = useRef()
   const myCamRef = useRef()
+  const scrollRef = useRef()
   const myStreamRef = useRef()
   const friendVideoRef = useRef()
   const [friendStream, setFriendStream] = useState(null)
   const [friendData, setFriendData] = useState({})
 
-  const [chatInput, setChatInput] = useState('')
-  const [messages, setMessages] = useState([])
-  const scrollRef = useRef()
-  const myPeer = useRef()
-  const [handPoseNet, setHandPoseNet] = useState(null)
   const [count, setCount] = useState(null)
+  const [messages, setMessages] = useState([])
+  const [chatInput, setChatInput] = useState('')
+  const [handPoseNet, setHandPoseNet] = useState(null)
 
   const [winner, setWinner] = useState(null)
   const [myHealth, setMyHealth] = useState(100)
-  const [friendHealth, setFriendHealth] = useState(100)
   const [myChoice, setMyChoice] = useState(null)
+  const [friendHealth, setFriendHealth] = useState(100)
   const [friendChoice, setFriendChoice] = useState(null)
-  const [inputFlowRunning, setInputFlowRunning] = useState(false)
   const [roundProcessing, setRoundProcessing] = useState(false)
+  const [inputFlowRunning, setInputFlowRunning] = useState(false)
   const [icons, setIcons] = useState({ video: false, audio: false })
 
   useEffect(() => {
