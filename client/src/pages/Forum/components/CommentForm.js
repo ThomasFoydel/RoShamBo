@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'react-toastify'
 import React, { useState } from 'react'
 import { Stack, Input, Button } from '@mui/material'
 import useClasses from 'customHooks/useClasses'
@@ -53,7 +54,7 @@ const CommentForm = ({ props: { postId, setPosts, token } }) => {
           })
           setCommentInput('')
         })
-        .catch((err) => console.error('new comment error ', err))
+        .catch(({ response }) => toast.error(response?.data?.message))
     }
   }
 

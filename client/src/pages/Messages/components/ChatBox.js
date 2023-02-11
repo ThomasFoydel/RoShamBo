@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'react-toastify'
 import React, { useState } from 'react'
 import { Grid, Input, Button } from '@mui/material'
 import useClasses from 'customHooks/useClasses'
@@ -30,8 +31,7 @@ const ChatBox = ({ props: { token, currentThread } }) => {
         { receiver: currentThread, content: inputValue },
         { headers: { 'x-auth-token': token } }
       )
-      .then((res) => console.error(res))
-      .catch((err) => console.error(err))
+      .catch(({ response }) => toast.error(response?.data?.message))
   }
 
   const handleChange = ({ target: { value } }) => setInputValue(value)

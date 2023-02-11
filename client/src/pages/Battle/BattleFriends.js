@@ -1,9 +1,10 @@
 import axios from 'axios'
-import { CTX } from 'context/Store'
+import { toast } from 'react-toastify'
 import { Link } from 'react-router-dom'
 import { Avatar, Typography, Grid } from '@mui/material'
 import React, { useState, useEffect, useContext } from 'react'
 import useClasses from 'customHooks/useClasses'
+import { CTX } from 'context/Store'
 
 const styles = (theme) => ({
   battleFriends: {
@@ -63,7 +64,7 @@ const BattleFriends = () => {
     axios
       .get('/api/user/friendships', { headers: { 'x-auth-token': token } })
       .then(({ data }) => setFriendlist(data))
-      .catch((err) => console.error({ err }))
+      .catch(({ response }) => toast.error(response?.data?.message))
   }, [token])
 
   return (

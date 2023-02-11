@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'react-toastify'
 import React, { useState, useEffect, useContext } from 'react'
 import MessageNotification from 'components/MessageNotification/MessageNotification'
 import useClasses from 'customHooks/useClasses'
@@ -113,7 +114,7 @@ const Forum = ({ props: { socketRef } }) => {
     axios
       .get('/api/forum/posts')
       .then(({ data }) => setPosts(data))
-      .catch((err) => console.error(err))
+      .catch(({ response }) => toast.error(response?.data?.message))
   }, [token])
 
   useEffect(() => {
@@ -143,7 +144,7 @@ const Forum = ({ props: { socketRef } }) => {
     axios
       .delete(`/api/forum/post/${id}`, { headers: { 'x-auth-token': token } })
       .then(({ data }) => data && setPosts((posts) => posts.filter((p) => p._id !== data)))
-      .catch((err) => console.error(err))
+      .catch(({ response }) => toast.error(response?.data?.message))
   }
 
   const deleteComment = (id) => {
@@ -162,7 +163,7 @@ const Forum = ({ props: { socketRef } }) => {
             return copy
           })
       )
-      .catch((err) => console.error(err))
+      .catch(({ response }) => toast.error(response?.data?.message))
   }
 
   const closeMessageNotification = () => setMessageNotification(initMessageNotification)

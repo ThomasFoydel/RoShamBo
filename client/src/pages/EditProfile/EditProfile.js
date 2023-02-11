@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'react-toastify'
 import { Link } from 'react-router-dom'
 import { Close } from '@mui/icons-material'
 import React, { useState, useEffect, useContext } from 'react'
@@ -88,7 +89,7 @@ const EditProfile = ({ props: { socketRef } }) => {
           setShowProfileInput(false)
           updateState({ type: 'CHANGE_PROFILE_PIC', payload: { profilePic: data } })
         })
-        .catch((err) => console.error(err))
+        .catch(({ response }) => toast.error(response?.data?.message))
     }
   }
 
@@ -105,7 +106,7 @@ const EditProfile = ({ props: { socketRef } }) => {
         setFormData(formDataInitialValues)
         updateState({ type: 'UPDATE_USER_INFO', payload: { update: data } })
       })
-      .catch((err) => console.error(err))
+      .catch(({ response }) => toast.error(response?.data?.message))
   }
 
   useEffect(() => {

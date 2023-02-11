@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'react-toastify'
 import React, { useState, useEffect, useContext } from 'react'
 import FriendRequest from './components/FriendRequest'
 import useClasses from 'customHooks/useClasses'
@@ -6,9 +7,9 @@ import { CTX } from 'context/Store'
 
 const styles = (theme) => ({
   friendRequests: {
+    ...theme.centerHorizontal,
     qidth: '100%',
     textAlign: 'center',
-    ...theme.centerHorizontal,
     fontFamily: 'OpenDyslexic',
   },
   btn: {
@@ -32,7 +33,7 @@ const FriendRequests = () => {
     axios
       .get('/api/user/friendrequests', { headers: { 'x-auth-token': token } })
       .then(({ data }) => subscribed && setFriendRequests(data))
-      .catch((err) => console.error(err))
+      .catch(({ response }) => toast.error(response?.data?.message))
     return () => (subscribed = false)
   }, [])
 
@@ -43,14 +44,14 @@ const FriendRequests = () => {
         setFriendRequests(data.friendRequests)
         updateState({ type: 'SET_FRIENDLIST', payload: data.friendList })
       })
-      .catch((err) => console.error(err))
+      .catch(({ response }) => toast.error(response?.data?.message))
   }
 
   const reject = (id) => {
     axios
       .post('/api/user/reject-fr', { id }, { headers: { 'x-auth-token': token } })
       .then(({ data }) => setFriendRequests(data))
-      .catch((err) => console.error(err))
+      .catch(({ response }) => toast.error(response?.data?.message))
   }
 
   return (

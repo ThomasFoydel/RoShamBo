@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'react-toastify'
 import React, { useState, useEffect, useRef } from 'react'
 import useClasses from 'customHooks/useClasses'
 import Message from './Message'
@@ -41,7 +42,7 @@ const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
       .then(({ data }) => {
         if (data && Array.isArray(data) && subscribed) setThread(data)
       })
-      .catch((err) => console.error(err))
+      .catch(({ response }) => toast.error(response?.data?.message))
 
     return () => (subscribed = false)
   }, [currentThread, token])

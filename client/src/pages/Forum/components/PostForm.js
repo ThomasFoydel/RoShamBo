@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'react-toastify'
 import React, { useState } from 'react'
 import { Stack, Button, Input } from '@mui/material'
 import useClasses from 'customHooks/useClasses'
@@ -6,11 +7,11 @@ import useClasses from 'customHooks/useClasses'
 const styles = (theme) => ({
   form: {
     ...theme.centerHorizontal,
-    background: 'linear-gradient(to bottom right, #bbb, #eee)',
     width: '80%',
     padding: '2em',
     maxWidth: '400px',
     borderRadius: '4px',
+    background: 'linear-gradient(to bottom right, #bbb, #eee)',
   },
   input: {
     width: '100%',
@@ -38,18 +39,17 @@ const PostForm = ({ props: { setPosts, token } }) => {
 
   const makePost = (e) => {
     e.preventDefault()
-    if (form.content && form.title) {
-      setForm(initialState)
-      axios
-        .post('/api/forum/post', form, { headers: { 'x-auth-token': token } })
-        .then(({ data }) => setPosts((posts) => [data, ...posts]))
-        .catch((err) => console.error('new post error ', err))
-    }
+    if (!form.content || !form.title) return toast.error('All fields required')
+    axios
+      .post('/api/forum/post', form, { headers: { 'x-auth-token': token } })
+      .then(({ data }) => {
+        setPosts((posts) => [data, ...posts])
+        setForm(initialState)
+      })
+      .catch(({ response }) => toast.error(response?.data?.message))
   }
 
-  const handleChange = ({ target: { id, value } }) => {
-    setForm((f) => ({ ...f, [id]: value }))
-  }
+  const handleChange = ({ target: { id, value } }) => setForm((f) => ({ ...f, [id]: value }))
 
   return (
     <form onSubmit={makePost}>
