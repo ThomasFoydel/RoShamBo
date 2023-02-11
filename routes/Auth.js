@@ -11,6 +11,12 @@ const sendUser = (res, user, token, message) => {
   return res.status(200).send({ status: 'success', message, user: userInfo, token })
 }
 
+const makeToken = (user) => {
+  return jwt.sign({ tokenUser: { userId: user._id, email: user.email } }, process.env.SECRET, {
+    expiresIn: '1000h',
+  })
+}
+
 router.post('/register', async (req, res) => {
   const { email, name, password, confirmpassword } = req.body || {}
   const allFieldsExist = email && name && password && confirmpassword
@@ -49,16 +55,7 @@ router.post('/register', async (req, res) => {
   API.user
     .create({ email, name, password })
     .then((user) => {
-      const token = jwt.sign(
-        {
-          tokenUser: {
-            userId: user._id,
-            email: user.email,
-          },
-        },
-        process.env.SECRET,
-        { expiresIn: '1000hr' }
-      )
+      const token = makeToken(user)
       return sendUser(res, user, token, 'Registration successful')
     })
     .catch(() =>
@@ -81,16 +78,7 @@ router.post('/login', async (req, res) => {
       const passwordsMatch = await bcrypt.compare(req.body.password, user.password)
 
       if (passwordsMatch) {
-        const token = jwt.sign(
-          {
-            tokenUser: {
-              userId: user._id,
-              email: user.email,
-            },
-          },
-          process.env.SECRET,
-          { expiresIn: '1000h' }
-        )
+        const token = makeToken(user)
         return sendUser(res, user, token, 'Login successful')
       } else {
         return res.status(401).send({ status: 'error', message: 'Incorrect auth info' })
