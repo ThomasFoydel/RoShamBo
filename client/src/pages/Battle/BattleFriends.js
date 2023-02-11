@@ -1,32 +1,32 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import { CTX } from 'context/Store';
-import { Link } from 'react-router-dom';
-import { Avatar, Typography, Grid } from '@mui/material';
-import useClasses from 'customHooks/useClasses';
+import axios from 'axios'
+import { CTX } from 'context/Store'
+import { Link } from 'react-router-dom'
+import { Avatar, Typography, Grid } from '@mui/material'
+import React, { useState, useEffect, useContext } from 'react'
+import useClasses from 'customHooks/useClasses'
 
 const styles = (theme) => ({
   battleFriends: {
-    background: 'linear-gradient(#ccc, #ddd)',
     padding: '2em',
+    background: 'linear-gradient(#ccc, #ddd)',
   },
   friend: {
     padding: '1em',
-    borderRadius: '4px',
-    background: '#111',
     margin: '.5em',
+    background: '#111',
+    borderRadius: '4px',
   },
   friendName: {
-    fontSize: '2rem',
     margin: '0 .5em',
+    fontSize: '2rem',
     [theme.breakpoints.down('xs')]: {
       fontSize: '1.2rem',
     },
   },
   link: {
     fontSize: '2rem',
-    color: theme.palette.secondary.main,
     fontWeight: 'bold',
+    color: theme.palette.secondary.main,
     '&:hover': {
       color: theme.palette.secondary.light,
     },
@@ -37,65 +37,76 @@ const styles = (theme) => ({
   friendPic: {
     background: theme.palette.primary.main,
   },
+  noFriends: {
+    width: '100%',
+    padding: '2rem',
+    background: 'black',
+    textAlign: 'center',
+    a: {
+      color: theme.palette.primary.main,
+      '&:hover': {
+        color: theme.palette.primary.light,
+      },
+    },
+  },
 })
 
 const BattleFriends = () => {
-  const classes = useClasses(styles);
-
-  const [appState] = useContext(CTX);
-  const { token } = appState.auth;
-  const { id } = appState.user;
-  const [friendlist, setFriendlist] = useState([]);
+  const [friendlist, setFriendlist] = useState([])
+  const [{ auth, user }] = useContext(CTX)
+  const classes = useClasses(styles)
+  const { token } = auth
+  const { id } = user
 
   useEffect(() => {
-    if (!token) return;
+    if (!token) return
     axios
       .get('/api/user/friendships', { headers: { 'x-auth-token': token } })
       .then(({ data }) => setFriendlist(data))
-      .catch((err) => console.log({ err }));
-  }, [token]);
+      .catch((err) => console.error({ err }))
+  }, [token])
 
   return (
-    <Grid container justify='center' className={classes.battleFriends}>
+    <Grid container justify="center" className={classes.battleFriends}>
+      {friendlist.length === 0 && (
+        <div className={classes.noFriends}>
+          <Typography>No friends yet...</Typography>
+          <Typography>
+            Go meet some new friends in the <Link to="/forum">Forum</Link>
+          </Typography>
+          <Typography>
+            Or go battle <Link to="/battle/computer">the computer</Link>
+          </Typography>
+          <Typography>
+            or a <Link to="/battle/random">random user</Link>
+          </Typography>
+        </div>
+      )}
       {friendlist.map(({ _id, receiver, sender }) => (
-        <Friend
-          key={_id}
-          props={{ friend: sender._id === id ? receiver : sender, _id }}
-        />
+        <Friend key={_id} props={{ friend: sender._id === id ? receiver : sender, _id }} />
       ))}
     </Grid>
-  );
-};
+  )
+}
 
 const Friend = ({ props: { friend, _id } }) => {
-  const classes = useClasses(styles);
+  const classes = useClasses(styles)
   return (
-    <Grid
-      container
-      alignItems='center'
-      justify='center'
-      className={classes.friend}
-    >
+    <Grid container alignItems="center" justify="center" className={classes.friend}>
       <Grid
         item
-        className={classes.friendPic}
         component={Avatar}
+        className={classes.friendPic}
         src={`/api/images/${friend.profilePic}`}
       />
-
       <Grid item={Typography} className={classes.friendName}>
         {friend.name}
       </Grid>
-      <Grid
-        item
-        className={classes.link}
-        component={Link}
-        to={`/friendbattle/${_id}`}
-      >
+      <Grid item className={classes.link} component={Link} to={`/friendbattle/${_id}`}>
         connect for battle
       </Grid>
     </Grid>
-  );
-};
+  )
+}
 
-export default BattleFriends;
+export default BattleFriends
