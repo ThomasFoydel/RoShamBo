@@ -82,23 +82,19 @@ const Auth = () => {
           setFormState(initialState)
         }
       })
-      .catch(({ response }) => toast.error(response?.data?.message))
+      .catch(({ response }) => toast.error(response?.data?.message || type + ' failed'))
   }
 
   const props = { formState, handleAuth, setAuthPage, setFormState, classes }
-
-  const ModalBody = (
-    <div className={classes.modalBody}>
-      {authPage === 'register' ? <Register props={props} /> : <Login props={props} />}
-    </div>
-  )
 
   const closeErr = () => setErr(null)
 
   return (
     <Dialog open={authModal} onClose={closeModal}>
       {redirect && <Navigate to="/howto" />}
-      {ModalBody}
+      <div className={classes.modalBody}>
+        {authPage === 'register' ? <Register props={props} /> : <Login props={props} />}
+      </div>
       <Snackbar
         open={err}
         onClose={closeErr}

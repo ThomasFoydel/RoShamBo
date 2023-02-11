@@ -1,5 +1,6 @@
 import axios from 'axios'
 import io from 'socket.io-client'
+import 'react-toastify/dist/ReactToastify.css'
 import { ThemeProvider } from '@emotion/react'
 import { StyledEngineProvider } from '@mui/material/styles'
 import React, { useState, useEffect, useContext, useRef } from 'react'
@@ -139,8 +140,8 @@ const App = () => {
             </Routes>
             <Auth />
           </div>
-          <ToastContainer position="bottom-right" />
         </Router>
+        <ToastContainer position="bottom-right" />
       </ThemeProvider>
     </StyledEngineProvider>
   )
