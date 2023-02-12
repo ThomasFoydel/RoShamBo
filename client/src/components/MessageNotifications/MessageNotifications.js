@@ -7,8 +7,9 @@ import useClasses from 'customHooks/useClasses'
 
 const styles = (theme) => ({
   link: {
-    color: theme.palette.primary.main,
     width: '100%',
+    display: 'block',
+    color: theme.palette.primary.main,
     '&:hover': {
       color: theme.palette.primary.light,
     },
@@ -35,8 +36,8 @@ const MessageNotifications = ({ socketRef, socketLoaded }) => {
           toast.info(
             <div>
               <Link
+                to="/messages"
                 className={classes.link}
-                to="/messages/"
                 onClick={() => updateState({ type: 'CURRENT_THREAD', payload: message.sender._id })}
               >
                 <div className={classes.top}>
@@ -48,7 +49,7 @@ const MessageNotifications = ({ socketRef, socketLoaded }) => {
                   : message.content.slice(0, 30) + '...'}
               </Link>
             </div>,
-            { icon: false, autoClose: false }
+            { icon: false }
           )
         }
       })

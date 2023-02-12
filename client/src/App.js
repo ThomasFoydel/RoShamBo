@@ -130,7 +130,7 @@ const App = () => {
           <Auth />
         </div>
         <MessageNotifications socketRef={socketRef} socketLoaded={socketLoaded} />
-        <ToastContainer position="bottom-right" theme="dark" />
+        <ToastContainer position="bottom-right" theme="dark" limit={5} />
       </ThemeProvider>
     </StyledEngineProvider>
   )
