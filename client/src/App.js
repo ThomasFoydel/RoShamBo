@@ -30,6 +30,7 @@ const App = () => {
   const [{ isLoggedIn, auth }, updateState] = useContext(CTX)
   const { token } = auth
 
+  const [authFetchComplete, setAuthFetchComplete] = useState(false)
   const [socketLoaded, setSocketLoaded] = useState(false)
   const socketRef = useRef(null)
 
@@ -40,20 +41,19 @@ const App = () => {
     const noToken = !rsbToken || rsbToken === 'undefined'
     if (noToken || remember === 'false') return updateState({ type: 'LOGOUT' })
 
-    axios
-      .get('/api/auth/', { headers: { 'x-auth-token': rsbToken } })
-      .then(({ data }) => {
-        if (subscribed) {
-          if (data.err && !isDev()) return updateState({ type: 'LOGOUT' })
-          if (data) {
-            updateState({
-              type: 'LOGIN',
-              payload: { user: data.user, token: data.token, remember },
-            })
-          }
+    const fetchAuth = async () => {
+      try {
+        const { data } = await axios.get('/api/auth/', { headers: { 'x-auth-token': rsbToken } })
+        if (data?.err && !isDev() && subscribed) return updateState({ type: 'LOGOUT' })
+        if (data && subscribed) {
+          updateState({ type: 'LOGIN', payload: { user: data.user, token: data.token, remember } })
         }
-      })
-      .catch(() => !isDev() && updateState({ type: 'LOGOUT' }))
+      } catch ({ response }) {
+        if (!isDev()) updateState({ type: 'LOGOUT' })
+      }
+      setTimeout(() => setAuthFetchComplete(true), 100)
+    }
+    fetchAuth()
 
     return () => {
       if (socketRef.current) socketRef.current.emit('disconnect-room', socketRef.current.id)
@@ -84,51 +84,57 @@ const App = () => {
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
-        <div
-          style={{
-            color: 'white',
-            minHeight: '100vh',
-            background: '#111',
-            paddingBottom: '3rem',
-            fontFamily: 'OpenDyslexic',
-          }}
-        >
-          <NavBar />
-          <Routes>
-            <Route exact path="/" element={loggedAndLoaded ? <Home /> : <Landing />} />
-            <Route
-              exact
-              path="/profile/edit"
-              element={loggedAndLoaded ? <EditProfile /> : <Landing />}
-            />
-            <Route exact path="/profile/:id" element={socketOrNotLoggedIn ? <Profile /> : <></>} />
-            <Route exact path="/battle" element={isLoggedIn ? <Battle /> : <Landing />} />
-            <Route exact path="/battle/computer" element={<ComputerBattle />} />
-            <Route
-              exact
-              path="/messages"
-              element={loggedAndLoaded ? <Messages props={{ socketRef }} /> : <Landing />}
-            />
-            <Route
-              exact
-              path="/battle/random"
-              element={loggedAndLoaded ? <RandomBattle props={{ socketRef }} /> : <Landing />}
-            />
-            <Route
-              exact
-              path="/battle/friends"
-              element={loggedAndLoaded ? <BattleFriends /> : <Landing />}
-            />
-            <Route
-              exact
-              path="/friendbattle/:friendshipId"
-              element={loggedAndLoaded ? <FriendBattle props={{ socketRef }} /> : <Landing />}
-            />
-            <Route exact path="/howto" element={<HowTo />} />
-            <Route exact path="/forum" element={socketOrNotLoggedIn ? <Forum /> : <></>} />
-          </Routes>
-          <Auth />
-        </div>
+        {authFetchComplete && (
+          <div
+            style={{
+              color: 'white',
+              minHeight: '100vh',
+              background: '#111',
+              paddingBottom: '3rem',
+              fontFamily: 'OpenDyslexic',
+            }}
+          >
+            <NavBar />
+            <Routes>
+              <Route exact path="/" element={loggedAndLoaded ? <Home /> : <Landing />} />
+              <Route
+                exact
+                path="/profile/edit"
+                element={loggedAndLoaded ? <EditProfile /> : <Landing />}
+              />
+              <Route
+                exact
+                path="/profile/:id"
+                element={socketOrNotLoggedIn ? <Profile /> : <></>}
+              />
+              <Route exact path="/battle" element={isLoggedIn ? <Battle /> : <Landing />} />
+              <Route exact path="/battle/computer" element={<ComputerBattle />} />
+              <Route
+                exact
+                path="/messages"
+                element={loggedAndLoaded ? <Messages props={{ socketRef }} /> : <Landing />}
+              />
+              <Route
+                exact
+                path="/battle/random"
+                element={loggedAndLoaded ? <RandomBattle props={{ socketRef }} /> : <Landing />}
+              />
+              <Route
+                exact
+                path="/battle/friends"
+                element={loggedAndLoaded ? <BattleFriends /> : <Landing />}
+              />
+              <Route
+                exact
+                path="/friendbattle/:friendshipId"
+                element={loggedAndLoaded ? <FriendBattle props={{ socketRef }} /> : <Landing />}
+              />
+              <Route exact path="/howto" element={<HowTo />} />
+              <Route exact path="/forum" element={socketOrNotLoggedIn ? <Forum /> : <></>} />
+            </Routes>
+            <Auth />
+          </div>
+        )}
         <MessageNotifications socketRef={socketRef} socketLoaded={socketLoaded} />
         <ToastContainer position="bottom-right" theme="dark" limit={5} />
       </ThemeProvider>
