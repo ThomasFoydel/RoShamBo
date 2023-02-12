@@ -116,13 +116,15 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
       console.log('Invalid current image id: ', currentPic, err)
     }
   }
-
-  API.user
-    .updateProfile(userId, { profilePic: id })
-    .then(({ profilePic }) =>
-      res.status(201).send({ status: 'success', message: 'Image uploaded', profilePic })
-    )
-    .catch(() => res.status(500).send({ status: 'error', message: 'Database error' }))
+  try {
+    const updatedUser = await API.user.updateProfile(userId, { profilePic: id })
+    if (!updatedUser) {
+      return res.status(404).send({ status: 'error', message: 'User not found' })
+    }
+    return res.status(201).send({ status: 'success', message: 'Image uploaded', profilePic })
+  } catch (err) {
+    return res.status(500).send({ status: 'error', message: 'Database error' })
+  }
 })
 
 module.exports = router
