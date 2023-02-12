@@ -109,33 +109,29 @@ const Forum = () => {
   useEffect(() => {
     axios
       .get('/api/forum/posts')
-      .then(({ data }) => setPosts(data))
+      .then(({ data }) => data?.posts && setPosts(data.posts))
       .catch(({ response }) => toast.error(response?.data?.message))
   }, [token])
 
   const deletePost = (id) => {
     axios
       .delete(`/api/forum/post/${id}`, { headers: { 'x-auth-token': token } })
-      .then(({ data }) => data && setPosts((posts) => posts.filter((p) => p._id !== data)))
+      .then(
+        ({ data }) =>
+          data?.postId && setPosts((posts) => posts.filter((p) => p._id !== data.postId))
+      )
       .catch(({ response }) => toast.error(response?.data?.message))
   }
 
   const deleteComment = (id) => {
     axios
-      .delete(`/api/forum/comment/${id}`, {
-        headers: { 'x-auth-token': token },
+      .delete(`/api/forum/comment/${id}`, { headers: { 'x-auth-token': token } })
+      .then(({ data }) => {
+        const { updatedPost } = data
+        if (updatedPost) {
+          setPosts((posts) => posts.map((p) => (p._id === updatedPost._id ? updatedPost : p)))
+        }
       })
-      .then(
-        ({ data }) =>
-          data &&
-          data._id &&
-          setPosts((posts) => {
-            const copy = [...posts]
-            const post = copy.find((p) => p._id === data._id)
-            Object.assign(post, data)
-            return copy
-          })
-      )
       .catch(({ response }) => toast.error(response?.data?.message))
   }
 

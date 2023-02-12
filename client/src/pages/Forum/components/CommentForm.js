@@ -48,8 +48,8 @@ const CommentForm = ({ props: { postId, setPosts, token } }) => {
         .then(({ data }) => {
           setPosts((posts) => {
             const copy = [...posts]
-            const post = copy.find((p) => p._id === data._id)
-            Object.assign(post, data)
+            const post = copy.find((p) => p._id === data.post._id)
+            Object.assign(post, data.post)
             return copy
           })
           setCommentInput('')

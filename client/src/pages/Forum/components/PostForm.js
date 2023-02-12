@@ -43,7 +43,7 @@ const PostForm = ({ props: { setPosts, token } }) => {
     axios
       .post('/api/forum/post', form, { headers: { 'x-auth-token': token } })
       .then(({ data }) => {
-        setPosts((posts) => [data, ...posts])
+        setPosts((posts) => [data.post, ...posts])
         setForm(initialState)
       })
       .catch(({ response }) => toast.error(response?.data?.message))
