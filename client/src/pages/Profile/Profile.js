@@ -140,7 +140,7 @@ const Profile = () => {
 
   const requestFriend = () => {
     axios
-      .post('/api/user/friendrequest/', { id }, { headers: { 'x-auth-token': auth.token } })
+      .post('/api/user/friendship/', { id }, { headers: { 'x-auth-token': auth.token } })
       .then(() => setFriendshipExists(true))
       .catch(({response}) => toast.error(response?.data?.message))
   }

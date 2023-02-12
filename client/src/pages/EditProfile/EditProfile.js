@@ -96,7 +96,7 @@ const EditProfile = () => {
     e.preventDefault()
 
     const update = Object.fromEntries(Object.entries(formData).filter((e) => e[1].length > 0))
-
+    
     axios
       .put('/api/user/profile', update, { headers: { 'x-auth-token': token } })
       .then(({ data: { user } }) => {

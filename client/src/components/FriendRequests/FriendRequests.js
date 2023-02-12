@@ -31,7 +31,7 @@ const FriendRequests = () => {
   useEffect(() => {
     let subscribed = true
     axios
-      .get('/api/user/friendrequests', { headers: { 'x-auth-token': token } })
+      .get('/api/user/friendship/requests', { headers: { 'x-auth-token': token } })
       .then(({ data: { friendRequests } }) => subscribed && setFriendRequests(friendRequests))
       .catch(({ response }) => toast.error(response?.data?.message))
     return () => (subscribed = false)
@@ -39,18 +39,22 @@ const FriendRequests = () => {
 
   const accept = (id) => {
     axios
-      .post('/api/user/accept-fr', { id }, { headers: { 'x-auth-token': token } })
-      .then(({ data }) => {
-        setFriendRequests(data.friendRequests)
-        updateState({ type: 'SET_FRIENDLIST', payload: data.friendList })
+      .put('/api/user/friendship', { id, accept: true }, { headers: { 'x-auth-token': token } })
+      .then(({ data: { friendRequests, friendList } }) => {
+        setFriendRequests(friendRequests)
+        toast.success('Freind request accepted')
+        updateState({ type: 'SET_FRIENDLIST', payload: friendList })
       })
       .catch(({ response }) => toast.error(response?.data?.message))
   }
 
   const reject = (id) => {
     axios
-      .post('/api/user/reject-fr', { id }, { headers: { 'x-auth-token': token } })
-      .then(({ data: { friendRequests } }) => setFriendRequests(friendRequests))
+      .put('/api/user/friendship', { id, accept: false }, { headers: { 'x-auth-token': token } })
+      .then(({ data: { friendRequests } }) => {
+        setFriendRequests(friendRequests)
+        toast.success('Freind request rejected')
+      })
       .catch(({ response }) => toast.error(response?.data?.message))
   }
 

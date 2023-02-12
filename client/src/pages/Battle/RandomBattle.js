@@ -452,7 +452,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
     randoData.userId &&
       axios
         .post(
-          '/api/user/friendrequest',
+          '/api/user/friendship',
           { id: randoData.userId },
           { headers: { 'x-auth-token': token } }
         )
