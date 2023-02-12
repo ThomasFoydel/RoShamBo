@@ -63,7 +63,7 @@ const BattleFriends = () => {
     if (!token) return
     axios
       .get('/api/user/friendships', { headers: { 'x-auth-token': token } })
-      .then(({ data: { friendList } }) => setFriendlist(friendList))
+      .then(({ data: { friendships } }) => setFriendlist(friendships))
       .catch(({ response }) => toast.error(response?.data?.message))
   }, [token])
 
