@@ -258,7 +258,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
     if (count === null) return
     if (count > 0) {
       const getHandPose = async () => {
-        const myChoice = await detect(handPoseNet)
+        const myChoice = await detect(handPoseNet, myCamRef)
         if (myChoice) setMyChoice(myChoice)
       }
       getHandPose()
