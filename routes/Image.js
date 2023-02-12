@@ -12,8 +12,8 @@ const router = express.Router()
 
 const mongoURI = process.env.MONGO_URI
 const conn = mongoose.createConnection(mongoURI, {
-  useNewUrlParser: true,
   useUnifiedTopology: true,
+  useNewUrlParser: true,
 })
 
 let gfs
@@ -43,29 +43,41 @@ const storage = new GridFsStorage({
 const upload = multer({ storage })
 
 const deleteImage = (id) => {
-  if (!id || id === 'undefined') return res.send({ err: 'no image id' })
-  const _id = new mongoose.Types.ObjectId(id)
+  if (!id || id === 'undefined')
+    return res.status(400).send({ status: 'error', message: 'No image id' })
+  let _id
+  try {
+    _id = new mongoose.Types.ObjectId(id)
+  } catch (err) {
+    return res.status(400).send({ status: 'error', message: 'Invalid id' })
+  }
   gfs.delete(_id, (err) => {
-    if (err) return res.send({ err: 'image deletion error' })
+    if (err) return res.status(500).send({ status: 'error', message: 'Image deletion error' })
   })
 }
 
 router.get('/:id', ({ params: { id } }, res) => {
-  if (!id || id === 'undefined') return res.send({ err: 'no image id' })
-  const _id = new mongoose.Types.ObjectId(id)
+  if (!id || id === 'undefined') {
+    return res.status(400).send({ status: 'error', message: 'No image id' })
+  }
+  let _id
+  try {
+    _id = new mongoose.Types.ObjectId(id)
+  } catch (err) {
+    return res.status(400).send({ status: 'error', message: 'Invalid id' })
+  }
   gfs.find({ _id }).toArray((_, files) => {
-    if (!files || files.length === 0) return res.send({ err: 'no files exist' })
+    if (!files || files.length === 0) return res.status(404).send({ err: 'Image not found' })
     gfs.openDownloadStream(_id).pipe(res)
   })
 })
 
 router.get('/', (_, res) => {
   if (!gfs) {
-    res.send({ err: 'database error' })
-    process.exit(0)
+    return res.status(500).send({ status: 'error', message: 'Database error' })
   }
   gfs.find().toArray((_, files) => {
-    if (!files || files.length === 0) return res.send({ err: 'no files' })
+    if (!files || files.length === 0) return res.status(404).send({ err: 'Image not found' })
 
     const f = files
       .map((file) => {
@@ -78,41 +90,39 @@ router.get('/', (_, res) => {
       })
       .sort((a, b) => new Date(b['uploadDate']).getTime() - new Date(a['uploadDate']).getTime())
 
-    return res.render('index', {
-      files: f,
-    })
+    return res.status(200).json({ files: f })
   })
 })
 
-router.post('/upload/profilepic', auth, upload.single('image'), async (req, res) => {
+router.post('/', auth, upload.single('image'), async (req, res) => {
   const { tokenUser, file } = req
   const { userId } = tokenUser
   const { id } = file
 
   if (file.size > 5000000) {
     deleteImage(id)
-    return res.send({ err: 'file may not exceed 5mb' })
+    return res.status(400).send({ status: 'error', message: 'File may not exceed 5mb' })
   }
 
   const foundUser = await API.user.findById(userId)
-  if (!foundUser) return res.send({ err: 'user not found' })
+  if (!foundUser) return res.status(404).send({ status: 'error', message: 'User not found' })
   const currentPic = foundUser.profilePic
   if (currentPic) {
     let currentPicId
     try {
       currentPicId = new mongoose.Types.ObjectId(currentPic)
+      gfs.delete(currentPicId, () => console.log('Image deletion failed ', currentPicId))
     } catch (err) {
-      console.log('invalid id: ', currentPic)
+      console.log('Invalid current image id: ', currentPic, err)
     }
-    gfs.delete(currentPicId, (err) => {
-      if (err) return res.send({ err: 'database error' })
-    })
   }
 
   API.user
     .updateProfile(userId, { profilePic: id })
-    .then((user) => res.send(user.profilePic))
-    .catch(() => res.send({ err: 'database error' }))
+    .then(({ profilePic }) =>
+      res.status(201).send({ status: 'success', message: 'Image uploaded', profilePic })
+    )
+    .catch(() => res.status(500).send({ status: 'error', message: 'Database error' }))
 })
 
 module.exports = router

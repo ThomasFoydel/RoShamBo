@@ -4,7 +4,7 @@ const auth = require('../middleware/auth')
 
 const router = express.Router()
 
-router.get('/connect/:friendshipId', auth, async (req, res) => {
+router.get('/:friendshipId', auth, async (req, res) => {
   const { friendshipId } = req.params
   const { userId } = req.tokenUser
   API.friendship
