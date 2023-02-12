@@ -32,7 +32,9 @@ router.delete('/:commentId', auth, async (req, res) => {
   const { userId } = req.tokenUser
   const { commentId } = req.params
   const foundComment = await API.comment.find(commentId)
-  if (!foundComment) return res.sendStatus(404)
+  if (!foundComment) {
+    return res.status(404).send({ status: 'error', message: 'Comment not found' })
+  }
   if (foundComment.author._id.toString() !== userId) {
     return res.status(401).send({ status: 'error', message: 'Not authorized' })
   }
@@ -44,7 +46,6 @@ router.delete('/:commentId', auth, async (req, res) => {
   if (!updatedPost) {
     return res.status(500).send({ status: 'error', message: 'Post not found' })
   }
-
   return res.status(200).send({ status: 'success', message: 'Comment deleted', updatedPost })
 })
 
