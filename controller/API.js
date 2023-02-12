@@ -87,6 +87,7 @@ const API = {
   comment: {
     create: (content, author, post) => Comment.create({ content, author, post }),
     find: (id) => Comment.findById(id),
+    findByPostId: (postId) => Comment.find({ post: postId }),
     delete: (id) => Comment.findByIdAndDelete(id, { useFindAndModify: false }),
   },
   friendship: {
