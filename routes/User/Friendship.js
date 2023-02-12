@@ -6,31 +6,30 @@ const auth = require('../../middleware/auth')
 const router = express.Router()
 
 router.post('/', auth, async (req, res) => {
-  const sender = req.tokenUser.userId
-  const receiver = req.body.id
-  let senderId
-  let receiverId
   try {
-    senderId = new mongoose.Types.ObjectId(sender)
-    receiverId = new mongoose.Types.ObjectId(receiver)
-  } catch (err) {
-    return res.status(404).send({ status: 'error', message: 'Invalid ID(s)' })
-  }
-  API.friendship.findByUsers(senderId, receiverId).then((existingFriendship) => {
+    const sender = req.tokenUser.userId
+    const receiver = req.body.id
+    let senderId
+    let receiverId
+
+    try {
+      senderId = new mongoose.Types.ObjectId(sender)
+      receiverId = new mongoose.Types.ObjectId(receiver)
+    } catch (err) {
+      return res.status(404).send({ status: 'error', message: 'Invalid ID(s)' })
+    }
+    const existingFriendship = await API.friendship.findByUsers(senderId, receiverId)
     if (existingFriendship) {
       return res.status(404).send({ status: 'error', message: 'Friendship not found' })
     }
-    API.friendship
-      .create(senderId, receiverId)
-      .then((newFriendRequest) =>
-        res
-          .status(201)
-          .send({ status: 'success', message: 'Friend request sent', newFriendRequest })
-      )
-      .catch(() =>
-        res.status(500).send({ status: 'error', message: 'Friend request creation failed' })
-      )
-  })
+
+    const newFriendRequest = await API.friendship.create(senderId, receiverId)
+    return res
+      .status(201)
+      .send({ status: 'success', message: 'Friend request sent', newFriendRequest })
+  } catch (err) {
+    return res.status(500).send({ status: 'error', message: 'Friend request creation failed' })
+  }
 })
 
 router.put('/', auth, async (req, res) => {
@@ -65,32 +64,34 @@ router.put('/', auth, async (req, res) => {
 })
 
 router.get('/requests', auth, async (req, res) => {
-  const { userId } = req.tokenUser
-  API.friendship
-    .findPending(userId)
-    .then((friendRequests) =>
-      res
-        .status(200)
-        .send({ status: 'success', message: 'Friend request fetch successful', friendRequests })
-    )
-    .catch(() =>
-      res
-        .status(500)
-        .send({ status: 'error', message: 'Database is down, we are working to fix this' })
-    )
+  try {
+    const { userId } = req.tokenUser
+    const friendRequests = await API.friendship.findPending(userId)
+    if (!friendRequests) {
+      return res.status(404).send({ status: 'error', message: 'Friend requests not found' })
+    }
+    return res
+      .status(200)
+      .send({ status: 'success', message: 'Friend request fetch successful', friendRequests })
+  } catch (err) {
+    return res
+      .status(500)
+      .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+  }
 })
 
 router.get('/', auth, async ({ tokenUser: { userId } }, res) => {
-  API.friendship
-    .findFriendlist(userId)
-    .then((friendships) =>
-      res.status(200).send({ status: 'success', message: 'Friendships found', friendships })
-    )
-    .catch(() =>
-      res
-        .status(500)
-        .send({ status: 'error', message: 'Database is down, we are working to fix this' })
-    )
+  try {
+    const friendships = await API.friendship.findFriendlist(userId)
+    if (!friendships) {
+      return res.status(404).send({ status: 'error', message: 'Friendships not found' })
+    }
+    return res.status(200).send({ status: 'success', message: 'Friendships found', friendships })
+  } catch (err) {
+    res
+      .status(500)
+      .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+  }
 })
 
 module.exports = router
