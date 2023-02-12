@@ -99,9 +99,9 @@ const EditProfile = () => {
 
     axios
       .put('/api/user/profile', update, { headers: { 'x-auth-token': token } })
-      .then(({ data }) => {
+      .then(({ data: { user } }) => {
         setFormData(formDataInitialValues)
-        updateState({ type: 'UPDATE_USER_INFO', payload: { update: data } })
+        updateState({ type: 'UPDATE_USER_INFO', payload: { update: user } })
       })
       .catch(({ response }) => toast.error(response?.data?.message))
   }

@@ -32,7 +32,7 @@ const FriendRequests = () => {
     let subscribed = true
     axios
       .get('/api/user/friendrequests', { headers: { 'x-auth-token': token } })
-      .then(({ data }) => subscribed && setFriendRequests(data))
+      .then(({ data: { friendRequests } }) => subscribed && setFriendRequests(friendRequests))
       .catch(({ response }) => toast.error(response?.data?.message))
     return () => (subscribed = false)
   }, [])
@@ -50,7 +50,7 @@ const FriendRequests = () => {
   const reject = (id) => {
     axios
       .post('/api/user/reject-fr', { id }, { headers: { 'x-auth-token': token } })
-      .then(({ data }) => setFriendRequests(data))
+      .then(({ data: { friendRequests } }) => setFriendRequests(friendRequests))
       .catch(({ response }) => toast.error(response?.data?.message))
   }
 

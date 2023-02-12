@@ -142,7 +142,7 @@ const Profile = () => {
     axios
       .post('/api/user/friendrequest/', { id }, { headers: { 'x-auth-token': auth.token } })
       .then(() => setFriendshipExists(true))
-      .catch(() => toast.error('Something went wrong, friend request not created'))
+      .catch(({response}) => toast.error(response?.data?.message))
   }
 
   const expStyles = {
