@@ -41,7 +41,7 @@ const PostForm = ({ props: { setPosts, token } }) => {
     e.preventDefault()
     if (!form.content || !form.title) return toast.error('All fields required')
     axios
-      .post('/api/forum/post', form, { headers: { 'x-auth-token': token } })
+      .post('/api/forum/posts', form, { headers: { 'x-auth-token': token } })
       .then(({ data }) => {
         setPosts((posts) => [data.post, ...posts])
         setForm(initialState)

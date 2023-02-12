@@ -115,7 +115,7 @@ const Forum = () => {
 
   const deletePost = (id) => {
     axios
-      .delete(`/api/forum/post/${id}`, { headers: { 'x-auth-token': token } })
+      .delete(`/api/forum/posts/${id}`, { headers: { 'x-auth-token': token } })
       .then(
         ({ data }) =>
           data?.postId && setPosts((posts) => posts.filter((p) => p._id !== data.postId))
@@ -125,7 +125,7 @@ const Forum = () => {
 
   const deleteComment = (id) => {
     axios
-      .delete(`/api/forum/comment/${id}`, { headers: { 'x-auth-token': token } })
+      .delete(`/api/forum/comments/${id}`, { headers: { 'x-auth-token': token } })
       .then(({ data }) => {
         const { updatedPost } = data
         if (updatedPost) {

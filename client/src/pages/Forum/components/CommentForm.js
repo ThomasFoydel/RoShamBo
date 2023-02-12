@@ -41,7 +41,7 @@ const CommentForm = ({ props: { postId, setPosts, token } }) => {
     if (commentInput.length > 0 && commentInput.length <= 100) {
       axios
         .post(
-          '/api/forum/comment',
+          '/api/forum/comments',
           { content: commentInput, postId },
           { headers: { 'x-auth-token': token } }
         )
