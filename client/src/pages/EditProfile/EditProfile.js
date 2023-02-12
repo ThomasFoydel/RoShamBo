@@ -81,10 +81,10 @@ const EditProfile = () => {
       const fd = new FormData()
       fd.append('image', file, file.name)
       axios
-        .post('/api/image/upload/profilepic', fd, { headers: { 'x-auth-token': token } })
-        .then(({ data }) => {
+        .post('/api/image', fd, { headers: { 'x-auth-token': token } })
+        .then(({ data: { profilePic } }) => {
           setShowProfileInput(false)
-          updateState({ type: 'CHANGE_PROFILE_PIC', payload: { profilePic: data } })
+          updateState({ type: 'CHANGE_PROFILE_PIC', payload: { profilePic } })
         })
         .catch(({ response }) => toast.error(response?.data?.message))
     }
