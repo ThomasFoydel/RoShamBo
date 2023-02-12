@@ -100,9 +100,7 @@ const Friend = ({ props: { friend, _id } }) => {
         className={classes.friendPic}
         src={`/api/images/${friend.profilePic}`}
       />
-      <Grid item={Typography} className={classes.friendName}>
-        {friend.name}
-      </Grid>
+      <Grid className={classes.friendName}>{friend.name}</Grid>
       <Grid item className={classes.link} component={Link} to={`/friendbattle/${_id}`}>
         connect for battle
       </Grid>

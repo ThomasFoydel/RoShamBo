@@ -11,9 +11,19 @@ router.get('/connect/:friendshipId', auth, async (req, res) => {
     .findById(friendshipId)
     .then(({ participants, _id, sender, receiver }) => {
       if (!participants.includes(userId)) return res.sendStatus(401)
-      return res.status(200).send({ success: true, roomId: _id, users: [sender, receiver] })
+      return res.status(200).send({
+        status: 'success',
+        message: 'Friendship found',
+        success: true,
+        roomId: _id,
+        users: [sender, receiver],
+      })
     })
-    .catch(() => res.status(500).send({ err: 'Database is down, we are working to fix this' }))
+    .catch(() =>
+      res
+        .status(500)
+        .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+    )
 })
 
 module.exports = router

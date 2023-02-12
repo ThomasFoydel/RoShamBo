@@ -36,9 +36,7 @@ const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
     if (!currentThread || !token) return setThread([])
 
     axios
-      .get(`/api/message/thread/${currentThread}`, {
-        headers: { 'x-auth-token': token },
-      })
+      .get(`/api/message/thread/${currentThread}`, { headers: { 'x-auth-token': token } })
       .then(({ data }) => {
         if (data && Array.isArray(data) && subscribed) setThread(data)
       })
