@@ -1,4 +1,5 @@
 const express = require('express')
+const { default: mongoose } = require('mongoose')
 const API = require('../controller/API')
 const auth = require('../middleware/auth')
 
@@ -8,6 +9,12 @@ router.get('/:friendshipId', auth, async (req, res) => {
   try {
     const { friendshipId } = req.params
     const { userId } = req.tokenUser
+    let friendObjId
+    try {
+      friendObjId = new mongoose.Types.ObjectId(friendshipId)
+    } catch (err) {
+      return res.status(400).send({ status: 'error', message: 'Invalid friendship ID' })
+    }
     const friendship = await API.friendship.findById(friendshipId)
     if (!friendship) {
       return res.status(404).send({ status: 'error', message: 'Friendship not found' })

@@ -53,6 +53,7 @@ const styles = (theme) => ({
 })
 
 const BattleFriends = () => {
+  const [fetchCompleted, setFetchCompleted] = useState(false)
   const [friendlist, setFriendlist] = useState([])
   const [{ auth, user }] = useContext(CTX)
   const classes = useClasses(styles)
@@ -61,15 +62,24 @@ const BattleFriends = () => {
 
   useEffect(() => {
     if (!token) return
-    axios
-      .get('/api/user/friendships', { headers: { 'x-auth-token': token } })
-      .then(({ data: { friendships } }) => setFriendlist(friendships))
-      .catch(({ response }) => toast.error(response?.data?.message))
+    const fetchFriends = async () => {
+      try {
+        const { data } = await axios.get('/api/user/friendships', {
+          headers: { 'x-auth-token': token },
+        })
+        setFriendlist(data.friendships)
+      } catch ({ response }) {
+        toast.error(response?.data?.message)
+      }
+      setFetchCompleted(true)
+    }
+
+    fetchFriends()
   }, [token])
 
   return (
     <Grid container justify="center" className={classes.battleFriends}>
-      {friendlist.length === 0 && (
+      {fetchCompleted && friendlist.length === 0 && (
         <div className={classes.noFriends}>
           <Typography>No friends yet...</Typography>
           <Typography>

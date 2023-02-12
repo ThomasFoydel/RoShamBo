@@ -1,13 +1,14 @@
 import axios from 'axios'
 import Peer from 'peerjs'
 import Webcam from 'react-webcam'
-import { Grid } from '@mui/material'
+import { toast } from 'react-toastify'
+import { Grid, Typography } from '@mui/material'
+import { Link, useParams } from 'react-router-dom'
 import * as handpose from '@tensorflow-models/handpose'
 import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import useClasses from 'customHooks/useClasses'
 import loadingblue from 'imgs/loadingblue.gif'
-import { useParams } from 'react-router-dom'
 import weaponAudio from 'audio/weapons'
 import weaponImgs from 'imgs/weapons'
 import { CTX } from 'context/Store'
@@ -188,6 +189,20 @@ const styles = (theme) => ({
     padding: '.1rem .2rem',
     fontFamily: 'OpenDyslexic',
   },
+  friendNotfound: {
+    ...theme.centerHorizontal,
+    padding: '2rem',
+    marginTop: '4rem',
+    textAlign: 'center',
+    background: theme.palette.primary.dark,
+    a: {
+      fontWeight: 'bold',
+      color: theme.palette.secondary.light,
+      '&:hover': {
+        color: theme.palette.secondary.main,
+      },
+    },
+  },
 })
 
 const FriendBattle = ({ props: { socketRef } }) => {
@@ -205,8 +220,9 @@ const FriendBattle = ({ props: { socketRef } }) => {
   const scrollRef = useRef()
   const myStreamRef = useRef()
   const friendVideoRef = useRef()
-  const [friendStream, setFriendStream] = useState(null)
   const [friendData, setFriendData] = useState({})
+  const [friendStream, setFriendStream] = useState(null)
+  const [friendNotFound, setFriendNotFound] = useState(false)
 
   const [count, setCount] = useState(null)
   const [messages, setMessages] = useState([])
@@ -224,12 +240,12 @@ const FriendBattle = ({ props: { socketRef } }) => {
 
   useEffect(() => {
     return () => {
-      socket.off('user-connected')
-      socket.off('friendbattle-message')
-      socket.off('user-disconnected')
       socket.off('game-begin')
-      socket.off('round-outcome')
       socket.off('game-resume')
+      socket.off('round-outcome')
+      socket.off('user-connected')
+      socket.off('user-disconnected')
+      socket.off('friendbattle-message')
       socket.emit('leave-room', friendshipId)
     }
   }, [])
@@ -262,7 +278,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
   }
 
   useEffect(() => {
-    return async () => {
+    return () => {
       if (socket) socket.emit('disconnect-room', socket.id)
       if (myPeer.current) myPeer.current.destroy()
     }
@@ -328,7 +344,9 @@ const FriendBattle = ({ props: { socketRef } }) => {
       .get(`/api/battles/${friendshipId}`, { headers: { 'x-auth-token': token } })
       .then(async ({ data }) => {
         myPeer.current = new Peer()
-        for (const user of data.users) user._id !== id && setFriendData(user)
+        const friend = data.users.find((u) => u._id !== id)
+        if (!friend) return setFriendNotFound(true)
+        setFriendData(friend)
 
         myPeer.current.on('open', (peerId) => {
           socket.emit('join-room', {
@@ -446,12 +464,25 @@ const FriendBattle = ({ props: { socketRef } }) => {
           }
         }
       })
+      .catch(({ response }) => {
+        toast.error(response?.data?.message)
+        setFriendNotFound(true)
+      })
   }
 
   const playAgain = () => {
     setWinner(null)
     socket.emit('play-again', friendshipId)
   }
+
+  if (friendNotFound)
+    return (
+      <div className={classes.friendNotfound}>
+        <Typography>FRIEND NOT FOUND</Typography>
+        <Typography>Return to the</Typography>
+        <Link to="/battle/friends">Friend Battle Directory</Link>
+      </div>
+    )
 
   return (
     <div className={classes.friendBattle}>
