@@ -1,7 +1,6 @@
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import React, { useState, useEffect, useContext } from 'react'
-import MessageNotification from 'components/MessageNotification/MessageNotification'
 import useClasses from 'customHooks/useClasses'
 import PostForm from './components/PostForm'
 import Post from './components/Post'
@@ -99,16 +98,13 @@ const styles = (theme) => ({
   },
 })
 
-const initMessageNotification = { sender: null, content: null, senderId: null }
-
-const Forum = ({ props: { socketRef } }) => {
+const Forum = () => {
   const [appState] = useContext(CTX)
   const { token } = appState.auth
   const { isLoggedIn } = appState
   const userId = appState.user.id
   const classes = useClasses(styles)
   const [posts, setPosts] = useState([])
-  const [messageNotification, setMessageNotification] = useState(initMessageNotification)
 
   useEffect(() => {
     axios
@@ -116,29 +112,6 @@ const Forum = ({ props: { socketRef } }) => {
       .then(({ data }) => setPosts(data))
       .catch(({ response }) => toast.error(response?.data?.message))
   }, [token])
-
-  useEffect(() => {
-    let subscribed = true
-    if (socketRef && socketRef.current) {
-      socketRef.current.on('chat-message-notification', (message) => {
-        if (subscribed) {
-          setMessageNotification({
-            sender: message.sender.name,
-            content: message.content,
-            senderId: message.sender._id,
-          })
-        }
-      })
-    }
-
-    return () => {
-      subscribed = false
-      if (socketRef && socketRef.current) {
-        setMessageNotification(initMessageNotification)
-        socketRef.current.off('chat-message-notification')
-      }
-    }
-  }, [])
 
   const deletePost = (id) => {
     axios
@@ -166,8 +139,6 @@ const Forum = ({ props: { socketRef } }) => {
       .catch(({ response }) => toast.error(response?.data?.message))
   }
 
-  const closeMessageNotification = () => setMessageNotification(initMessageNotification)
-
   return (
     <div className={classes.forum}>
       {isLoggedIn && <PostForm props={{ setPosts, token }} />}
@@ -186,13 +157,6 @@ const Forum = ({ props: { socketRef } }) => {
           }}
         />
       ))}
-      <MessageNotification
-        props={{
-          severity: 'info',
-          message: messageNotification,
-          close: closeMessageNotification,
-        }}
-      />
     </div>
   )
 }

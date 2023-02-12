@@ -66,7 +66,7 @@ const Auth = () => {
   const [authPage, setAuthPage] = useState('login')
   const [redirect, setRedirect] = useState(false)
   const classes = useClasses(styles)
-  const { path } = useLocation()
+  const { pathname } = useLocation()
 
   const closeModal = () => updateState({ type: 'AUTH_MODAL', payload: false })
 
@@ -84,14 +84,14 @@ const Auth = () => {
   }
 
   useEffect(() => {
-    if (path === 'howto') setRedirect(false)
-  }, [path])
+    if (pathname === '/howto') setRedirect(false)
+  }, [pathname])
 
   const props = { formState, handleAuth, setAuthPage, setFormState, classes }
 
   return (
     <Dialog open={authModal} onClose={closeModal} PaperProps={{ className: classes.modalBody }}>
-      {redirect && path !== 'howto' && <Navigate to="/howto" />}
+      {redirect && pathname !== '/howto' && <Navigate to="/howto" />}
       {authPage === 'register' ? <Register props={props} /> : <Login props={props} />}
     </Dialog>
   )

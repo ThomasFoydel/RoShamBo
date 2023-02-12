@@ -31,3 +31,9 @@ button,
 input {
   cursor: pointer;
 }
+
+.Toastify__toast--info,
+.Toastify__toast--error,
+.Toastify__toast--success {
+  box-shadow: 0px 0px 30px #f1fbff30;
+}

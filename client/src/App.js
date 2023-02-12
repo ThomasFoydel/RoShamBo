@@ -2,9 +2,11 @@ import axios from 'axios'
 import io from 'socket.io-client'
 import 'react-toastify/dist/ReactToastify.css'
 import { ThemeProvider } from '@emotion/react'
+import { ToastContainer } from 'react-toastify'
+import { Routes, Route } from 'react-router-dom'
 import { StyledEngineProvider } from '@mui/material/styles'
 import React, { useState, useEffect, useContext, useRef } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import MessageNotifications from 'components/MessageNotifications/MessageNotifications'
 import ComputerBattle from 'pages/Battle/ComputerBattle'
 import EditProfile from 'pages/EditProfile/EditProfile'
 import BattleFriends from 'pages/Battle/BattleFriends'
@@ -23,7 +25,6 @@ import { isDev } from 'utils/utils'
 import Home from 'pages/Home/Home'
 import theme from 'theme/Theme'
 import './global.css'
-import { ToastContainer } from 'react-toastify'
 
 const App = () => {
   const [{ isLoggedIn, auth }, updateState] = useContext(CTX)
@@ -71,6 +72,7 @@ const App = () => {
     return () => {
       if (socketRef.current) {
         socketRef.current.removeAllListeners()
+        socketRef.current.off('chat-message-notification')
         socketRef.current.off()
       }
     }
@@ -82,66 +84,53 @@ const App = () => {
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
-        <Router>
-          <div
-            style={{
-              color: 'white',
-              minHeight: '100vh',
-              background: '#111',
-              paddingBottom: '3rem',
-              fontFamily: 'OpenDyslexic',
-            }}
-          >
-            <NavBar />
-            <Routes>
-              <Route
-                exact
-                path="/"
-                element={loggedAndLoaded ? <Home props={{ socketRef }} /> : <Landing />}
-              />
-              <Route
-                exact
-                path="/profile/edit"
-                element={loggedAndLoaded ? <EditProfile props={{ socketRef }} /> : <Landing />}
-              />
-              <Route
-                exact
-                path="/profile/:id"
-                element={socketOrNotLoggedIn ? <Profile props={{ socketRef }} /> : <></>}
-              />
-              <Route exact path="/battle" element={isLoggedIn ? <Battle /> : <Landing />} />
-              <Route exact path="/battle/computer" element={<ComputerBattle />} />
-              <Route
-                exact
-                path="/messages"
-                element={loggedAndLoaded ? <Messages props={{ socketRef }} /> : <Landing />}
-              />
-              <Route
-                exact
-                path="/battle/random"
-                element={loggedAndLoaded ? <RandomBattle props={{ socketRef }} /> : <Landing />}
-              />
-              <Route
-                exact
-                path="/battle/friends"
-                element={loggedAndLoaded ? <BattleFriends props={{ socketRef }} /> : <Landing />}
-              />
-              <Route
-                exact
-                path="/friendbattle/:friendshipId"
-                element={loggedAndLoaded ? <FriendBattle props={{ socketRef }} /> : <Landing />}
-              />
-              <Route exact path="/howto" element={<HowTo />} />
-              <Route
-                exact
-                path="/forum"
-                element={socketOrNotLoggedIn ? <Forum props={{ socketRef }} /> : <></>}
-              />
-            </Routes>
-            <Auth />
-          </div>
-        </Router>
-        <ToastContainer position="bottom-right" />
+        <div
+          style={{
+            color: 'white',
+            minHeight: '100vh',
+            background: '#111',
+            paddingBottom: '3rem',
+            fontFamily: 'OpenDyslexic',
+          }}
+        >
+          <NavBar />
+          <Routes>
+            <Route exact path="/" element={loggedAndLoaded ? <Home /> : <Landing />} />
+            <Route
+              exact
+              path="/profile/edit"
+              element={loggedAndLoaded ? <EditProfile /> : <Landing />}
+            />
+            <Route exact path="/profile/:id" element={socketOrNotLoggedIn ? <Profile /> : <></>} />
+            <Route exact path="/battle" element={isLoggedIn ? <Battle /> : <Landing />} />
+            <Route exact path="/battle/computer" element={<ComputerBattle />} />
+            <Route
+              exact
+              path="/messages"
+              element={loggedAndLoaded ? <Messages props={{ socketRef }} /> : <Landing />}
+            />
+            <Route
+              exact
+              path="/battle/random"
+              element={loggedAndLoaded ? <RandomBattle props={{ socketRef }} /> : <Landing />}
+            />
+            <Route
+              exact
+              path="/battle/friends"
+              element={loggedAndLoaded ? <BattleFriends /> : <Landing />}
+            />
+            <Route
+              exact
+              path="/friendbattle/:friendshipId"
+              element={loggedAndLoaded ? <FriendBattle props={{ socketRef }} /> : <Landing />}
+            />
+            <Route exact path="/howto" element={<HowTo />} />
+            <Route exact path="/forum" element={socketOrNotLoggedIn ? <Forum /> : <></>} />
+          </Routes>
+          <Auth />
+        </div>
+        <MessageNotifications socketRef={socketRef} socketLoaded={socketLoaded} />
+        <ToastContainer position="bottom-right" theme="dark" />
       </ThemeProvider>
     </StyledEngineProvider>
   )

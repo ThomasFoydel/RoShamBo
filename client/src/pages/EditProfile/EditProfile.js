@@ -2,9 +2,8 @@ import axios from 'axios'
 import { toast } from 'react-toastify'
 import { Link } from 'react-router-dom'
 import { Close } from '@mui/icons-material'
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useContext } from 'react'
 import { Grid, Card, Avatar, Input, Button, Typography, IconButton } from '@mui/material'
-import MessageNotification from 'components/MessageNotification/MessageNotification'
 import ImageUpload from 'components/ImageUpload/ImageUpload'
 import useClasses from 'customHooks/useClasses'
 import { CTX } from 'context/Store'
@@ -62,17 +61,15 @@ const styles = (theme) => ({
   },
 })
 
-const initMessageNotification = { sender: null, content: null, senderId: null }
 const formDataInitialValues = { name: '', displayEmail: '', bio: '' }
 
-const EditProfile = ({ props: { socketRef } }) => {
+const EditProfile = () => {
   const [{ user, auth }, updateState] = useContext(CTX)
-  const { token } = auth
   const { id, bio, name, profilePic, displayEmail } = user
-  const [profileImage, setProfileImage] = useState([])
+  const { token } = auth
   const [showProfileInput, setShowProfileInput] = useState(false)
   const [formData, setFormData] = useState(formDataInitialValues)
-  const [messageNotification, setMessageNotification] = useState(initMessageNotification)
+  const [profileImage, setProfileImage] = useState([])
   const classes = useClasses(styles)
 
   const toggleProfile = () => setShowProfileInput((s) => !s)
@@ -108,26 +105,6 @@ const EditProfile = ({ props: { socketRef } }) => {
       })
       .catch(({ response }) => toast.error(response?.data?.message))
   }
-
-  useEffect(() => {
-    let subscribed = true
-    socketRef.current.on('chat-message-notification', (message) => {
-      if (subscribed) {
-        setMessageNotification({
-          content: message.content,
-          sender: message.sender.name,
-          senderId: message.sender._id,
-        })
-      }
-    })
-    return () => {
-      subscribed = false
-      setMessageNotification(initMessageNotification)
-      socketRef.current.off('chat-message-notification')
-    }
-  }, [])
-
-  const closeMessageNotification = () => setMessageNotification(initMessageNotification)
 
   return (
     <>
@@ -219,9 +196,6 @@ const EditProfile = ({ props: { socketRef } }) => {
           </Grid>
         </Grid>
       )}
-      <MessageNotification
-        props={{ severity: 'info', message: messageNotification, close: closeMessageNotification }}
-      />
     </>
   )
 }

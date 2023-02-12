@@ -1,14 +1,12 @@
 import axios from 'axios'
+import { toast } from 'react-toastify'
 import { Link, useParams } from 'react-router-dom'
 import React, { useState, useEffect, useContext } from 'react'
 import { Avatar, Card, Typography, Button } from '@mui/material'
-import MessageNotification from 'components/MessageNotification/MessageNotification'
 import useClasses from 'customHooks/useClasses'
 import loadingblue from 'imgs/loadingblue.gif'
 import { CTX } from 'context/Store'
 import rps from 'imgs/rps.jpeg'
-
-const initMessageNotification = { sender: null, content: null, senderId: null }
 
 const styles = (theme) => ({
   profilePage: {
@@ -98,16 +96,14 @@ const styles = (theme) => ({
   },
 })
 
-const Profile = ({ props: { socketRef } }) => {
+const Profile = () => {
   const { id } = useParams()
   const [{ user, auth, isLoggedIn }] = useContext(CTX)
-  const [messageNotification, setMessageNotification] = useState(initMessageNotification)
   const [backgroundPosition, setBackgroundPosition] = useState(null)
   const [friendshipExists, setFriendshipExists] = useState(true)
   const [userInput, setUserInput] = useState({})
   const [loading, setLoading] = useState(false)
   const [rank, setRank] = useState(null)
-  const [err, setErr] = useState('')
   const classes = useClasses(styles)
 
   const isCurrentUser = id === user.id
@@ -135,43 +131,19 @@ const Profile = ({ props: { socketRef } }) => {
         if (subscribed) {
           setTimeout(() => {
             setLoading(false)
-            setErr('No user found')
+            toast.error('No user found')
           }, 1200)
         }
       })
     return () => (subscribed = false)
   }, [user.id, id])
 
-  useEffect(() => {
-    let subscribed = true
-    if (socketRef && socketRef.current) {
-      socketRef.current.on('chat-message-notification', (message) => {
-        if (subscribed) {
-          setMessageNotification({
-            content: message.content,
-            sender: message.sender.name,
-            senderId: message.sender._id,
-          })
-        }
-      })
-    }
-    return () => {
-      subscribed = false
-      if (socketRef && socketRef.current) {
-        setMessageNotification(initMessageNotification)
-        socketRef.current.off('chat-message-notification')
-      }
-    }
-  }, [])
-
   const requestFriend = () => {
     axios
       .post('/api/user/friendrequest/', { id }, { headers: { 'x-auth-token': auth.token } })
       .then(() => setFriendshipExists(true))
-      .catch(() => setErr('Something went wrong, friend request not created'))
+      .catch(() => toast.error('Something went wrong, friend request not created'))
   }
-
-  const closeMessageNotification = () => setMessageNotification(initMessageNotification)
 
   const expStyles = {
     white: {
@@ -236,13 +208,6 @@ const Profile = ({ props: { socketRef } }) => {
           )}
         </div>
       </Card>
-      <MessageNotification
-        props={{
-          severity: 'info',
-          message: messageNotification,
-          close: closeMessageNotification,
-        }}
-      />
     </div>
   )
 }

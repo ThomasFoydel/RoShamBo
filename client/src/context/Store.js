@@ -70,7 +70,6 @@ export default function Store(props) {
     isLoggedIn: false,
     currentThread: null,
     auth: { token: null },
-    messageNotification: { sender: null, content: null },
     user: { name: '', displayEmail: '', id: null, friends: [] },
   })
 
