@@ -11,7 +11,7 @@ const Comment = ({ props: { comment, userId, deleteComment, classes } }) => (
             <Grid item>
               <Avatar
                 className={classes.commentAvatar}
-                src={`/api/image/${comment.author.profilePic}`}
+                src={`/api/images/${comment.author.profilePic}`}
               >
                 {comment.author.name && comment.author.name[0].toUpperCase()}
               </Avatar>

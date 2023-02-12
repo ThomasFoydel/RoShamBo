@@ -325,7 +325,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
     loadHandPose()
 
     axios
-      .get(`/api/battle/${friendshipId}`, { headers: { 'x-auth-token': token } })
+      .get(`/api/battles/${friendshipId}`, { headers: { 'x-auth-token': token } })
       .then(async ({ data }) => {
         myPeer.current = new Peer()
         for (const user of data.users) user._id !== id && setFriendData(user)

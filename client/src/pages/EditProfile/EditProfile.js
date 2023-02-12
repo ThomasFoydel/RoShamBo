@@ -81,7 +81,7 @@ const EditProfile = () => {
       const fd = new FormData()
       fd.append('image', file, file.name)
       axios
-        .post('/api/image', fd, { headers: { 'x-auth-token': token } })
+        .post('/api/images', fd, { headers: { 'x-auth-token': token } })
         .then(({ data: { profilePic } }) => {
           setShowProfileInput(false)
           updateState({ type: 'CHANGE_PROFILE_PIC', payload: { profilePic } })
@@ -98,7 +98,7 @@ const EditProfile = () => {
     const update = Object.fromEntries(Object.entries(formData).filter((e) => e[1].length > 0))
     
     axios
-      .put('/api/user/profile', update, { headers: { 'x-auth-token': token } })
+      .put('/api/user/profiles', update, { headers: { 'x-auth-token': token } })
       .then(({ data: { user } }) => {
         setFormData(formDataInitialValues)
         updateState({ type: 'UPDATE_USER_INFO', payload: { update: user } })
@@ -132,7 +132,7 @@ const EditProfile = () => {
               alt="your profile"
               onClick={toggleProfile}
               className={classes.profilePic}
-              src={`/api/image/${profilePic}`}
+              src={`/api/images/${profilePic}`}
             >
               {name && name[0] && name[0].toUpperCase()}
             </Avatar>

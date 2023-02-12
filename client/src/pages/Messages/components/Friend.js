@@ -32,7 +32,7 @@ const Friend = ({ props: { friend, handleSelectFriend } }) => {
       className={classes.friend}
       onClick={() => handleSelectFriend(friend._id)}
     >
-      <Avatar className={classes.friendProfilePic} src={`/api/image/${friend.profilePic}`}>
+      <Avatar className={classes.friendProfilePic} src={`/api/images/${friend.profilePic}`}>
         {!friend.profilePic && friend.name && friend.name[0].toUpperCase()}
       </Avatar>
       <Typography className={classes.friendName}>{friend.name}</Typography>

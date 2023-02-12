@@ -48,7 +48,7 @@ const Message = ({ props: { message, userId } }) => {
           <Link to={`/profile/${message.sender._id}`}>
             <Avatar
               className={classes.senderProfilePic}
-              src={`/api/image/${message.sender.profilePic}`}
+              src={`/api/images/${message.sender.profilePic}`}
             >
               {message.sender.name &&
                 !message.sender.profilePic &&

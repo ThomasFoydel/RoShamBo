@@ -31,7 +31,7 @@ const FriendRequests = () => {
   useEffect(() => {
     let subscribed = true
     axios
-      .get('/api/user/friendship/requests', { headers: { 'x-auth-token': token } })
+      .get('/api/user/friendships/requests', { headers: { 'x-auth-token': token } })
       .then(({ data: { friendRequests } }) => subscribed && setFriendRequests(friendRequests))
       .catch(({ response }) => toast.error(response?.data?.message))
     return () => (subscribed = false)
@@ -39,7 +39,7 @@ const FriendRequests = () => {
 
   const accept = (id) => {
     axios
-      .put('/api/user/friendship', { id, accept: true }, { headers: { 'x-auth-token': token } })
+      .put('/api/user/friendships', { id, accept: true }, { headers: { 'x-auth-token': token } })
       .then(({ data: { friendRequests, friendList } }) => {
         setFriendRequests(friendRequests)
         toast.success('Freind request accepted')
@@ -50,7 +50,7 @@ const FriendRequests = () => {
 
   const reject = (id) => {
     axios
-      .put('/api/user/friendship', { id, accept: false }, { headers: { 'x-auth-token': token } })
+      .put('/api/user/friendships', { id, accept: false }, { headers: { 'x-auth-token': token } })
       .then(({ data: { friendRequests } }) => {
         setFriendRequests(friendRequests)
         toast.success('Freind request rejected')

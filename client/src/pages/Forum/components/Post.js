@@ -13,7 +13,7 @@ const Post = ({
         <Grid container alignItems="center">
           <Grid item>
             <Link to={`/profile/${post.author._id}`}>
-              <Avatar src={`/api/image/${post.author.profilePic}`} className={classes.postAvatar}>
+              <Avatar src={`/api/images/${post.author.profilePic}`} className={classes.postAvatar}>
                 {post.author.name && post.author.name[0].toUpperCase()}
               </Avatar>
             </Link>

@@ -116,7 +116,7 @@ const Profile = () => {
     let subscribed = true
     setLoading(true)
     axios
-      .get(`/api/user/profile/${id}`, { headers: { userId: user.id } })
+      .get(`/api/user/profiles/${id}`, { headers: { userId: user.id } })
       .then(({ data: { user, friendshipExists } }) => {
         if (subscribed) {
           setTimeout(() => {
@@ -140,7 +140,7 @@ const Profile = () => {
 
   const requestFriend = () => {
     axios
-      .post('/api/user/friendship/', { id }, { headers: { 'x-auth-token': auth.token } })
+      .post('/api/user/friendships/', { id }, { headers: { 'x-auth-token': auth.token } })
       .then(() => setFriendshipExists(true))
       .catch(({response}) => toast.error(response?.data?.message))
   }
@@ -180,7 +180,7 @@ const Profile = () => {
         <Avatar
           alt={userInput.name || 'loading'}
           classes={{ root: classes.profilePic }}
-          src={loading || !userInput.name ? loadingblue : `/api/image/${userInput.profilePic}`}
+          src={loading || !userInput.name ? loadingblue : `/api/images/${userInput.profilePic}`}
         >
           {!userInput.profilePic && userInput.name && userInput.name[0].toUpperCase()}
         </Avatar>

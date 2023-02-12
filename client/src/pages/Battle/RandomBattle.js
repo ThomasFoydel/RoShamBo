@@ -444,7 +444,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
   useEffect(() => {
     randoData.userId &&
       axios
-        .get(`/api/user/profile/${randoData.userId}`, { headers: { 'x-auth-token': token } })
+        .get(`/api/user/profiles/${randoData.userId}`, { headers: { 'x-auth-token': token } })
         .then(({ data: { friendshipExists } }) => setFriendshipExists(friendshipExists))
   }, [randoData])
 
@@ -452,7 +452,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
     randoData.userId &&
       axios
         .post(
-          '/api/user/friendship',
+          '/api/user/friendships',
           { id: randoData.userId },
           { headers: { 'x-auth-token': token } }
         )
