@@ -30,11 +30,18 @@ router.post('/register', async (req, res) => {
     return res.status(400).send({ status: 'error', message: 'Valid email required' })
   }
 
-  const existingUser = await API.user.findByEmail(email)
-  if (existingUser) {
+  let existingUser
+  try {
+    existingUser = await API.user.findByEmail(email)
+    if (existingUser) {
+      return res
+        .status(400)
+        .send({ status: 'error', message: 'Account with this email already exists' })
+    }
+  } catch (err) {
     return res
-      .status(400)
-      .send({ status: 'error', message: 'Account with this email already exists' })
+      .status(500)
+      .send({ status: 'error', message: 'Database is down, we are working to fix this' })
   }
 
   if (name.length < 5 || name.length > 10) {
@@ -52,56 +59,51 @@ router.post('/register', async (req, res) => {
     return res.status(400).send({ status: 'error', message: 'Password must be more secure' })
   }
 
-  API.user
-    .create({ email, name, password })
-    .then((user) => {
-      const token = makeToken(user)
-      return sendUser(res, user, token, 'Registration successful')
-    })
-    .catch(() =>
-      res
-        .status(500)
-        .send({ status: 'error', message: 'Database is down, we are working to fix this' })
-    )
+  try {
+    const user = await API.user.create({ email, name, password })
+    const token = makeToken(user)
+    return sendUser(res, user, token, 'Registration successful')
+  } catch (err) {
+    return res
+      .status(500)
+      .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+  }
 })
 
 router.post('/login', async (req, res) => {
   if (!req.body.email || !req.body.password) {
     return res.status(400).send({ status: 'error', message: 'All fields required' })
   }
-  API.user
-    .findByEmail(req.body.email)
-    .then(async (user) => {
-      if (!user) {
-        return res.status(400).send({ status: 'error', message: 'Incorrect auth info' })
-      }
-      const passwordsMatch = await bcrypt.compare(req.body.password, user.password)
+  try {
+    const user = await API.user.findByEmail(req.body.email)
+    if (!user) {
+      return res.status(400).send({ status: 'error', message: 'User not found' })
+    }
+    const passwordsMatch = await bcrypt.compare(req.body.password, user.password)
 
-      if (passwordsMatch) {
-        const token = makeToken(user)
-        return sendUser(res, user, token, 'Login successful')
-      } else {
-        return res.status(401).send({ status: 'error', message: 'Incorrect auth info' })
-      }
-    })
-    .catch(() =>
-      res
-        .status(500)
-        .send({ status: 'error', message: 'Database is down, we are working to fix this' })
-    )
+    if (passwordsMatch) {
+      const token = makeToken(user)
+      return sendUser(res, user, token, 'Login successful')
+    } else {
+      return res.status(401).send({ status: 'error', message: 'Incorrect auth info' })
+    }
+  } catch (err) {
+    return res
+      .status(500)
+      .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+  }
 })
 
 router.get('/', auth, async (req, res) => {
-  const { tokenUser } = req
-  const token = req.header('x-auth-token')
-  if (tokenUser) {
+  try {
+    const { tokenUser, token } = req
     const { userId } = tokenUser
-    return API.user
-      .findById({ _id: userId })
-      .then(async (user) => sendUser(res, user, token, 'User found'))
-      .catch(() => res.status(500).send({ status: 'error', message: 'Database error' }))
+    const user = await API.user.findById(userId)
+    if (!user) return res.status(400).send({ status: 'error', message: 'User not found' })
+    return sendUser(res, user, token, 'User found')
+  } catch (err) {
+    return res.status(500).send({ status: 'error', message: 'Database error' })
   }
-  return res.status(401).send({ status: 'error', message: 'No token' })
 })
 
 module.exports = router

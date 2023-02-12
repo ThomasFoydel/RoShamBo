@@ -7,6 +7,7 @@ module.exports = function (req, res, next) {
   try {
     const decoded = jwt.verify(token, process.env.SECRET)
     req.tokenUser = decoded.tokenUser
+    req.token = token
     next()
   } catch (err) {
     if (err.name === 'TokenExpiredError') return res.status(401).send({ msg: 'token expired' })
