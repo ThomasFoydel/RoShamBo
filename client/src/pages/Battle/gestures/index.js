@@ -1,15 +1,15 @@
-import { paperGesture } from './paper';
-import { rockGesture } from './rock';
-import { scissorsGesture } from './scissors';
-import { birdGesture } from './bird';
-import { treeGesture } from './tree';
+import { rockGesture } from './rock'
+import { birdGesture } from './bird'
+import { treeGesture } from './tree'
+import { paperGesture } from './paper'
+import { scissorsGesture } from './scissors'
 
 const gestures = {
-  paper: paperGesture,
   rock: rockGesture,
-  scissors: scissorsGesture,
   bird: birdGesture,
   tree: treeGesture,
-};
+  paper: paperGesture,
+  scissors: scissorsGesture,
+}
 
-export default gestures;
+export default gestures
