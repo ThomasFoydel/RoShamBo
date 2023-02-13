@@ -22,7 +22,8 @@ const ChatBox = ({ props: { token, currentThread } }) => {
   const [inputValue, setInputValue] = useState('')
   const classes = useClasses(styles)
 
-  const sendMessage = () => {
+  const sendMessage = (e) => {
+    e.preventDefault()
     if (!token || !inputValue) return
     setInputValue('')
     axios
@@ -36,29 +37,28 @@ const ChatBox = ({ props: { token, currentThread } }) => {
 
   const handleChange = ({ target: { value } }) => setInputValue(value)
 
-  const handleKeyDown = ({ charCode }) => charCode === 13 && sendMessage()
-
   return (
-    <Grid
-      container
-      wrap="nowrap"
-      direction="row"
-      alignItems="flex-end"
-      justify="space-around"
-      className={classes.chatbox}
-    >
+    <form onSubmit={sendMessage}>
       <Grid
-        item
-        component={Input}
-        value={inputValue}
-        onChange={handleChange}
-        className={classes.input}
-        onKeyPress={handleKeyDown}
-      />
-      <Grid item component={Button} className={classes.sendBtn} onClick={sendMessage}>
-        send
+        container
+        wrap="nowrap"
+        direction="row"
+        alignItems="flex-end"
+        justify="space-around"
+        className={classes.chatbox}
+      >
+        <Grid
+          item
+          component={Input}
+          value={inputValue}
+          onChange={handleChange}
+          className={classes.input}
+        />
+        <Grid item component={Button} className={classes.sendBtn} type="submit">
+          send
+        </Grid>
       </Grid>
-    </Grid>
+    </form>
   )
 }
 
