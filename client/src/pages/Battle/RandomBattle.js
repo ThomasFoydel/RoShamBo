@@ -563,7 +563,8 @@ const RandomBattle = ({ props: { socketRef } }) => {
                           I'm ready
                         </button>
                       )}
-                      {inPool && !randoData && <Typography>Waiting for opponent...</Typography>}
+
+                      {inPool && !randoData?.userId && <Typography>Waiting for opponent...</Typography>}
                     </>
                   )}
                 </div>
