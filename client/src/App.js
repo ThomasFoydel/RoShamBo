@@ -39,7 +39,10 @@ const App = () => {
     const remember = localStorage.getItem('remember')
     const rsbToken = localStorage.getItem('roshambo-token')
     const noToken = !rsbToken || rsbToken === 'undefined'
-    if (noToken || remember === 'false') return updateState({ type: 'LOGOUT' })
+    if (noToken || remember === 'false') {
+      setAuthFetchComplete(true)
+      return updateState({ type: 'LOGOUT' })
+    }
 
     const fetchAuth = async () => {
       try {
