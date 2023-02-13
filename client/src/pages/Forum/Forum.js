@@ -20,8 +20,8 @@ const styles = (theme) => ({
     [theme.breakpoints.down('md')]: {
       margin: '2em 1em',
     },
-    [theme.breakpoints.down('xs')]: {
-      padding: '0.5em',
+    [theme.breakpoints.down('sm')]: {
+      padding: '0.75em',
     },
   },
   postAvatar: {
@@ -44,7 +44,7 @@ const styles = (theme) => ({
     [theme.breakpoints.down('sm')]: {
       fontSize: '1.8rem',
     },
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       fontSize: '1.5rem',
     },
   },
@@ -56,7 +56,7 @@ const styles = (theme) => ({
   comments: {
     padding: '1em',
     maxWidth: '100%',
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       padding: '0',
     },
   },
@@ -67,7 +67,7 @@ const styles = (theme) => ({
     background: '#111',
     borderRadius: '10px',
     color: theme.palette.primary.light,
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       margin: '0.5em 0',
     },
   },

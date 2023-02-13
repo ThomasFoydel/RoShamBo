@@ -12,9 +12,9 @@ const styles = (theme) => ({
   input: {
     padding: '1em',
     marginRight: '1em',
-    [theme.breakpoints.down('xs')]: {
-      padding: '.4em',
-      marginRight: '.4em',
+    [theme.breakpoints.down('sm')]: {
+      padding: '.6em',
+      marginRight: '.6em',
     },
   },
   button: {
@@ -25,9 +25,9 @@ const styles = (theme) => ({
     '&:hover': {
       backgroundColor: theme.palette.primary.dark,
     },
-    [theme.breakpoints.down('xs')]: {
-      padding: '.4em',
-      marginRight: '.4em',
+    [theme.breakpoints.down('sm')]: {
+      padding: '.6em',
+      marginRight: '.6em',
     },
   },
 })

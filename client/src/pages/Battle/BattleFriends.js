@@ -20,19 +20,25 @@ const styles = (theme) => ({
   friendName: {
     margin: '0 .5em',
     fontSize: '2rem',
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       fontSize: '1.2rem',
     },
   },
   link: {
-    fontSize: '2rem',
-    fontWeight: 'bold',
-    color: theme.palette.secondary.main,
-    '&:hover': {
-      color: theme.palette.secondary.light,
+    color: theme.palette.primary.main,
+    p: {
+      fontSize: '2rem',
+      fontWeight: 'bold',
+      color: theme.palette.secondary.main,
+      [theme.breakpoints.down('sm')]: {
+        fontSize: '1.2rem',
+      },
     },
-    [theme.breakpoints.down('xs')]: {
-      fontSize: '1rem',
+    '&:hover': {
+      color: theme.palette.primary.light,
+      p: {
+        color: theme.palette.secondary.light,
+      },
     },
   },
   friendPic: {
@@ -103,18 +109,22 @@ const BattleFriends = () => {
 const Friend = ({ props: { friend, _id } }) => {
   const classes = useClasses(styles)
   return (
-    <Grid container alignItems="center" justify="center" className={classes.friend}>
-      <Grid
-        item
-        component={Avatar}
-        className={classes.friendPic}
-        src={`/api/images/${friend.profilePic}`}
-      />
-      <Grid className={classes.friendName}>{friend.name}</Grid>
-      <Grid item className={classes.link} component={Link} to={`/friendbattle/${_id}`}>
-        connect for battle
+    <Link to={`/friendbattle/${_id}`} className={classes.link}>
+      <Grid container alignItems="center" justify="center" className={classes.friend}>
+        <Grid
+          item
+          component={Avatar}
+          className={classes.friendPic}
+          src={`/api/images/${friend.profilePic}`}
+        />
+        <Grid item className={classes.friendName}>
+          {friend.name}
+        </Grid>
+        <Grid item component="p">
+          connect for battle
+        </Grid>
       </Grid>
-    </Grid>
+    </Link>
   )
 }
 

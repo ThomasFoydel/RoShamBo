@@ -21,7 +21,7 @@ const styles = (theme) => ({
       marginLeft: '.3rem',
       letterSpacing: '.3rem',
     },
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       fontSize: '2.5rem',
       marginLeft: '.2rem',
       letterSpacing: '.2rem',
@@ -51,13 +51,14 @@ const styles = (theme) => ({
       color: '#fff',
       background: 'rgba(255,255,255,0.15)',
     },
-    [theme.breakpoints.down('sm')]: {
-      fontSize: '2rem',
+    [theme.breakpoints.down('md')]: {
+      fontSize: '4rem',
       padding: '.2rem 1rem',
     },
-    [theme.breakpoints.down('xs')]: {
-      fontSize: '1.4rem',
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '1.8rem',
       padding: '.2rem 1rem',
+      top: '14rem',
     },
   },
 })

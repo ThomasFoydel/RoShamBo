@@ -133,9 +133,9 @@ const styles = (theme) => ({
   drawerIcon: {
     width: '50px',
     height: '50px',
-    [theme.breakpoints.down('xs')]: {
-      width: '35px',
-      height: '35px',
+    [theme.breakpoints.down('sm')]: {
+      width: '40px',
+      height: '40px',
     },
   },
   drawer: {

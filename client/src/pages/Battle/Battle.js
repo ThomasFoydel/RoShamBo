@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Grid, Typography } from '@mui/material'
 import { People, Casino, Computer } from '@mui/icons-material'
+import { Grid, Typography, useMediaQuery } from '@mui/material'
 import useClasses from 'customHooks/useClasses'
 
 const styles = (theme) => ({
@@ -32,9 +32,6 @@ const styles = (theme) => ({
     fontWeight: 'bold',
     transition: 'all 0.3s ease',
     color: theme.palette.primary.dark,
-    [theme.breakpoints.down('xs')]: {
-      fontSize: '1.4rem',
-    },
   },
   icon: {
     width: '100%',
@@ -44,14 +41,15 @@ const styles = (theme) => ({
   },
 })
 
-const options = [
-  { link: 'friends', text: 'Friends', icon: People },
-  { link: 'computer', text: 'Computer', icon: Computer },
-  { link: 'random', text: 'Random User', icon: Casino },
-]
-
 const Battle = () => {
   const classes = useClasses(styles)
+  const small = useMediaQuery('(max-width:500px)')
+
+  const options = [
+    { link: 'friends', text: 'Friends', icon: People },
+    { link: 'computer', text: 'Computer', icon: Computer },
+    { link: 'random', text: small ? 'Random' : 'Random User', icon: Casino },
+  ]
 
   return (
     <Grid

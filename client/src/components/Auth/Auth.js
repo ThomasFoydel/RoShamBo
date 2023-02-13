@@ -18,7 +18,8 @@ const styles = (theme) => ({
     maxWidth: '500px',
     minWidth: '275px',
     padding: '2rem 4rem',
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
+      minWidth: '225px',
       padding: '2rem 2rem',
     },
   },
