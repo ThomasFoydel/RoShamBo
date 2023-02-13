@@ -6,9 +6,9 @@ import Message from './Message'
 
 const styles = () => ({
   thread: {
+    height: '325px',
     padding: '16px',
     overflow: 'auto',
-    maxHeight: '60vh',
   },
 })
 
@@ -36,9 +36,9 @@ const MessageBox = ({ props: { currentThread, token, socket, userId } }) => {
     if (!currentThread || !token) return setThread([])
 
     axios
-      .get(`/api/message/thread/${currentThread}`, { headers: { 'x-auth-token': token } })
-      .then(({ data }) => {
-        if (data && Array.isArray(data) && subscribed) setThread(data)
+      .get(`/api/messages/${currentThread}`, { headers: { 'x-auth-token': token } })
+      .then(({ data: { messages } }) => {
+        if (messages && Array.isArray(messages) && subscribed) setThread(messages)
       })
       .catch(({ response }) => toast.error(response?.data?.message))
 

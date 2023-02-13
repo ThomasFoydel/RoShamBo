@@ -11,6 +11,8 @@ const styles = (theme) => ({
   },
   sendBtn: {
     color: 'white',
+    marginLeft: '1rem',
+    marginRight: '.5rem',
     background: theme.palette.primary.main,
     '&:hover': {
       background: theme.palette.primary.dark,
@@ -25,14 +27,14 @@ const ChatBox = ({ props: { token, currentThread } }) => {
   const sendMessage = (e) => {
     e.preventDefault()
     if (!token || !inputValue) return
-    setInputValue('')
     axios
       .post(
-        '/api/message/new',
+        '/api/messages',
         { receiver: currentThread, content: inputValue },
         { headers: { 'x-auth-token': token } }
       )
       .catch(({ response }) => toast.error(response?.data?.message))
+    setInputValue('')
   }
 
   const handleChange = ({ target: { value } }) => setInputValue(value)
@@ -44,7 +46,7 @@ const ChatBox = ({ props: { token, currentThread } }) => {
         wrap="nowrap"
         direction="row"
         alignItems="flex-end"
-        justify="space-around"
+        justifyContent="flex-end"
         className={classes.chatbox}
       >
         <Grid

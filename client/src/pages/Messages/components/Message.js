@@ -15,12 +15,29 @@ const styles = (theme) => ({
   },
   authorSection: {
     padding: '.25em .75em',
+    p: {
+      marginLeft: '.5rem',
+    },
   },
   mineAuthorSection: {
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
+    flexDirection: 'row-reverse',
+    p: {
+      marginLeft: '0',
+      marginRight: '.5rem',
+    },
+  },
+  profileLink: {
+    color: 'white',
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      color: theme.palette.secondary.light,
+      img: {
+        opacity: '0.8',
+      },
+    },
   },
   senderProfilePic: {
-    marginRight: '.5em',
     background: theme.palette.primary.light,
   },
   messageContent: {
@@ -30,6 +47,9 @@ const styles = (theme) => ({
   },
   senderName: {
     textAlign: 'center',
+    [theme.breakpoints.down('sm')]: {
+      display: 'none',
+    },
   },
 })
 
@@ -45,8 +65,9 @@ const Message = ({ props: { message, userId } }) => {
           alignItems="center"
           className={`${classes.authorSection} ${mine && classes.mineAuthorSection}`}
         >
-          <Link to={`/profile/${message.sender._id}`}>
+          <Link to={`/profile/${message.sender._id}`} className={classes.profileLink}>
             <Avatar
+              sx={{ color: 'inherit' }}
               className={classes.senderProfilePic}
               src={`/api/images/${message.sender.profilePic}`}
             >

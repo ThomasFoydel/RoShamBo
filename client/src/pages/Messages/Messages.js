@@ -11,6 +11,7 @@ const styles = (theme) => ({
     ...theme.centerHorizontal,
     width: '90%',
     color: 'white',
+    height: '400px',
     padding: '.5em',
     maxWidth: '50em',
     marginTop: '5em',
@@ -20,6 +21,9 @@ const styles = (theme) => ({
   friendList: {
     overflow: 'auto',
     maxHeight: '60vh',
+    borderRadius: '4px',
+    paddingRight: '1rem',
+    background: '#aaaaaaaa',
   },
 })
 
@@ -32,10 +36,7 @@ const Messages = ({ props: { socketRef } }) => {
   const classes = useClasses(styles)
 
   const handleSelectFriend = (id) => {
-    updateState({
-      type: 'CURRENT_THREAD',
-      payload: id === currentThread ? null : id,
-    })
+    updateState({ type: 'CURRENT_THREAD', payload: id === currentThread ? null : id })
   }
 
   return (

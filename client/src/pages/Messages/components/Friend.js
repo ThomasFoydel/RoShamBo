@@ -4,10 +4,20 @@ import useClasses from 'customHooks/useClasses'
 const styles = (theme) => ({
   friend: {
     padding: '.3em',
+    cursor: 'pointer',
     background: '#111',
     borderRadius: '4px',
+    marginBottom: '.4rem',
+    transition: 'all 0.2s ease',
+    paddingRight: '16px !important',
+    '.MuiAvatar-root': {
+      transition: 'all 0.2s ease',
+    },
     '&:hover': {
-      cursor: 'pointer',
+      color: theme.palette.secondary.light,
+      '.MuiAvatar-root': {
+        color: theme.palette.secondary.main,
+      },
     },
   },
   friendProfilePic: {

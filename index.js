@@ -38,12 +38,17 @@ mongoose
 
     app.use('/api', apiRoutes)
 
-    app.get('/api/message/thread/:friendId', auth, (req, res) => {
+    app.get('/api/messages/:friendId', auth, async (req, res) => {
       const { userId } = req.tokenUser
       const { friendId } = req.params
-      API.message.findByUsers(userId, friendId).then((messages) => {
-        res.send(messages)
-      })
+      try {
+        const messages = await API.message.findByUsers(userId, friendId)
+        return res.status(200).send({ status: 'success', message: 'Messages found', messages })
+      } catch (err) {
+        return res
+          .status(500)
+          .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+      }
     })
 
     io.on('connection', (socket) => {
@@ -59,25 +64,27 @@ mongoose
           users[userId] = socket.id
         }
       } catch (err) {
-        console.error('jwt decoding error err: ', err)
+        console.error('jwt decoding error error: ', err)
       }
 
-      app.post('/api/message/new', auth, async (req, res) => {
+      app.post('/api/messages', auth, async (req, res) => {
         const { receiver, content } = req.body
         const sender = req.tokenUser.userId
-        API.message
-          .create(sender, receiver, content)
-          .then((message) => {
-            if (users[receiver]) {
-              io.to(users[receiver]).emit('chat-message-notification', message)
-              io.to(users[receiver]).emit('chat-message', message)
-            }
-            if (users[sender]) io.to(users[sender]).emit('chat-message', message)
-            return res.status(201).send(message)
-          })
-          .catch(() =>
-            res.status(500).send({ err: 'Database is down, we are working to fix this' })
-          )
+        try {
+          const message = await API.message.create(sender, receiver, content)
+          if (users[receiver]) {
+            io.to(users[receiver]).emit('chat-message-notification', message)
+            io.to(users[receiver]).emit('chat-message', message)
+          }
+          if (users[sender]) io.to(users[sender]).emit('chat-message', message)
+          return res
+            .status(201)
+            .send({ status: 'success', message: 'Message sent', messageData: message })
+        } catch (err) {
+          return res
+            .status(500)
+            .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+        }
       })
 
       socket.on('join-random-pool', ({ peerId, socketId, token }) => {
