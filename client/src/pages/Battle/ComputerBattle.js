@@ -130,7 +130,6 @@ const styles = (theme) => ({
   startBtn: {
     border: 'none',
     color: 'white',
-    cursor: 'pointer',
     marginTop: '1rem',
     borderRadius: '.5rem',
     letterSpacing: '.1rem',

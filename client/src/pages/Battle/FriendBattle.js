@@ -116,7 +116,6 @@ const styles = (theme) => ({
   controlBtn: {
     width: '5.7rem',
     display: 'flex',
-    cursor: 'pointer',
     fontWeight: 'bold',
     alignItems: 'center',
     margin: '.2rem .1rem',
