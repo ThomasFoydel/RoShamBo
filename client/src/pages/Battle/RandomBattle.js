@@ -1,7 +1,7 @@
 import axios from 'axios'
 import Peer from 'peerjs'
 import Webcam from 'react-webcam'
-import { Grid } from '@mui/material'
+import { Grid, Stack, Typography } from '@mui/material'
 import * as handpose from '@tensorflow-models/handpose'
 import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
 import React, { useState, useEffect, useRef, useContext } from 'react'
@@ -102,7 +102,6 @@ const styles = (theme) => ({
     position: 'absolute',
     whiteSpace: 'nowrap',
     letterSpacing: '.2rem',
-    fontFamily: 'OpenDyslexic',
     transform: 'translateX(-50%) translateY(-50%)',
   },
   controls: {
@@ -119,21 +118,20 @@ const styles = (theme) => ({
     alignItems: 'center',
     margin: '.2rem .1rem',
     padding: '.1rem .2rem',
-    fontFamily: 'OpenDyslexic',
     justifyContent: 'space-between',
   },
   messenger: {
     display: 'flex',
-    maxWidth: '100%',
     flexDirection: 'column',
     justifyContent: 'space-between',
   },
   messages: {
-    height: '11rem',
     maxWidth: '100%',
     overflowY: 'auto',
     textAlign: 'left',
-    background: 'rgba(255,255,255,0.2)',
+    minHeight: '11rem',
+    paddingTop: '.4rem',
+    background: '#9a3a9b',
   },
   message: {
     lineHeight: '1.3rem',
@@ -144,20 +142,39 @@ const styles = (theme) => ({
   dialogSection: {
     color: 'white',
     fontSize: '1rem',
-    minHeight: '4rem',
     textAlign: 'center',
-    background: 'purple',
-    fontFamily: 'OpenDyslexic',
+    [theme.breakpoints.down('md')]: {
+      paddingRight: '0.4rem',
+      paddingLeft: '0.6rem',
+    },
+    [theme.breakpoints.down('sm')]: {
+      padding: '0',
+    },
   },
   dialog: {
     height: '100%',
     maxWidth: '100%',
-    justifyContent: 'space-between',
+    overflow: 'hidden',
+    background: 'purple',
+    borderRadius: '1rem',
+    [theme.breakpoints.down('md')]: {
+      marginTop: '0',
+      borderRadius: '3rem',
+    },
+  },
+  dialogTop: {
+    height: '9rem',
+    [theme.breakpoints.down('md')]: {
+      height: '6rem',
+    },
   },
   dialogTitle: {
     maxWidth: '100%',
     padding: '0 .2rem',
     fontSize: '1.2rem',
+    [theme.breakpoints.down('md')]: {
+      marginTop: '1.5rem',
+    },
   },
   chooseMessage: {
     top: '50%',
@@ -166,32 +183,35 @@ const styles = (theme) => ({
     fontSize: '2.5rem',
     textAlign: 'center',
     position: 'absolute',
-    fontFamily: 'OpenDyslexic',
     transform: 'translateY(-50%)',
   },
   messageInput: {
-    zIndex: '2',
+    width: '100%',
+    outline: 'none',
+    paddingLeft: '1.8rem',
     padding: '.5rem .2rem',
-    fontFamily: 'OpenDyslexic',
+    [theme.breakpoints.down('md')]: {
+      height: '4rem',
+      paddingLeft: '2rem',
+    },
   },
   randomBattle: {
-    background: 'black',
+    paddingTop: '2rem',
     paddingBottom: '20rem',
+    background: theme.palette.primary.dark,
   },
-  game: {},
   results: {
     maxWidth: '100%',
-  },
-  playAgainBtn: {
-    cursor: 'pointer',
-    padding: '.1rem .2rem',
-    fontFamily: 'OpenDyslexic',
+    background: 'purple',
+    button: {
+      width: '6rem',
+      margin: '.2rem',
+      padding: '.1rem .2rem',
+    },
   },
   readyBtn: {
-    maxWidth: '100%',
-    cursor: 'pointer',
-    padding: '.1rem .2rem',
-    fontFamily: 'OpenDyslexic',
+    marginBottom: '.4rem',
+    padding: '.2rem .4rem',
   },
 })
 
@@ -487,12 +507,12 @@ const RandomBattle = ({ props: { socketRef } }) => {
 
   return (
     <div className={classes.randomBattle}>
-      <Grid container className={classes.game} direction="column">
+      <Grid container direction="column">
         <Grid item>
           <Grid container alignContent="stretch" direction="row">
             <Grid item xs={12} sm={12} md={5} lg={5}>
-              <Grid container direction="column" className={classes.playerContainer}>
-                <Grid item className={classes.videoContainer}>
+              <Stack direction="column" className={classes.playerContainer}>
+                <div className={classes.videoContainer}>
                   {randoStream && randoStream.active ? (
                     <Video stream={randoStream} display={displayRando} />
                   ) : (
@@ -516,45 +536,40 @@ const RandomBattle = ({ props: { socketRef } }) => {
                     />
                   </div>
                   {!displayRando && <div className={classes.chooseMessage}>choose your weapon</div>}
-                </Grid>
-                <Grid item className={classes.healthbarContainer}>
+                </div>
+                <div className={classes.healthbarContainer}>
                   <div className={classes.healthbar} style={{ width: `${randoHealth}%` }}></div>
                   <div className={classes.playerName}>{randoData.name}</div>
-                </Grid>
-              </Grid>
+                </div>
+              </Stack>
             </Grid>
             <Grid item xs={12} md={2} sm={6} lg={2} className={classes.dialogSection}>
-              <Grid
-                container
-                direction="column"
-                className={classes.dialog}
-                justifycontent="space-between"
-              >
-                <Grid item className={classes.dialogTitle}>
-                  <p>RANDOM BATTLE</p>
-                </Grid>
-
-                <Grid item>
-                  {userMediaLoaded && !inPool && (
-                    <button className={classes.readyBtn} onClick={handleReady}>
-                      I'm ready
-                    </button>
-                  )}
-                </Grid>
-
-                <Grid item className={classes.results}>
-                  {winner && (
-                    <>
-                      <div>winner: {winner === id ? name : randoData.name}</div>
-                      <button className={classes.playAgainBtn} onClick={playAgain}>
-                        play again
-                      </button>
+              <Stack direction="column" justifyContent="space-between" className={classes.dialog}>
+                <div className={classes.dialogTop}>
+                  {winner ? (
+                    <div className={classes.results}>
+                      <div className={classes.dialogTitle}>
+                        {winner === id ? name : randoData.name} wins!
+                      </div>
+                      <button onClick={playAgain}>rematch</button>
                       {!friendshipExists && <button onClick={handleAddFriend}>add friend</button>}
-                      <button onClick={handleBackToPool}>next random user</button>
+                      <button onClick={handleBackToPool}>next user</button>
+                    </div>
+                  ) : (
+                    <>
+                      <p className={classes.dialogTitle}>RANDOM BATTLE</p>
+
+                      {userMediaLoaded && !inPool && (
+                        <button className={classes.readyBtn} onClick={handleReady}>
+                          I'm ready
+                        </button>
+                      )}
+                      {inPool && !randoData && <Typography>Waiting for opponent...</Typography>}
                     </>
                   )}
-                </Grid>
-                <Grid item className={classes.messenger}>
+                </div>
+
+                <div className={classes.messenger}>
                   <ul className={classes.messages}>
                     {messages &&
                       messages.map((message, i) => (
@@ -576,13 +591,12 @@ const RandomBattle = ({ props: { socketRef } }) => {
                       />
                     </form>
                   )}
-                </Grid>
-              </Grid>
+                </div>
+              </Stack>
             </Grid>
-
             <Grid item xs={12} sm={6} md={5} lg={5}>
-              <Grid container direction="column" className={classes.playerContainer}>
-                <Grid item className={classes.videoContainer}>
+              <Stack className={classes.playerContainer}>
+                <div className={classes.videoContainer}>
                   <Webcam
                     ref={myCamRef}
                     className={classes.myVideo}
@@ -610,13 +624,13 @@ const RandomBattle = ({ props: { socketRef } }) => {
                       <span> {!icons.audio ? 'Mute' : 'Unmute'}</span>
                     </button>
                   </div>
-                </Grid>
+                </div>
 
-                <Grid item className={classes.healthbarContainer}>
+                <div className={classes.healthbarContainer}>
                   <div className={classes.healthbar} style={{ width: `${myHealth}%` }}></div>
                   <div className={classes.playerName}>{name}</div>
-                </Grid>
-              </Grid>
+                </div>
+              </Stack>
             </Grid>
           </Grid>
         </Grid>

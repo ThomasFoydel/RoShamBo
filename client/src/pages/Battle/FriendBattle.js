@@ -2,7 +2,7 @@ import axios from 'axios'
 import Peer from 'peerjs'
 import Webcam from 'react-webcam'
 import { toast } from 'react-toastify'
-import { Grid, Typography } from '@mui/material'
+import { Grid, Stack, Typography } from '@mui/material'
 import { Link, useParams } from 'react-router-dom'
 import * as handpose from '@tensorflow-models/handpose'
 import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
@@ -105,7 +105,6 @@ const styles = (theme) => ({
     whiteSpace: 'nowrap',
     position: 'absolute',
     letterSpacing: '.2rem',
-    fontFamily: 'OpenDyslexic',
     transform: 'translateX(-50%) translateY(-50%)',
   },
   controls: {
@@ -127,16 +126,16 @@ const styles = (theme) => ({
   },
   messenger: {
     display: 'flex',
-    maxWidth: '100%',
     flexDirection: 'column',
     justifyContent: 'space-between',
   },
   messages: {
-    height: '11rem',
     maxWidth: '100%',
-    textAlign: 'left',
     overflowY: 'auto',
-    background: 'rgba(255,255,255,0.2)',
+    textAlign: 'left',
+    minHeight: '11rem',
+    paddingTop: '.4rem',
+    background: '#9a3a9b',
   },
   message: {
     lineHeight: '1.3rem',
@@ -147,20 +146,39 @@ const styles = (theme) => ({
   dialogSection: {
     color: 'white',
     fontSize: '1rem',
-    minHeight: '4rem',
     textAlign: 'center',
-    background: 'purple',
-    fontFamily: 'OpenDyslexic',
+    [theme.breakpoints.down('md')]: {
+      paddingRight: '0.4rem',
+      paddingLeft: '0.6rem',
+    },
+    [theme.breakpoints.down('sm')]: {
+      padding: '0',
+    },
   },
   dialog: {
     height: '100%',
     maxWidth: '100%',
-    justifyContent: 'space-between',
+    overflow: 'hidden',
+    background: 'purple',
+    borderRadius: '1rem',
+    [theme.breakpoints.down('md')]: {
+      marginTop: '0',
+      borderRadius: '3rem',
+    },
+  },
+  dialogTop: {
+    height: '9rem',
+    [theme.breakpoints.down('md')]: {
+      height: '6rem',
+    },
   },
   dialogTitle: {
     maxWidth: '100%',
     padding: '0 .2rem',
     fontSize: '1.2rem',
+    [theme.breakpoints.down('md')]: {
+      marginTop: '1.5rem',
+    },
   },
   chooseMessage: {
     top: '50%',
@@ -169,25 +187,34 @@ const styles = (theme) => ({
     fontSize: '2.5rem',
     textAlign: 'center',
     position: 'absolute',
-    fontFamily: 'OpenDyslexic',
     transform: 'translateY(-50%)',
   },
   messageInput: {
-    zIndex: '2',
+    width: '100%',
+    outline: 'none',
+    paddingLeft: '1.8rem',
     padding: '.5rem .2rem',
-    fontFamily: 'OpenDyslexic',
+    [theme.breakpoints.down('md')]: {
+      paddingLeft: '2rem',
+      height: '4rem',
+    },
   },
   friendBattle: {
-    background: 'black',
+    paddingTop: '2rem',
     paddingBottom: '20rem',
+    background: theme.palette.primary.dark,
   },
   results: {
     maxWidth: '100%',
+    background: 'purple',
+    button: {
+      width: '6rem',
+      margin: '.2rem',
+      padding: '.1rem .2rem',
+    },
   },
   playAgainBtn: {
-    cursor: 'pointer',
-    padding: '.1rem .2rem',
-    fontFamily: 'OpenDyslexic',
+    padding: '.2rem .4rem',
   },
   friendNotfound: {
     ...theme.centerHorizontal,
@@ -206,8 +233,8 @@ const styles = (theme) => ({
 })
 
 const FriendBattle = ({ props: { socketRef } }) => {
-  const { friendshipId } = useParams()
   const [{ user, auth }] = useContext(CTX)
+  const { friendshipId } = useParams()
   const { name, id } = user
   const { token } = auth
 
@@ -302,7 +329,11 @@ const FriendBattle = ({ props: { socketRef } }) => {
     if (myStreamRef.current) {
       if (myStreamRef.current.getAudioTracks().length === 0) return
       const enabled = myStreamRef.current.getAudioTracks()[0].enabled
-      setIcons({ ...icons, audio: !icons.audio })
+      setIcons((icons) => {
+        console.log({ icons })
+        console.log({ ...icons, audio: !icons.audio })
+        return { ...icons, audio: !icons.audio }
+      })
       if (enabled) myStreamRef.current.getAudioTracks()[0].enabled = false
       else myStreamRef.current.getAudioTracks()[0].enabled = true
     }
@@ -312,8 +343,8 @@ const FriendBattle = ({ props: { socketRef } }) => {
     e.preventDefault()
     if (!chatInput) return
     socket.emit('friendbattle-message', {
-      content: chatInput,
       name,
+      content: chatInput,
       roomId: friendshipId,
     })
     setChatInput('')
@@ -490,8 +521,8 @@ const FriendBattle = ({ props: { socketRef } }) => {
         <Grid item>
           <Grid container alignContent="stretch" direction="row">
             <Grid item xs={12} sm={12} md={5} lg={5}>
-              <Grid container direction="column" className={classes.playerContainer}>
-                <Grid item className={classes.videoContainer}>
+              <Stack direction="column" className={classes.playerContainer}>
+                <div className={classes.videoContainer}>
                   {friendStream && friendStream.active ? (
                     <Video stream={friendStream} display={displayFriend} />
                   ) : (
@@ -513,25 +544,18 @@ const FriendBattle = ({ props: { socketRef } }) => {
                   {!displayFriend && (
                     <div className={classes.chooseMessage}>choose your weapon</div>
                   )}
-                </Grid>
-                <Grid item className={classes.healthbarContainer}>
+                </div>
+                <div className={classes.healthbarContainer}>
                   <div className={classes.healthbar} style={{ width: `${friendHealth}%` }}></div>
                   <div className={classes.playerName}>{friendData.name}</div>
-                </Grid>
-              </Grid>
+                </div>
+              </Stack>
             </Grid>
             <Grid item xs={12} md={2} sm={6} lg={2} className={classes.dialogSection}>
-              <Grid
-                container
-                direction="column"
-                className={classes.dialog}
-                justifycontent="space-between"
-              >
-                <Grid item className={classes.dialogTitle}>
-                  <p>FRIEND BATTLE</p>
-                </Grid>
+              <Stack direction="column" className={classes.dialog} justifyContent="space-between">
+                <p className={classes.dialogTitle}>FRIEND BATTLE</p>
 
-                <Grid item className={classes.results}>
+                <div className={classes.results}>
                   {winner && (
                     <>
                       <div>winner: {winner === id ? name : friendData.name}</div>
@@ -540,8 +564,8 @@ const FriendBattle = ({ props: { socketRef } }) => {
                       </button>
                     </>
                   )}
-                </Grid>
-                <Grid item className={classes.messenger}>
+                </div>
+                <div className={classes.messenger}>
                   <ul className={classes.messages}>
                     {messages &&
                       messages.map((message, i) => (
@@ -560,13 +584,13 @@ const FriendBattle = ({ props: { socketRef } }) => {
                       className={classes.messageInput}
                     />
                   </form>
-                </Grid>
-              </Grid>
+                </div>
+              </Stack>
             </Grid>
 
             <Grid item xs={12} sm={6} md={5} lg={5}>
-              <Grid container direction="column" className={classes.playerContainer}>
-                <Grid item className={classes.videoContainer}>
+              <Stack direction="column" className={classes.playerContainer}>
+                <div className={classes.videoContainer}>
                   <Webcam
                     ref={myCamRef}
                     className={classes.myVideo}
@@ -594,12 +618,12 @@ const FriendBattle = ({ props: { socketRef } }) => {
                       <span> {!icons.audio ? 'Mute' : 'Unmute'}</span>
                     </button>
                   </div>
-                </Grid>
-                <Grid item className={classes.healthbarContainer}>
+                </div>
+                <div className={classes.healthbarContainer}>
                   <div className={classes.healthbar} style={{ width: `${myHealth}%` }}></div>
                   <div className={classes.playerName}>{name}</div>
-                </Grid>
-              </Grid>
+                </div>
+              </Stack>
             </Grid>
           </Grid>
         </Grid>
