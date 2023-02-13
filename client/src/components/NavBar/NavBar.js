@@ -50,7 +50,6 @@ const NavButton = styled(Button)(({ theme }) => ({
   height: '45px',
   whiteSpace: 'nowrap',
   borderRadius: '50px',
-  fontFamily: 'OpenDyslexic',
 }))
 
 const NavBarTab = styled(Tab)(({ theme }) => ({

@@ -94,7 +94,6 @@ const App = () => {
               minHeight: '100vh',
               background: '#111',
               paddingBottom: '3rem',
-              fontFamily: 'OpenDyslexic',
             }}
           >
             <NavBar />

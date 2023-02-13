@@ -8,9 +8,8 @@ import { CTX } from 'context/Store'
 const styles = (theme) => ({
   friendRequests: {
     ...theme.centerHorizontal,
-    qidth: '100%',
+    width: '100%',
     textAlign: 'center',
-    fontFamily: 'OpenDyslexic',
   },
   btn: {
     color: 'white',

@@ -18,9 +18,7 @@ export default createTheme({
     },
   },
   typography: {
-    fontFamily: 'OpenDyslexic',
     tab: {
-      fontFamily: 'OpenDyslexic',
       textTransform: 'none',
       fontWeight: '700',
       fontSize: '1rem',

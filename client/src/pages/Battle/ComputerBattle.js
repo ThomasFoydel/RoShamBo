@@ -73,7 +73,6 @@ const styles = (theme) => ({
     fontSize: '8rem',
     fontWeight: 'bold',
     position: 'absolute',
-    fontFamily: 'OpenDyslexic',
     transform: 'translateX(-50%) translateY(-50%)',
   },
   robot: {
@@ -109,7 +108,6 @@ const styles = (theme) => ({
     textAlign: 'center',
     borderRadius: '1.2rem',
     flexDirection: 'column',
-    fontFamily: 'OpenDyslexic',
     backgroundColor: theme.palette.common.magenta,
     [theme.breakpoints.down('md')]: {
       height: '27rem',
@@ -137,7 +135,6 @@ const styles = (theme) => ({
     borderRadius: '.5rem',
     letterSpacing: '.1rem',
     padding: '.1rem 1.2rem',
-    fontFamily: 'OpenDyslexic',
     transition: 'all 0.3s ease',
     background: theme.palette.primary.dark,
     '&:hover': {
@@ -198,7 +195,6 @@ const styles = (theme) => ({
     height: '12rem',
     fontSize: '1.8rem',
     textAlign: 'center',
-    fontFamily: 'OpenDyslexic',
     [theme.breakpoints.down('sm')]: {
       width: '90%',
       ...theme.centerHorizontal,
