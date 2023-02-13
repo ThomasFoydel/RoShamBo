@@ -30,6 +30,9 @@ const styles = (theme) => ({
   profileLink: {
     color: 'white',
     transition: 'all 0.2s ease',
+    img: {
+      transition: 'all 0.2s ease',
+    },
     '&:hover': {
       color: theme.palette.secondary.light,
       img: {
@@ -52,6 +55,9 @@ const styles = (theme) => ({
       display: 'none',
     },
   },
+  noBackground: {
+    background: 'none !important',
+  },
 })
 
 const Message = ({ props: { message, userId } }) => {
@@ -61,24 +67,26 @@ const Message = ({ props: { message, userId } }) => {
   return (
     <Stack className={`${classes.message} ${mine && classes.mine}`}>
       <div>
-        <Stack
-          direction="row"
-          alignItems="center"
-          className={`${classes.authorSection} ${mine && classes.mineAuthorSection}`}
-        >
-          <Link to={`/profile/${message.sender._id}`} className={classes.profileLink}>
+        <Link to={`/profile/${message.sender._id}`} className={classes.profileLink}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            className={`${classes.authorSection} ${mine && classes.mineAuthorSection}`}
+          >
             <Avatar
               sx={{ color: 'inherit' }}
-              className={classes.senderProfilePic}
+              className={`${classes.senderProfilePic} ${
+                message.sender.profilePic && classes.noBackground
+              }`}
               src={`/api/images/${message.sender.profilePic}`}
             >
               {message.sender.name &&
                 !message.sender.profilePic &&
                 message.sender.name[0].toUpperCase()}
             </Avatar>
-          </Link>
-          <Typography className={classes.senderName}>{message.sender.name}</Typography>
-        </Stack>
+            <Typography className={classes.senderName}>{message.sender.name}</Typography>
+          </Stack>
+        </Link>
       </div>
       <div>
         <Typography className={classes.messageContent}>{message.content}</Typography>

@@ -13,8 +13,14 @@ const styles = (theme) => ({
     '.MuiAvatar-root': {
       transition: 'all 0.2s ease',
     },
+    img: {
+      transition: 'all 0.2s ease',
+    },
     '&:hover': {
       color: theme.palette.secondary.light,
+      img: {
+        opacity: '0.8',
+      },
       '.MuiAvatar-root': {
         color: theme.palette.secondary.main,
       },
@@ -29,6 +35,9 @@ const styles = (theme) => ({
       display: 'none',
     },
   },
+  noBackground: {
+    background: 'none',
+  },
 })
 
 const Friend = ({ props: { friend, handleSelectFriend } }) => {
@@ -42,7 +51,10 @@ const Friend = ({ props: { friend, handleSelectFriend } }) => {
       className={classes.friend}
       onClick={() => handleSelectFriend(friend._id)}
     >
-      <Avatar className={classes.friendProfilePic} src={`/api/images/${friend.profilePic}`}>
+      <Avatar
+        className={`${classes.friendProfilePic} ${friend.profilePic && classes.noBackground}`}
+        src={`/api/images/${friend.profilePic}`}
+      >
         {!friend.profilePic && friend.name && friend.name[0].toUpperCase()}
       </Avatar>
       <Typography className={classes.friendName}>{friend.name}</Typography>
