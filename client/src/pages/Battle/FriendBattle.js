@@ -327,11 +327,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
     if (myStreamRef.current) {
       if (myStreamRef.current.getAudioTracks().length === 0) return
       const enabled = myStreamRef.current.getAudioTracks()[0].enabled
-      setIcons((icons) => {
-        console.log({ icons })
-        console.log({ ...icons, audio: !icons.audio })
-        return { ...icons, audio: !icons.audio }
-      })
+      setIcons((icons) => ({ ...icons, audio: !icons.audio }))
       if (enabled) myStreamRef.current.getAudioTracks()[0].enabled = false
       else myStreamRef.current.getAudioTracks()[0].enabled = true
     }
