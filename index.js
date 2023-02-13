@@ -69,6 +69,11 @@ mongoose
 
       app.post('/api/messages', auth, async (req, res) => {
         const { receiver, content } = req.body
+        if (content.length > 500) {
+          return res
+            .status(400)
+            .send({ status: 'error', message: 'Content cannot exceed 500 characters' })
+        }
         const sender = req.tokenUser.userId
         try {
           const message = await API.message.create(sender, receiver, content)

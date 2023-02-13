@@ -18,8 +18,8 @@ const messageSchema = mongoose.Schema(
     content: {
       type: String,
       validate: {
-        validator: (c) => c.length < 500,
-        message: 'must be less than 500 characters',
+        validator: (c) => c.length <= 500,
+        message: 'Message cannot exceed 500 characters',
       },
     },
   },

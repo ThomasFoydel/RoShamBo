@@ -33,8 +33,8 @@ const ChatBox = ({ props: { token, currentThread } }) => {
         { receiver: currentThread, content: inputValue },
         { headers: { 'x-auth-token': token } }
       )
+      .then(() => setInputValue(''))
       .catch(({ response }) => toast.error(response?.data?.message))
-    setInputValue('')
   }
 
   const handleChange = ({ target: { value } }) => setInputValue(value)

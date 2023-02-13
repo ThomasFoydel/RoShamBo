@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Grid, Avatar, Typography } from '@mui/material'
+import { Stack, Avatar, Typography } from '@mui/material'
 import useClasses from 'customHooks/useClasses'
 
 const styles = (theme) => ({
@@ -43,6 +43,7 @@ const styles = (theme) => ({
   messageContent: {
     padding: '1em',
     borderRadius: '12px',
+    overflowWrap: 'break-word',
     background: 'rgba(255,255,255,0.2)',
   },
   senderName: {
@@ -58,10 +59,10 @@ const Message = ({ props: { message, userId } }) => {
   const classes = useClasses(styles)
 
   return (
-    <Grid className={`${classes.message} ${mine && classes.mine}`} container direction="column">
-      <Grid item>
-        <Grid
-          container
+    <Stack className={`${classes.message} ${mine && classes.mine}`}>
+      <div>
+        <Stack
+          direction="row"
           alignItems="center"
           className={`${classes.authorSection} ${mine && classes.mineAuthorSection}`}
         >
@@ -77,12 +78,12 @@ const Message = ({ props: { message, userId } }) => {
             </Avatar>
           </Link>
           <Typography className={classes.senderName}>{message.sender.name}</Typography>
-        </Grid>
-      </Grid>
-      <Grid item>
+        </Stack>
+      </div>
+      <div>
         <Typography className={classes.messageContent}>{message.content}</Typography>
-      </Grid>
-    </Grid>
+      </div>
+    </Stack>
   )
 }
 
