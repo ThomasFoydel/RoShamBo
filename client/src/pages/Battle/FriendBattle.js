@@ -9,12 +9,12 @@ import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import useClasses from 'customHooks/useClasses'
 import loadingblue from 'imgs/loadingblue.gif'
+import blueCube from 'imgs/loadingblue.mp4'
 import weaponAudio from 'audio/weapons'
 import weaponImgs from 'imgs/weapons'
 import { CTX } from 'context/Store'
 import { detect } from './utils'
 import soundFx from 'audio/fx'
-
 const playSound = (s) => {
   s.currentTime = 0
   s.play()
@@ -236,18 +236,20 @@ const FriendBattle = ({ props: { socketRef } }) => {
   const { name, id } = user
   const { token } = auth
 
-  const [displayFriend, setDisplayFriend] = useState(true)
   const classes = useClasses(styles)
   const socket = socketRef.current
 
   const myPeer = useRef()
   const myCamRef = useRef()
+  const blueCubeRef = useRef()
   const scrollRef = useRef()
+  const callState = useRef()
   const myStreamRef = useRef()
   const friendVideoRef = useRef()
   const [friendData, setFriendData] = useState({})
   const [friendStream, setFriendStream] = useState(null)
   const [friendNotFound, setFriendNotFound] = useState(false)
+  const [displaySelectMessage, setDisplaySelectMessage] = useState(true)
 
   const [count, setCount] = useState(null)
   const [messages, setMessages] = useState([])
@@ -296,9 +298,21 @@ const FriendBattle = ({ props: { socketRef } }) => {
     }
   }, [count])
 
-  const getRoundInput = () => {
+  const changeStreamTrack = async (track) => {
+    return Promise.all(
+      callState.current.peerConnection.getSenders().map(async (sender) => {
+        if (sender.track.kind === 'video') await sender.replaceTrack(track)
+      })
+    )
+  }
+
+  const getRoundInput = async () => {
     setFriendChoice(null)
-    setDisplayFriend(false)
+    if (callState.current) {
+      const blueCubeTrack = blueCubeRef.current.captureStream().getVideoTracks()[0]
+      await changeStreamTrack(blueCubeTrack)
+    }
+    setDisplaySelectMessage(false)
     setCount(10)
   }
 
@@ -385,6 +399,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
         myStreamRef.current = stream
 
         myPeer.current.on('call', function (call) {
+          callState.current = call
           call.answer(stream, { metadata: socket.id })
           call.on('stream', function (callStream) {
             setFriendStream(callStream)
@@ -432,13 +447,18 @@ const FriendBattle = ({ props: { socketRef } }) => {
           }
         })
 
-        socket.on('round-outcome', (outcome) => {
+        socket.on('round-outcome', async (outcome) => {
           if (!roundProcessing) {
             setRoundProcessing(true)
 
             const { tie, winner, loser, newState, gameOver, tieWeapon, ...roundChoices } = outcome
 
-            setDisplayFriend(true)
+            if (callState.current) {
+              const myStreamTrack = myStreamRef.current.getVideoTracks()[0]
+              await changeStreamTrack(myStreamTrack)
+            }
+            setDisplaySelectMessage(true)
+
             if (tie) {
               setFriendChoice(tieWeapon)
               playSound(soundFx.tie)
@@ -477,6 +497,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
         function connectToNewUser(userId, stream, userSocketId) {
           const call = myPeer.current.call(userId, stream, { metadata: userSocketId })
           if (call) {
+            callState.current = call
             call.on('stream', (userVideoStream) => setFriendStream(userVideoStream))
             call.on('close', () => {
               call.removeAllListeners()
@@ -518,7 +539,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
               <Stack direction="column" className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
                   {friendStream && friendStream.active ? (
-                    <Video stream={friendStream} display={displayFriend} />
+                    <Video stream={friendStream} />
                   ) : (
                     <img className={classes.friendVideo} src={loadingblue} alt="friends webcam" />
                   )}
@@ -535,7 +556,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
                       src={weaponImgs[friendChoice || 'blank']}
                     />
                   </div>
-                  {!displayFriend && (
+                  {!displaySelectMessage && (
                     <div className={classes.chooseMessage}>choose your weapon</div>
                   )}
                 </div>
@@ -622,11 +643,14 @@ const FriendBattle = ({ props: { socketRef } }) => {
           </Grid>
         </Grid>
       </Grid>
+      <video autoPlay loop ref={blueCubeRef} style={{ display: 'none' }}>
+        <source src={blueCube} type="video/mp4" />
+      </video>
     </div>
   )
 }
 
-const Video = ({ stream, display }) => {
+const Video = ({ stream, display = true }) => {
   const classes = useClasses(styles)
   const ref = useRef()
 
