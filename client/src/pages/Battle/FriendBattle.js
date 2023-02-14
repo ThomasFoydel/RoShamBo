@@ -15,6 +15,7 @@ import weaponImgs from 'imgs/weapons'
 import { CTX } from 'context/Store'
 import { detect } from './utils'
 import soundFx from 'audio/fx'
+import Video from './Video'
 
 const playSound = (s) => {
   s.currentTime = 0
@@ -53,15 +54,6 @@ const styles = (theme) => ({
     minHeight: '100%',
     maxHeight: '100%',
     objectFit: 'cover',
-  },
-  friendVideo: {
-    width: '100%',
-    display: 'block',
-    minWidth: '100%',
-    maxHeight: '100%',
-    minHeight: '100%',
-    objectFit: 'cover',
-    transition: 'all .8s ease',
   },
   iconLayer: {
     top: 0,
@@ -649,17 +641,6 @@ const FriendBattle = ({ props: { socketRef } }) => {
       </video>
     </div>
   )
-}
-
-const Video = ({ stream }) => {
-  const classes = useClasses(styles)
-  const ref = useRef()
-
-  useEffect(() => {
-    if (stream) ref.current.srcObject = stream
-  }, [stream])
-
-  return <video autoPlay ref={ref} playsInline className={classes.friendVideo} />
 }
 
 export default FriendBattle

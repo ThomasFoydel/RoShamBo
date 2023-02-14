@@ -14,6 +14,7 @@ import weaponImgs from 'imgs/weapons'
 import { CTX } from 'context/Store'
 import { detect } from './utils'
 import soundFx from 'audio/fx'
+import Video from './Video'
 
 const playSound = (s) => {
   s.currentTime = 0
@@ -52,15 +53,6 @@ const styles = (theme) => ({
     minHeight: '100%',
     maxHeight: '100%',
     objectFit: 'cover',
-  },
-  randoVideo: {
-    width: '100%',
-    display: 'block',
-    minWidth: '100%',
-    maxHeight: '100%',
-    minHeight: '100%',
-    objectFit: 'cover',
-    transition: 'all .8s ease',
   },
   iconLayer: {
     top: 0,
@@ -366,7 +358,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
         if (!roundProcessing) {
           setRoundProcessing(true)
           const { tie, winner, loser, newState, gameOver, tieWeapon, ...roundChoices } = outcome
-          
+
           setDisplaySelectMessage(false)
           if (callState.current) {
             const myStreamTrack = myStreamRef.current.getVideoTracks()[0]
@@ -669,17 +661,6 @@ const RandomBattle = ({ props: { socketRef } }) => {
       </video>
     </div>
   )
-}
-
-const Video = ({ stream }) => {
-  const classes = useClasses(styles)
-  const ref = useRef()
-
-  useEffect(() => {
-    if (stream) ref.current.srcObject = stream
-  }, [stream])
-
-  return <video autoPlay ref={ref} playsInline className={classes.randoVideo} />
 }
 
 export default RandomBattle
