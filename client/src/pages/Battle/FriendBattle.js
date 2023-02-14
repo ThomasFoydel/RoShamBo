@@ -596,6 +596,8 @@ const FriendBattle = ({ props: { socketRef } }) => {
               <Stack direction="column" className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
                   <Webcam
+                    audio
+                    muted
                     ref={myCamRef}
                     className={classes.myVideo}
                     onUserMedia={handleUserMedia}

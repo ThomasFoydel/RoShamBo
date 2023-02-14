@@ -230,7 +230,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const [inputFlowRunning, setInputFlowRunning] = useState(false)
   const [icons, setIcons] = useState({ video: false, audio: false })
   const [randoData, setRandoData] = useState({ name: '', userId: null })
-  const [displaySelectMessage, setDisplaySelectMessage] = useState(true)
+  const [displaySelectMessage, setDisplaySelectMessage] = useState(false)
 
   const [randoChoice, setRandoChoice] = useState(null)
   const [randoHealth, setRandoHealth] = useState(100)
@@ -615,6 +615,8 @@ const RandomBattle = ({ props: { socketRef } }) => {
               <Stack className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
                   <Webcam
+                    muted
+                    audio
                     ref={myCamRef}
                     className={classes.myVideo}
                     onUserMedia={handleUserMedia}
