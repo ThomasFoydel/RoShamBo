@@ -94,4 +94,22 @@ router.get('/', auth, async ({ tokenUser: { userId } }, res) => {
   }
 })
 
+router.delete('/:friendId', auth, async ({ tokenUser: { userId } }, res) => {
+  const { friendId } = req.params
+  try {
+    const friendship = await API.friendship.findByUsers(userId, friendId)
+    if (!friendship) {
+      return res.status(404).send({ status: 'error', message: 'Friendship not found' })
+    }
+    await API.friendship.delete(friendship._id)
+    return res
+      .status(200)
+      .send({ status: 'success', message: 'Friendship deleted', friendshipId: friendship._id })
+  } catch (err) {
+    return res
+      .status(500)
+      .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+  }
+})
+
 module.exports = router

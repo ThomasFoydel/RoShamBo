@@ -96,7 +96,7 @@ const API = {
     findByReceiver: (id) => Friendship.find({ receiver: id }),
     findByUsers: (user1, user2) =>
       Friendship.findOne({
-        $and: [{ participants: { $in: [user2] } }, { participants: { $in: [user1] } }],
+        $and: [{ participants: { $in: [user1] } }, { participants: { $in: [user2] } }],
       }),
     findFriendlist: (id) =>
       Friendship.find({ $and: [{ status: 'accepted' }, { participants: { $in: [id] } }] }).populate(
@@ -104,6 +104,7 @@ const API = {
       ),
     findPending: (id) =>
       Friendship.find({ $and: [{ status: 'pending' }, { receiver: id }] }).populate('sender'),
+    delete: (id) => Friendship.findByIdAndDelete(id),
     accept: (id) =>
       Friendship.findById(id).then(({ sender, receiver }) =>
         User.findByIdAndUpdate(
