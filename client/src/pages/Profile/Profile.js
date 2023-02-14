@@ -120,12 +120,12 @@ const expStyles = {
 
 const Profile = () => {
   const { id } = useParams()
-  const [{ user, auth, isLoggedIn }] = useContext(CTX)
+  const [{ user, auth, isLoggedIn }, updateState] = useContext(CTX)
   const [backgroundPosition, setBackgroundPosition] = useState(null)
   const [fetchComplete, setFetchComplete] = useState(false)
   const [friendship, setFriendship] = useState(null)
-  const [userData, setUserData] = useState({})
   const [loading, setLoading] = useState(false)
+  const [userData, setUserData] = useState({})
   const [rank, setRank] = useState(null)
   const classes = useClasses(styles)
 
@@ -177,9 +177,10 @@ const Profile = () => {
   const removeFriend = () => {
     axios
       .delete(`/api/user/friendships/${id}`, { headers: { 'x-auth-token': auth.token } })
-      .then(({ data: { friendshipId } }) => {
+      .then(({ data: { friendId } }) => {
         setFriendship(null)
         toast.success('Friendship deleted')
+        updateState({ type: 'REMOVE_FRIEND', payload: friendId })
       })
       .catch(({ response }) => toast.error(response?.data?.message))
   }

@@ -101,9 +101,7 @@ router.delete('/:friendId', auth, async ({ tokenUser: { userId }, params: { frie
       return res.status(404).send({ status: 'error', message: 'Friendship not found' })
     }
     await API.friendship.delete(friendship._id)
-    return res
-      .status(200)
-      .send({ status: 'success', message: 'Friendship deleted', friendshipId: friendship._id })
+    return res.status(200).send({ status: 'success', message: 'Friendship deleted', friendId })
   } catch (err) {
     return res
       .status(500)

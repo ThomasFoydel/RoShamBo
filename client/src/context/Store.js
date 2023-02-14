@@ -57,6 +57,12 @@ export function reducer(state, action) {
     case 'SET_FRIENDLIST':
       return { ...state, user: { ...state.user, friends: payload } }
 
+    case 'REMOVE_FRIEND':
+      return {
+        ...state,
+        user: { ...state.user, friends: state.user.friends.filter((f) => f._id !== payload) },
+      }
+
     default:
       console.error(`REDUCER ERROR. TYPE: ${type}, PAYLOAD:${payload}`)
       return { ...state }
