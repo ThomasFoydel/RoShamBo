@@ -1,5 +1,6 @@
-import useClasses from 'customHooks/useClasses'
 import { useEffect, useRef } from 'react'
+import useClasses from 'customHooks/useClasses'
+import loadingblue from 'imgs/loadingblue.gif'
 
 const styles = () => ({
   video: {
@@ -21,7 +22,11 @@ const Video = ({ stream }) => {
     if (stream) ref.current.srcObject = stream
   }, [stream])
 
-  return <video autoPlay ref={ref} playsInline className={classes.video} />
+  return stream && stream.active ? (
+    <video autoPlay ref={ref} playsInline className={classes.video} />
+  ) : (
+    <img className={classes.video} src={loadingblue} alt="Waiting for opponent" />
+  )
 }
 
 export default Video

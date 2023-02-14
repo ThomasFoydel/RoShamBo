@@ -7,7 +7,6 @@ import * as handpose from '@tensorflow-models/handpose'
 import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import useClasses from 'customHooks/useClasses'
-import loadingblue from 'imgs/loadingblue.gif'
 import blueCube from 'imgs/loadingblue.mp4'
 import { playSound } from 'utils/utils'
 import weaponAudio from 'audio/weapons'
@@ -525,15 +524,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
             <Grid item xs={12} sm={12} md={5} lg={5}>
               <Stack direction="column" className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
-                  {randoStream && randoStream.active ? (
-                    <Video stream={randoStream} />
-                  ) : (
-                    <img
-                      src={loadingblue}
-                      alt="random user webcam"
-                      className={classes.randoVideo}
-                    />
-                  )}
+                  <Video stream={randoStream} />
 
                   <div
                     className={classes.iconLayer}

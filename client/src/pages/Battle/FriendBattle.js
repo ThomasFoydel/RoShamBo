@@ -8,7 +8,6 @@ import { Grid, Stack, Typography } from '@mui/material'
 import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import useClasses from 'customHooks/useClasses'
-import loadingblue from 'imgs/loadingblue.gif'
 import blueCube from 'imgs/loadingblue.mp4'
 import { playSound } from 'utils/utils'
 import weaponAudio from 'audio/weapons'
@@ -527,11 +526,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
             <Grid item xs={12} sm={12} md={5} lg={5}>
               <Stack direction="column" className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
-                  {friendStream && friendStream.active ? (
-                    <Video stream={friendStream} />
-                  ) : (
-                    <img className={classes.friendVideo} src={loadingblue} alt="friends webcam" />
-                  )}
+                  <Video stream={friendStream} />
 
                   <div
                     className={classes.iconLayer}
