@@ -15,6 +15,7 @@ import weaponImgs from 'imgs/weapons'
 import { CTX } from 'context/Store'
 import { detect } from './utils'
 import soundFx from 'audio/fx'
+
 const playSound = (s) => {
   s.currentTime = 0
   s.play()
@@ -249,7 +250,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
   const [friendData, setFriendData] = useState({})
   const [friendStream, setFriendStream] = useState(null)
   const [friendNotFound, setFriendNotFound] = useState(false)
-  const [displaySelectMessage, setDisplaySelectMessage] = useState(true)
+  const [displaySelectMessage, setDisplaySelectMessage] = useState(false)
 
   const [count, setCount] = useState(null)
   const [messages, setMessages] = useState([])
@@ -308,11 +309,11 @@ const FriendBattle = ({ props: { socketRef } }) => {
 
   const getRoundInput = async () => {
     setFriendChoice(null)
-    if (callState.current) {
+    if (callState.current && blueCubeRef.current) {
       const blueCubeTrack = blueCubeRef.current.captureStream().getVideoTracks()[0]
       await changeStreamTrack(blueCubeTrack)
     }
-    setDisplaySelectMessage(false)
+    setDisplaySelectMessage(true)
     setCount(10)
   }
 
@@ -453,11 +454,11 @@ const FriendBattle = ({ props: { socketRef } }) => {
 
             const { tie, winner, loser, newState, gameOver, tieWeapon, ...roundChoices } = outcome
 
+            setDisplaySelectMessage(false)
             if (callState.current) {
               const myStreamTrack = myStreamRef.current.getVideoTracks()[0]
               await changeStreamTrack(myStreamTrack)
             }
-            setDisplaySelectMessage(true)
 
             if (tie) {
               setFriendChoice(tieWeapon)
@@ -556,7 +557,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
                       src={weaponImgs[friendChoice || 'blank']}
                     />
                   </div>
-                  {!displaySelectMessage && (
+                  {displaySelectMessage && (
                     <div className={classes.chooseMessage}>choose your weapon</div>
                   )}
                 </div>
@@ -650,7 +651,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
   )
 }
 
-const Video = ({ stream, display = true }) => {
+const Video = ({ stream }) => {
   const classes = useClasses(styles)
   const ref = useRef()
 
@@ -658,15 +659,7 @@ const Video = ({ stream, display = true }) => {
     if (stream) ref.current.srcObject = stream
   }, [stream])
 
-  return (
-    <video
-      autoPlay
-      ref={ref}
-      playsInline
-      className={classes.friendVideo}
-      style={{ opacity: display ? 1 : 0 }}
-    />
-  )
+  return <video autoPlay ref={ref} playsInline className={classes.friendVideo} />
 }
 
 export default FriendBattle

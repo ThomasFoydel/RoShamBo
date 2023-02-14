@@ -8,6 +8,7 @@ import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import useClasses from 'customHooks/useClasses'
 import loadingblue from 'imgs/loadingblue.gif'
+import blueCube from 'imgs/loadingblue.mp4'
 import weaponAudio from 'audio/weapons'
 import weaponImgs from 'imgs/weapons'
 import { CTX } from 'context/Store'
@@ -221,7 +222,9 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const { id, name } = user
   const myPeer = useRef()
   const myCamRef = useRef()
+  const callState = useRef()
   const scrollRef = useRef()
+  const blueCubeRef = useRef()
   const myStreamRef = useRef()
   const randoVideoRef = useRef()
   const socket = socketRef.current
@@ -233,13 +236,13 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const [chatInput, setChatInput] = useState('')
   const [handPoseNet, setHandPoseNet] = useState(null)
   const [randoStream, setRandoStream] = useState(null)
-  const [displayRando, setDisplayRando] = useState(true)
   const [userMediaLoaded, setUserMediaLoaded] = useState(false)
   const [roundProcessing, setRoundProcessing] = useState(false)
   const [friendshipExists, setFriendshipExists] = useState(true)
   const [inputFlowRunning, setInputFlowRunning] = useState(false)
   const [icons, setIcons] = useState({ video: false, audio: false })
   const [randoData, setRandoData] = useState({ name: '', userId: null })
+  const [displaySelectMessage, setDisplaySelectMessage] = useState(true)
 
   const [randoChoice, setRandoChoice] = useState(null)
   const [randoHealth, setRandoHealth] = useState(100)
@@ -249,6 +252,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
 
   function connectToNewUser(peerId, stream, roomId) {
     const call = myPeer.current.call(peerId, stream)
+    callState.current = call
     let streamcount = 0
     if (call) {
       call.on('stream', (userVideoStream) => {
@@ -268,9 +272,21 @@ const RandomBattle = ({ props: { socketRef } }) => {
     }
   }
 
-  const getRoundInput = () => {
+  const changeStreamTrack = async (track) => {
+    return Promise.all(
+      callState.current.peerConnection.getSenders().map(async (sender) => {
+        if (sender.track.kind === 'video') await sender.replaceTrack(track)
+      })
+    )
+  }
+
+  const getRoundInput = async () => {
     setRandoChoice(null)
-    setDisplayRando(false)
+    setDisplaySelectMessage(true)
+    if (callState.current && blueCubeRef.current) {
+      const blueCubeTrack = blueCubeRef.current.captureStream().getVideoTracks()[0]
+      await changeStreamTrack(blueCubeTrack)
+    }
     setCount(10)
   }
 
@@ -346,11 +362,16 @@ const RandomBattle = ({ props: { socketRef } }) => {
         }
       })
 
-      socket.on('randombattle-roundoutcome', (outcome) => {
+      socket.on('randombattle-roundoutcome', async (outcome) => {
         if (!roundProcessing) {
           setRoundProcessing(true)
           const { tie, winner, loser, newState, gameOver, tieWeapon, ...roundChoices } = outcome
-          setDisplayRando(true)
+          
+          setDisplaySelectMessage(false)
+          if (callState.current) {
+            const myStreamTrack = myStreamRef.current.getVideoTracks()[0]
+            await changeStreamTrack(myStreamTrack)
+          }
 
           if (tie) {
             playSound(soundFx.tie)
@@ -405,6 +426,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
       })
     })
     myPeer.current.on('call', function (call) {
+      callState.current = call
       call.answer(myStreamRef.current, { metadata: socket.id })
       call.on('stream', function (callStream) {
         setRandoStream(callStream)
@@ -498,7 +520,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
     setRandoHealth(100)
     setRandoStream(null)
     setRandoChoice(null)
-    setDisplayRando(true)
+    // setDisplayRando(true)
     setRoundProcessing(false)
     setFriendshipExists(true)
     setInputFlowRunning(false)
@@ -516,7 +538,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
               <Stack direction="column" className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
                   {randoStream && randoStream.active ? (
-                    <Video stream={randoStream} display={displayRando} />
+                    <Video stream={randoStream} />
                   ) : (
                     <img
                       src={loadingblue}
@@ -537,7 +559,9 @@ const RandomBattle = ({ props: { socketRef } }) => {
                       src={weaponImgs[randoChoice || 'blank']}
                     />
                   </div>
-                  {!displayRando && <div className={classes.chooseMessage}>choose your weapon</div>}
+                  {displaySelectMessage && (
+                    <div className={classes.chooseMessage}>choose your weapon</div>
+                  )}
                 </div>
                 <div className={classes.healthbarContainer}>
                   <div className={classes.healthbar} style={{ width: `${randoHealth}%` }}></div>
@@ -640,11 +664,14 @@ const RandomBattle = ({ props: { socketRef } }) => {
           </Grid>
         </Grid>
       </Grid>
+      <video autoPlay loop ref={blueCubeRef} style={{ display: 'none' }}>
+        <source src={blueCube} type="video/mp4" />
+      </video>
     </div>
   )
 }
 
-const Video = ({ stream, display }) => {
+const Video = ({ stream }) => {
   const classes = useClasses(styles)
   const ref = useRef()
 
@@ -652,15 +679,7 @@ const Video = ({ stream, display }) => {
     if (stream) ref.current.srcObject = stream
   }, [stream])
 
-  return (
-    <video
-      autoPlay
-      ref={ref}
-      playsInline
-      className={classes.randoVideo}
-      style={{ opacity: display ? 1 : 0 }}
-    />
-  )
+  return <video autoPlay ref={ref} playsInline className={classes.randoVideo} />
 }
 
 export default RandomBattle
