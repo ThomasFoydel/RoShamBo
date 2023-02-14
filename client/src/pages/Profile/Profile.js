@@ -219,7 +219,7 @@ const Profile = () => {
               )}
               {!isCurrentUser && friendship?.status === 'accepted' && (
                 <>
-                  <Link to={`/friendbattle/${userData._id}`}>
+                  <Link to={`/friendbattle/${friendship._id}`}>
                     <Button>BATTLE {userData.name}</Button>
                   </Link>
                   <Button onClick={removeFriend}>Remove Friend</Button>
