@@ -5,3 +5,8 @@ export const isDev = () => {
     return false
   }
 }
+
+export const playSound = (s) => {
+  s.currentTime = 0
+  s.play()
+}

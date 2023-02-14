@@ -9,17 +9,13 @@ import React, { useState, useEffect, useRef, useContext } from 'react'
 import useClasses from 'customHooks/useClasses'
 import loadingblue from 'imgs/loadingblue.gif'
 import blueCube from 'imgs/loadingblue.mp4'
+import { playSound } from 'utils/utils'
 import weaponAudio from 'audio/weapons'
 import weaponImgs from 'imgs/weapons'
 import { CTX } from 'context/Store'
 import { detect } from './utils'
 import soundFx from 'audio/fx'
 import Video from './Video'
-
-const playSound = (s) => {
-  s.currentTime = 0
-  s.play()
-}
 
 const styles = (theme) => ({
   playerContainer: {
