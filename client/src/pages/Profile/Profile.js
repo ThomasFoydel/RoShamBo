@@ -218,7 +218,12 @@ const Profile = () => {
                 </Button>
               )}
               {!isCurrentUser && friendship?.status === 'accepted' && (
-                <Button onClick={removeFriend}>Remove Friend</Button>
+                <>
+                  <Link to={`/friendbattle/${userData._id}`}>
+                    <Button>BATTLE {userData.name}</Button>
+                  </Link>
+                  <Button onClick={removeFriend}>Remove Friend</Button>
+                </>
               )}
               {isCurrentUser && !loading && (
                 <Typography className={classes.editLink} component={Link} to="/profile/edit">
