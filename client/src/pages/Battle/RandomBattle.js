@@ -507,7 +507,6 @@ const RandomBattle = ({ props: { socketRef } }) => {
     setRandoHealth(100)
     setRandoStream(null)
     setRandoChoice(null)
-    // setDisplayRando(true)
     setRoundProcessing(false)
     setFriendshipExists(true)
     setInputFlowRunning(false)

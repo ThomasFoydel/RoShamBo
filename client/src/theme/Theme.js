@@ -18,6 +18,7 @@ export default createTheme({
     },
   },
   typography: {
+    fontFamily: 'OpenDyslexic, sans-serif',
     tab: {
       textTransform: 'none',
       fontWeight: '700',
@@ -43,5 +44,4 @@ export default createTheme({
     marginLeft: '50%',
     transform: 'translateX(-50%)',
   },
-  
 })

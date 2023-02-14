@@ -527,7 +527,6 @@ const FriendBattle = ({ props: { socketRef } }) => {
               <Stack direction="column" className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
                   <Video stream={friendStream} />
-
                   <div
                     className={classes.iconLayer}
                     style={{
@@ -553,7 +552,6 @@ const FriendBattle = ({ props: { socketRef } }) => {
             <Grid item xs={12} md={2} sm={6} lg={2} className={classes.dialogSection}>
               <Stack direction="column" className={classes.dialog} justifyContent="space-between">
                 <p className={classes.dialogTitle}>FRIEND BATTLE</p>
-
                 <div className={classes.results}>
                   {winner && (
                     <>
