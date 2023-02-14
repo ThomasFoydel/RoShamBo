@@ -94,8 +94,7 @@ router.get('/', auth, async ({ tokenUser: { userId } }, res) => {
   }
 })
 
-router.delete('/:friendId', auth, async ({ tokenUser: { userId } }, res) => {
-  const { friendId } = req.params
+router.delete('/:friendId', auth, async ({ tokenUser: { userId }, params: { friendId } }, res) => {
   try {
     const friendship = await API.friendship.findByUsers(userId, friendId)
     if (!friendship) {

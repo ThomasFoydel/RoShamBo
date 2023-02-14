@@ -18,12 +18,11 @@ router.get('/:profileId', async (req, res) => {
     } catch (err) {
       return res.status(404).send({ status: 'error', message: 'Invalid ID(s)' })
     }
-    const existingFriendship = await API.friendship.findByUsers(userObjId, profileObjId)
-    const friendshipExists = !!existingFriendship
+    const friendship = await API.friendship.findByUsers(userObjId, profileObjId)
     const userProfile = await API.user.findById(profileObjId)
     return res
       .status(201)
-      .send({ status: 'success', message: 'Profile found', user: userProfile, friendshipExists })
+      .send({ friendship, status: 'success', user: userProfile, message: 'Profile found' })
   } catch (err) {
     return res
       .status(500)

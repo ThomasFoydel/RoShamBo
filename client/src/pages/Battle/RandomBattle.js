@@ -1,6 +1,7 @@
 import axios from 'axios'
 import Peer from 'peerjs'
 import Webcam from 'react-webcam'
+import { toast } from 'react-toastify'
 import { Grid, Stack, Typography } from '@mui/material'
 import * as handpose from '@tensorflow-models/handpose'
 import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
@@ -464,7 +465,8 @@ const RandomBattle = ({ props: { socketRef } }) => {
     randoData.userId &&
       axios
         .get(`/api/user/profiles/${randoData.userId}`, { headers: { 'x-auth-token': token } })
-        .then(({ data: { friendshipExists } }) => setFriendshipExists(friendshipExists))
+        .then(({ data: { friendship } }) => setFriendshipExists(!!friendship))
+        .catch(({ response }) => toast.error(response?.data?.message))
   }, [randoData])
 
   const handleAddFriend = () => {
@@ -476,6 +478,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
           { headers: { 'x-auth-token': token } }
         )
         .then(() => setFriendshipExists(true))
+        .catch(({ response }) => toast.error(response?.data?.message))
   }
 
   const handleBackToPool = () => {
@@ -564,7 +567,9 @@ const RandomBattle = ({ props: { socketRef } }) => {
                         </button>
                       )}
 
-                      {inPool && !randoData?.userId && <Typography>Waiting for opponent...</Typography>}
+                      {inPool && !randoData?.userId && (
+                        <Typography>Waiting for opponent...</Typography>
+                      )}
                     </>
                   )}
                 </div>

@@ -79,7 +79,6 @@ const styles = (theme) => ({
       color: theme.palette.primary.dark,
     },
   },
-  email: {},
   bio: {
     marginBottom: '.5em',
   },
@@ -96,17 +95,42 @@ const styles = (theme) => ({
   },
 })
 
+const expStyles = {
+  white: {
+    color: 'black',
+    backgroundColor: 'white',
+  },
+  blue: {
+    color: 'white',
+    backgroundColor: 'blue',
+  },
+  purple: {
+    color: 'white',
+    backgroundColor: 'blue',
+  },
+  brown: {
+    color: 'white',
+    backgroundColor: 'brown',
+  },
+  black: {
+    color: 'white',
+    backgroundColor: 'black',
+  },
+}
+
 const Profile = () => {
   const { id } = useParams()
   const [{ user, auth, isLoggedIn }] = useContext(CTX)
   const [backgroundPosition, setBackgroundPosition] = useState(null)
-  const [friendshipExists, setFriendshipExists] = useState(true)
-  const [userInput, setUserInput] = useState({})
+  const [fetchComplete, setFetchComplete] = useState(false)
+  const [friendship, setFriendship] = useState(null)
+  const [userData, setUserData] = useState({})
   const [loading, setLoading] = useState(false)
   const [rank, setRank] = useState(null)
   const classes = useClasses(styles)
 
   const isCurrentUser = id === user.id
+  const friendshipExists = !!friendship
 
   useEffect(() => {
     setBackgroundPosition(['left', 'center', 'right'][Math.floor(Math.random() * 3)])
@@ -117,13 +141,15 @@ const Profile = () => {
     setLoading(true)
     axios
       .get(`/api/user/profiles/${id}`, { headers: { userId: user.id } })
-      .then(({ data: { user, friendshipExists } }) => {
+      .then(({ data }) => {
+        const { user, friendship } = data
         if (subscribed) {
           setTimeout(() => {
             setLoading(false)
-            setUserInput(user)
+            setUserData(user)
+            setFetchComplete(true)
             setRank(getRank(user.exp))
-            setFriendshipExists(friendshipExists)
+            if (!isCurrentUser) setFriendship(friendship)
           }, 1200)
         }
       })
@@ -141,31 +167,21 @@ const Profile = () => {
   const requestFriend = () => {
     axios
       .post('/api/user/friendships/', { id }, { headers: { 'x-auth-token': auth.token } })
-      .then(() => setFriendshipExists(true))
-      .catch(({response}) => toast.error(response?.data?.message))
+      .then(({ data: { newFriendRequest } }) => {
+        setFriendship(newFriendRequest)
+        toast.success('Friend request sent')
+      })
+      .catch(({ response }) => toast.error(response?.data?.message))
   }
 
-  const expStyles = {
-    white: {
-      color: 'black',
-      backgroundColor: 'white',
-    },
-    blue: {
-      color: 'white',
-      backgroundColor: 'blue',
-    },
-    purple: {
-      color: 'white',
-      backgroundColor: 'blue',
-    },
-    brown: {
-      color: 'white',
-      backgroundColor: 'brown',
-    },
-    black: {
-      color: 'white',
-      backgroundColor: 'black',
-    },
+  const removeFriend = () => {
+    axios
+      .delete(`/api/user/friendships/${id}`, { headers: { 'x-auth-token': auth.token } })
+      .then(({ data: { friendshipId } }) => {
+        setFriendship(null)
+        toast.success('Friendship deleted')
+      })
+      .catch(({ response }) => toast.error(response?.data?.message))
   }
 
   return (
@@ -178,33 +194,38 @@ const Profile = () => {
       )}
       <Card className={`${classes.card} `}>
         <Avatar
-          alt={userInput.name || 'loading'}
+          alt={userData.name || 'loading'}
           classes={{ root: classes.profilePic }}
-          src={loading || !userInput.name ? loadingblue : `/api/images/${userInput.profilePic}`}
+          src={!fetchComplete ? loadingblue : `/api/images/${userData.profilePic}`}
         >
-          {!userInput.profilePic && userInput.name && userInput.name[0].toUpperCase()}
+          {!userData.profilePic && userData.name && userData.name[0].toUpperCase()}
         </Avatar>
         <div className={classes.infoSection}>
-          <Typography className={classes.username}>{userInput.name || 'loading'}</Typography>
+          <Typography className={classes.username}>{userData.name || 'loading'}</Typography>
 
-          {userInput.displayEmail && (
-            <Typography className={classes.email}>{userInput.displayEmail}</Typography>
-          )}
-          {userInput.bio && <Typography className={classes.bio}>{userInput.bio}</Typography>}
-          {rank && (
-            <Typography className={classes.exp} style={expStyles[rank]}>
-              exp: {userInput.exp}
-            </Typography>
-          )}
-          {!isCurrentUser && !friendshipExists && isLoggedIn && (
-            <Button className={classes.requestButton} onClick={requestFriend}>
-              request friendship
-            </Button>
-          )}
-          {isCurrentUser && !loading && (
-            <Typography className={classes.editLink} component={Link} to="/profile/edit">
-              edit profile
-            </Typography>
+          {fetchComplete && (
+            <>
+              {userData.displayEmail && <Typography>{userData.displayEmail}</Typography>}
+              {userData.bio && <Typography className={classes.bio}>{userData.bio}</Typography>}
+              {rank && (
+                <Typography className={classes.exp} style={expStyles[rank]}>
+                  exp: {userData.exp}
+                </Typography>
+              )}
+              {!isCurrentUser && !friendshipExists && isLoggedIn && (
+                <Button className={classes.requestButton} onClick={requestFriend}>
+                  request friendship
+                </Button>
+              )}
+              {!isCurrentUser && friendship?.status === 'accepted' && (
+                <Button onClick={removeFriend}>Remove Friend</Button>
+              )}
+              {isCurrentUser && !loading && (
+                <Typography className={classes.editLink} component={Link} to="/profile/edit">
+                  edit profile
+                </Typography>
+              )}
+            </>
           )}
         </div>
       </Card>
