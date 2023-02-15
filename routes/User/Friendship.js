@@ -50,6 +50,16 @@ router.put('/', auth, async (req, res) => {
     const friendRequests = await API.friendship.findPending(userId)
     const friendList = await API.friendship.findFriendlist(userId)
 
+    if (accept) {
+      const { users } = require('../../')
+      const newFriendId = friendrequest.participants.find((p) => p._id !== userId)._id
+      const newFriendSocket = users[newFriendId]
+      if (newFriendSocket) {
+        const io = req.app.get('socketio')
+        io.to(newFriendSocket).emit('friendrequest-accepted', userId)
+      }
+    }
+
     return res.status(200).send({
       friendList,
       friendRequests,

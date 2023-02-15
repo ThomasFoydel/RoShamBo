@@ -35,6 +35,7 @@ mongoose
   .then(() => {
     const expressServer = app.listen(process.env.PORT || 8000)
     const io = socketio(expressServer)
+    app.set('socketio', io)
 
     app.use('/api', apiRoutes)
 
@@ -383,3 +384,5 @@ mongoose
     }
   })
   .catch((err) => console.error('database connection error: ', err))
+
+module.exports = { users, randomPool }
