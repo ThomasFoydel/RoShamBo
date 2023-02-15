@@ -627,7 +627,12 @@ const FriendBattle = ({ props: { socketRef } }) => {
           </Grid>
         </Grid>
       </Grid>
-      <video autoPlay loop ref={blueCubeRef} style={{ display: 'none' }}>
+      <video
+        loop
+        autoPlay
+        ref={blueCubeRef}
+        style={{ visibility: 'hidden', zIndex: '-1', position: 'absolute' }}
+      >
         <source src={blueCube} type="video/mp4" />
       </video>
     </div>

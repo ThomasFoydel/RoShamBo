@@ -22,11 +22,10 @@ const Video = ({ stream }) => {
     if (stream) ref.current.srcObject = stream
   }, [stream])
 
-  return stream && stream.active ? (
-    <video autoPlay ref={ref} playsInline className={classes.video} />
-  ) : (
-    <img className={classes.video} src={loadingblue} alt="Waiting for opponent" />
-  )
+  if (stream && stream.active) {
+    return <video autoPlay ref={ref} playsInline className={classes.video} />
+  }
+  return <img className={classes.video} src={loadingblue} alt="Waiting for opponent" />
 }
 
 export default Video

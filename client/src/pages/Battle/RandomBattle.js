@@ -203,6 +203,8 @@ const styles = (theme) => ({
   },
 })
 
+const initRandoData = { name: '', userId: null }
+
 const RandomBattle = ({ props: { socketRef } }) => {
   const [{ auth, user }] = useContext(CTX)
   const { token } = auth
@@ -223,12 +225,12 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const [chatInput, setChatInput] = useState('')
   const [handPoseNet, setHandPoseNet] = useState(null)
   const [randoStream, setRandoStream] = useState(null)
+  const [randoData, setRandoData] = useState(initRandoData)
   const [userMediaLoaded, setUserMediaLoaded] = useState(false)
   const [roundProcessing, setRoundProcessing] = useState(false)
   const [friendshipExists, setFriendshipExists] = useState(true)
   const [inputFlowRunning, setInputFlowRunning] = useState(false)
   const [icons, setIcons] = useState({ video: false, audio: false })
-  const [randoData, setRandoData] = useState({ name: '', userId: null })
   const [displaySelectMessage, setDisplaySelectMessage] = useState(false)
 
   const [randoChoice, setRandoChoice] = useState(null)
@@ -270,11 +272,14 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const getRoundInput = async () => {
     setRandoChoice(null)
     setDisplaySelectMessage(true)
+    console.log(blueCubeRef.current, blueCubeRef.current.captureStream())
     if (callState.current && blueCubeRef.current) {
       const blueCubeTrack = blueCubeRef.current.captureStream().getVideoTracks()[0]
       await changeStreamTrack(blueCubeTrack)
+      setCount(10)
+    } else {
+      setTimeout(getRoundInput, 100)
     }
-    setCount(10)
   }
 
   useEffect(() => {
@@ -397,7 +402,10 @@ const RandomBattle = ({ props: { socketRef } }) => {
         setMessages((messages) => [...messages, message])
       )
 
-      socket.on('rando-left-the-building', () => handleBackToPool())
+      socket.on('rando-left-the-building', () => {
+        setInPool(false)
+        resetState()
+      })
 
       setUserMediaLoaded(true)
     })
@@ -490,13 +498,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
         .catch(({ response }) => toast.error(response?.data?.message))
   }
 
-  const handleBackToPool = () => {
-    if (randoVideoRef.current) {
-      randoVideoRef.current.close()
-      randoVideoRef.current.removeAllListeners()
-    }
-    myPeer.current.destroy()
-    socket.emit('leave-randomroom', roomId)
+  const resetState = () => {
     setCount(null)
     setWinner(null)
     setRoomId(null)
@@ -511,7 +513,17 @@ const RandomBattle = ({ props: { socketRef } }) => {
     setFriendshipExists(true)
     setInputFlowRunning(false)
     randoVideoRef.current = null
-    setRandoData({ name: '', userId: null })
+    setRandoData(initRandoData)
+  }
+
+  const handleBackToPool = () => {
+    if (randoVideoRef.current) {
+      randoVideoRef.current.close()
+      randoVideoRef.current.removeAllListeners()
+    }
+    myPeer.current.destroy()
+    socket.emit('leave-randomroom', roomId)
+    resetState()
     handleReady()
   }
 
@@ -553,7 +565,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
                   {winner ? (
                     <div className={classes.results}>
                       <div className={classes.dialogTitle}>
-                        {winner === id ? name : randoData.name} wins!
+                        {winner === id ? 'You' : 'Opponent'} won!
                       </div>
                       <button onClick={playAgain}>rematch</button>
                       {!friendshipExists && <button onClick={handleAddFriend}>add friend</button>}
@@ -644,7 +656,12 @@ const RandomBattle = ({ props: { socketRef } }) => {
           </Grid>
         </Grid>
       </Grid>
-      <video autoPlay loop ref={blueCubeRef} style={{ display: 'none' }}>
+      <video
+        loop
+        autoPlay
+        ref={blueCubeRef}
+        style={{ visibility: 'hidden', zIndex: '-1', position: 'absolute' }}
+      >
         <source src={blueCube} type="video/mp4" />
       </video>
     </div>
