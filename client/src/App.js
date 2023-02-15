@@ -2,7 +2,7 @@ import axios from 'axios'
 import io from 'socket.io-client'
 import 'react-toastify/dist/ReactToastify.css'
 import { ThemeProvider } from '@emotion/react'
-import { ToastContainer } from 'react-toastify'
+import { toast, ToastContainer } from 'react-toastify'
 import { Routes, Route } from 'react-router-dom'
 import { StyledEngineProvider } from '@mui/material/styles'
 import React, { useState, useEffect, useContext, useRef } from 'react'
@@ -71,10 +71,11 @@ const App = () => {
       socketRef.current = io(ENDPOINT, { transports: ['websocket', 'polling', 'flashsocket'] })
       setSocketLoaded(true)
       socketRef.current.on('friendrequest-accepted', (user) => {
+        toast.success(`${user.name} accepted your friend request`)
         updateState({ type: 'ADD_FRIEND', payload: user })
       })
-      socketRef.current.on('friendship-deleted', (userId) => {
-        updateState({ type: 'REMOVE_FRIEND', payload: userId })
+      socketRef.current.on('friendship-deleted', (user) => {
+        updateState({ type: 'REMOVE_FRIEND', payload: user._id })
       })
     }
 

@@ -130,11 +130,15 @@ const Profile = () => {
   const classes = useClasses(styles)
 
   const isCurrentUser = id === user.id
-  const friendshipExists = !!friendship
+  const isFriend = !!user.friends.find((f) => f._id === id)
 
   useEffect(() => {
     setBackgroundPosition(['left', 'center', 'right'][Math.floor(Math.random() * 3)])
   }, [])
+
+  useEffect(() => {
+    if (!isFriend) setFriendship(null)
+  }, [isFriend])
 
   useEffect(() => {
     let subscribed = true
@@ -148,8 +152,8 @@ const Profile = () => {
             setLoading(false)
             setUserData(user)
             setFetchComplete(true)
+            setFriendship(friendship)
             setRank(getRank(user.exp))
-            if (!isCurrentUser) setFriendship(friendship)
           }, 1200)
         }
       })
@@ -213,12 +217,12 @@ const Profile = () => {
                   exp: {userData.exp}
                 </Typography>
               )}
-              {!isCurrentUser && !friendshipExists && isLoggedIn && (
+              {!isCurrentUser && !friendship && isLoggedIn && (
                 <Button className={classes.requestButton} onClick={requestFriend}>
                   request friendship
                 </Button>
               )}
-              {!isCurrentUser && friendship?.status === 'accepted' && (
+              {isFriend && friendship && (
                 <>
                   <Link to={`/friendbattle/${friendship._id}`}>
                     <Button>BATTLE {userData.name}</Button>

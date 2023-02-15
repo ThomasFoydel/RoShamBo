@@ -41,7 +41,7 @@ const FriendRequests = () => {
       .put('/api/user/friendships', { id, accept: true }, { headers: { 'x-auth-token': token } })
       .then(({ data: { friendRequests, friendList } }) => {
         setFriendRequests(friendRequests)
-        toast.success('Freind request accepted')
+        toast.success('Friend request accepted')
         updateState({ type: 'SET_FRIENDLIST', payload: friendList })
       })
       .catch(({ response }) => toast.error(response?.data?.message))
@@ -52,7 +52,7 @@ const FriendRequests = () => {
       .put('/api/user/friendships', { id, accept: false }, { headers: { 'x-auth-token': token } })
       .then(({ data: { friendRequests } }) => {
         setFriendRequests(friendRequests)
-        toast.success('Freind request rejected')
+        toast.success('Friend request rejected')
       })
       .catch(({ response }) => toast.error(response?.data?.message))
   }

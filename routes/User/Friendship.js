@@ -56,7 +56,8 @@ router.put('/', auth, async (req, res) => {
       const newFriendSocket = users[newFriendId]
       if (newFriendSocket) {
         const io = req.app.get('socketio')
-        io.to(newFriendSocket).emit('friendrequest-accepted', userId)
+        const user = await API.user.findById(userId)
+        io.to(newFriendSocket).emit('friendrequest-accepted', user)
       }
     }
 
@@ -104,29 +105,32 @@ router.get('/', auth, async ({ tokenUser: { userId } }, res) => {
   }
 })
 
-router.delete('/:friendId', auth, async ({ tokenUser: { userId }, params: { friendId } }, res) => {
-  try {
-    const friendship = await API.friendship.findByUsers(userId, friendId)
-    if (!friendship) {
-      return res.status(404).send({ status: 'error', message: 'Friendship not found' })
-    }
-    await API.friendship.delete(friendship._id)
+router.delete(
+  '/:friendId',
+  auth,
+  async ({ app, tokenUser: { userId }, params: { friendId } }, res) => {
+    try {
+      const friendship = await API.friendship.findByUsers(userId, friendId)
+      if (!friendship) {
+        return res.status(404).send({ status: 'error', message: 'Friendship not found' })
+      }
+      await API.friendship.delete(friendship._id)
 
-    const { users } = require('../../')
-    const deletedFriendId = friendrequest.participants.find((p) => p._id !== userId)._id
-    const deletedFriendSocket = users[deletedFriendId]
-    if (deletedFriendSocket) {
-      const io = req.app.get('socketio')
-      const user = await API.user.findById(userId)
-      io.to(deletedFriendSocket).emit('friendship-deleted', user)
-    }
+      const { users } = require('../../')
+      const deletedFriendSocket = users[friendId]
+      if (deletedFriendSocket) {
+        const io = app.get('socketio')
+        const { friends, ...user } = (await API.user.findById(userId))._doc
+        io.to(deletedFriendSocket).emit('friendship-deleted', user)
+      }
 
-    return res.status(200).send({ status: 'success', message: 'Friendship deleted', friendId })
-  } catch (err) {
-    return res
-      .status(500)
-      .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+      return res.status(200).send({ status: 'success', message: 'Friendship deleted', friendId })
+    } catch (err) {
+      return res
+        .status(500)
+        .send({ status: 'error', message: 'Database is down, we are working to fix this' })
+    }
   }
-})
+)
 
 module.exports = router
