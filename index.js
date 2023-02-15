@@ -58,7 +58,6 @@ mongoose
         const decoded = jwt.verify(token, process.env.SECRET)
         const currentTime = Date.now() / 1000
         if (decoded.exp >= currentTime) {
-          /* token is expired, not authorized */
           const { userId } = decoded.tokenUser
           socket.userId = userId
           users[userId] = socket.id
