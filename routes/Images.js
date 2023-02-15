@@ -4,9 +4,9 @@ const multer = require('multer')
 const crypto = require('crypto')
 const express = require('express')
 const mongoose = require('mongoose')
-const GridFsStorage = require('multer-gridfs-storage')
+const API = require('../mongoDB/API')
 const auth = require('../middleware/auth')
-const API = require('../controller/API')
+const GridFsStorage = require('multer-gridfs-storage')
 
 const router = express.Router()
 

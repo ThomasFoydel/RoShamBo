@@ -1,7 +1,7 @@
 const express = require('express')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const API = require('../controller/API')
+const API = require('../mongoDB/API')
 const auth = require('../middleware/auth')
 
 const router = express.Router()

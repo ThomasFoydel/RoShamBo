@@ -1,5 +1,5 @@
 const express = require('express')
-const API = require('../../controller/API')
+const API = require('../../mongoDB/API')
 const auth = require('../../middleware/auth')
 
 const router = express.Router()
