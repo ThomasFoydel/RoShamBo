@@ -57,6 +57,9 @@ export function reducer(state, action) {
     case 'SET_FRIENDLIST':
       return { ...state, user: { ...state.user, friends: payload } }
 
+    case 'ADD_FRIEND':
+      return { ...state, user: { ...state.user, friends: [...state.user.friends, payload] } }
+
     case 'REMOVE_FRIEND':
       return {
         ...state,

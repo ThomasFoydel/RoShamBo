@@ -117,7 +117,8 @@ router.delete('/:friendId', auth, async ({ tokenUser: { userId }, params: { frie
     const deletedFriendSocket = users[deletedFriendId]
     if (deletedFriendSocket) {
       const io = req.app.get('socketio')
-      io.to(deletedFriendSocket).emit('friendship-deleted', userId)
+      const user = await API.user.findById(userId)
+      io.to(deletedFriendSocket).emit('friendship-deleted', user)
     }
 
     return res.status(200).send({ status: 'success', message: 'Friendship deleted', friendId })

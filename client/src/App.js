@@ -70,6 +70,12 @@ const App = () => {
       const ENDPOINT = `${urlBase}?token=${token}`
       socketRef.current = io(ENDPOINT, { transports: ['websocket', 'polling', 'flashsocket'] })
       setSocketLoaded(true)
+      socketRef.current.on('friendrequest-accepted', (user) => {
+        updateState({ type: 'ADD_FRIEND', payload: user })
+      })
+      socketRef.current.on('friendship-deleted', (userId) => {
+        updateState({ type: 'REMOVE_FRIEND', payload: userId })
+      })
     }
 
     return () => {
