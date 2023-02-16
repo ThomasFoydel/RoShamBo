@@ -14,7 +14,9 @@ const API = {
         const friendships = await Friendship.find({
           $and: [{ status: 'accepted' }, { participants: { $in: [id] } }],
         }).populate('sender receiver')
-        const friends = friendships.map((f) => f.participants.find((p) => p !== id))
+        const friends = friendships.map((f) =>
+          f.sender._id.toString() === id ? f.receiver : f.sender
+        )
         return { ...user._doc, friends }
       }
       return null
@@ -26,7 +28,9 @@ const API = {
         const friendships = await Friendship.find({
           $and: [{ status: 'accepted' }, { participants: { $in: [user._id] } }],
         }).populate('sender receiver')
-        const friends = friendships.map((f) => f.participants.find((p) => p !== user._id))
+        const friends = friendships.map((f) =>
+          f.sender._id.toString() === id ? f.receiver : f.sender
+        )
         return { ...user._doc, friends }
       }
       return null
