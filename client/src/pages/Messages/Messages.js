@@ -42,12 +42,13 @@ const Messages = ({ props: { socketRef } }) => {
   return (
     <Grid container justify="space-around" spacing={2} wrap="nowrap" className={classes.messages}>
       <Grid item className={classes.friendList} xs={4}>
-        {friends.map((friend) => (
-          <Friend
-            key={friend._id}
-            props={{ friend, className: classes.friend, handleSelectFriend }}
-          />
-        ))}
+        {friends &&
+          friends.map((friend) => (
+            <Friend
+              key={friend._id}
+              props={{ friend, className: classes.friend, handleSelectFriend }}
+            />
+          ))}
       </Grid>
       <Grid item xs={8}>
         <MessageBox props={{ currentThread, token, socket, userId }} />
