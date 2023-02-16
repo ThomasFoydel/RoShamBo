@@ -50,9 +50,9 @@ router.post('/', auth, async (req, res) => {
 
 router.put('/', auth, async (req, res) => {
   const { userId } = req.tokenUser
-  const { id, accept } = req.body
+  const { friendshipId, accept } = req.body
   try {
-    const friendrequest = await API.friendship.findById(id)
+    const friendrequest = await API.friendship.findById(friendshipId)
     if (!friendrequest) {
       return res.status(404).send({ status: 'error', message: 'Friend request not found' })
     }
@@ -61,7 +61,7 @@ router.put('/', auth, async (req, res) => {
       return res.status(401).send({ status: 'error', message: 'Not authorized' })
     }
 
-    await API.friendship[accept ? 'accept' : 'reject'](id)
+    await API.friendship[accept ? 'accept' : 'reject'](friendshipId)
 
     const friendRequests = await API.friendship.findPending(userId)
     const friendList = await API.friendship.findFriendlist(userId)
