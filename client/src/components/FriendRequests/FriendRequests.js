@@ -21,7 +21,7 @@ const styles = (theme) => ({
   },
 })
 
-const FriendRequests = ({ props: { socketRef } }) => {
+const FriendRequests = () => {
   const [{ auth, friendRequests }, updateState] = useContext(CTX)
   const { token } = auth
   const classes = useClasses(styles)

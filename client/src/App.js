@@ -136,11 +136,7 @@ const App = () => {
           >
             <NavBar />
             <Routes>
-              <Route
-                exact
-                path="/"
-                element={loggedAndLoaded ? <Home props={{ socketRef }} /> : <Landing />}
-              />
+              <Route exact path="/" element={loggedAndLoaded ? <Home /> : <Landing />} />
               <Route
                 exact
                 path="/profile/edit"
