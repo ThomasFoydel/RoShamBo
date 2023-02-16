@@ -1,15 +1,15 @@
-import { Button } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 
-const FriendRequest = ({ props: { request, reject, accept, btnClass } }) => (
-  <>
-    <div>{request.sender.name}</div>
-    <Button className={btnClass} onClick={() => accept(request._id)}>
+const FriendRequest = ({ props: { request, reject, accept, classes } }) => (
+  <div className={classes.friendRequest}>
+    <Typography className={classes.name}>{request.sender.name}</Typography>
+    <Button className={classes.btn} onClick={() => accept(request._id)}>
       accept
     </Button>
-    <Button className={btnClass} onClick={() => reject(request.sender._id, request._id)}>
+    <Button className={classes.btn} onClick={() => reject(request.sender._id, request._id)}>
       reject
     </Button>
-  </>
+  </div>
 )
 
 export default FriendRequest
