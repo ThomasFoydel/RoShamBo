@@ -115,7 +115,10 @@ const API = {
     delete: (id) => Comment.findByIdAndDelete(id, { useFindAndModify: false }),
   },
   friendship: {
-    create: (sender, receiver) => Friendship.create({ sender, receiver }),
+    create: async (sender, receiver) => {
+      const newFriendship = await Friendship.create({ sender, receiver })
+      return Friendship.findById(newFriendship._id).populate('sender receiver')
+    },
     findById: (id) => Friendship.findById(id).populate('sender receiver'),
     findByReceiver: (id) => Friendship.find({ receiver: id }),
     findByUsers: (user1, user2) =>

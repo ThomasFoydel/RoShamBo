@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { toast } from 'react-toastify'
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useContext } from 'react'
 import FriendRequest from './components/FriendRequest'
 import useClasses from 'customHooks/useClasses'
 import { CTX } from 'context/Store'
@@ -22,43 +22,30 @@ const styles = (theme) => ({
 })
 
 const FriendRequests = ({ props: { socketRef } }) => {
-  const [appState, updateState] = useContext(CTX)
-  const token = appState.auth.token
-  const [friendRequests, setFriendRequests] = useState([])
+  const [{ auth, friendRequests }, updateState] = useContext(CTX)
+  const { token } = auth
   const classes = useClasses(styles)
 
-  useEffect(() => {
-    let subscribed = true
+  const accept = (friendshipId) => {
     axios
-      .get('/api/user/friendships/requests', { headers: { 'x-auth-token': token } })
-      .then(({ data: { friendRequests } }) => subscribed && setFriendRequests(friendRequests))
-      .catch(({ response }) => toast.error(response?.data?.message))
-
-    socketRef.current.on('new-friendrequest', ({ friendRequest }) => {
-      // setFriendRequests((f) => [...f, friendRequest])
-    })
-    return () => {
-      subscribed = false
-      socketRef.current.off('new-friendrequest')
-    }
-  }, [])
-
-  const accept = (id) => {
-    axios
-      .put('/api/user/friendships', { id, accept: true }, { headers: { 'x-auth-token': token } })
-      .then(({ data: { friendRequests, friendList } }) => {
-        setFriendRequests(friendRequests)
+      .put(
+        '/api/user/friendships',
+        { friendshipId, accept: true },
+        { headers: { 'x-auth-token': token } }
+      )
+      .then(({ data: { friendList } }) => {
         toast.success('Friend request accepted')
+        updateState({ type: 'REMOVE_FRIEND_REQUEST', payload: { _id: friendshipId } })
         updateState({ type: 'SET_FRIENDLIST', payload: friendList })
       })
       .catch(({ response }) => toast.error(response?.data?.message))
   }
 
-  const reject = (id) => {
+  const reject = (friendId, friendshipId) => {
     axios
-      .put('/api/user/friendships', { id, accept: false }, { headers: { 'x-auth-token': token } })
-      .then(({ data: { friendRequests } }) => {
-        setFriendRequests(friendRequests)
+      .delete(`/api/user/friendships/${friendId}`, { headers: { 'x-auth-token': token } })
+      .then(() => {
+        updateState({ type: 'REMOVE_FRIEND_REQUEST', payload: { _id: friendshipId } })
         toast.success('Friend request rejected')
       })
       .catch(({ response }) => toast.error(response?.data?.message))

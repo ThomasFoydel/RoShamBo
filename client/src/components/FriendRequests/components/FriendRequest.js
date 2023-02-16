@@ -6,7 +6,7 @@ const FriendRequest = ({ props: { request, reject, accept, btnClass } }) => (
     <Button className={btnClass} onClick={() => accept(request._id)}>
       accept
     </Button>
-    <Button className={btnClass} onClick={() => reject(request._id)}>
+    <Button className={btnClass} onClick={() => reject(request.sender._id, request._id)}>
       reject
     </Button>
   </>

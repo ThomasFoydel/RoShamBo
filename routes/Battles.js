@@ -9,13 +9,13 @@ router.get('/:friendshipId', auth, async (req, res) => {
   try {
     const { friendshipId } = req.params
     const { userId } = req.tokenUser
-    let friendObjId
+    let friendshipObjId
     try {
-      friendObjId = new mongoose.Types.ObjectId(friendshipId)
+      friendshipObjId = new mongoose.Types.ObjectId(friendshipId)
     } catch (err) {
       return res.status(400).send({ status: 'error', message: 'Invalid friendship ID' })
     }
-    const friendship = await API.friendship.findById(friendshipId)
+    const friendship = await API.friendship.findById(friendshipObjId)
     if (!friendship) {
       return res.status(404).send({ status: 'error', message: 'Friendship not found' })
     }
@@ -24,11 +24,11 @@ router.get('/:friendshipId', auth, async (req, res) => {
       return res.status(401).send({ status: 'error', message: 'Not authorized' })
     }
     return res.status(200).send({
-      status: 'success',
-      message: 'Friendship found',
-      success: true,
       roomId: _id,
+      success: true,
+      status: 'success',
       users: [sender, receiver],
+      message: 'Friendship found',
     })
   } catch (err) {
     return res

@@ -48,9 +48,7 @@ const App = () => {
       try {
         const { data } = await axios.get('/api/auth/', { headers: { 'x-auth-token': rsbToken } })
         if (data?.err && !isDev() && subscribed) return updateState({ type: 'LOGOUT' })
-        if (data && subscribed) {
-          updateState({ type: 'LOGIN', payload: { user: data.user, token: data.token, remember } })
-        }
+        if (data && subscribed) updateState({ type: 'LOGIN', payload: { ...data, remember } })
       } catch ({ response }) {
         if (!isDev()) updateState({ type: 'LOGOUT' })
       }
@@ -77,9 +75,10 @@ const App = () => {
       socketRef.current.on('friendship-deleted', (user) => {
         updateState({ type: 'REMOVE_FRIEND', payload: user._id })
       })
-      socketRef.current.on('new-friendrequest', ({ user }) =>
+      socketRef.current.on('new-friendrequest', ({ user, friendRequest }) => {
         toast.info(`New friend request from ${user?.name}`)
-      )
+        updateState({ type: 'ADD_FRIEND_REQUEST', payload: friendRequest })
+      })
     }
 
     return () => {

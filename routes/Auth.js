@@ -6,9 +6,11 @@ const auth = require('../middleware/auth')
 
 const router = express.Router()
 
-const sendUser = (res, user, token, message) => {
+const sendUser = (res, message, user, token, friendRequests) => {
   const { password, email, ...userInfo } = user
-  return res.status(200).send({ status: 'success', message, user: userInfo, token })
+  return res
+    .status(200)
+    .send({ status: 'success', message, user: userInfo, token, friendRequests: friendRequests })
 }
 
 const makeToken = (user) => {
@@ -64,7 +66,7 @@ router.post('/register', async (req, res) => {
     const hasedPassword = await bcrypt.hash(password, salt)
     const user = await API.user.create({ email, name, password: hasedPassword })
     const token = makeToken(user)
-    return sendUser(res, user._doc, token, 'Registration successful')
+    return sendUser(res, 'Registration successful', user._doc, token, [])
   } catch (err) {
     return res
       .status(500)
@@ -85,7 +87,8 @@ router.post('/login', async (req, res) => {
 
     if (passwordsMatch) {
       const token = makeToken(user)
-      return sendUser(res, user, token, 'Login successful')
+      const friendRequests = await API.friendship.findPending(user._id)
+      return sendUser(res, 'Login successful', user, token, friendRequests)
     } else {
       return res.status(401).send({ status: 'error', message: 'Incorrect auth info' })
     }
@@ -101,8 +104,9 @@ router.get('/', auth, async (req, res) => {
     const { tokenUser, token } = req
     const { userId } = tokenUser
     const user = await API.user.findById(userId)
+    const friendRequests = await API.friendship.findPending(userId)
     if (!user) return res.status(400).send({ status: 'error', message: 'User not found' })
-    return sendUser(res, user, token, 'User found')
+    return sendUser(res, 'User found', user, token, friendRequests)
   } catch (err) {
     return res.status(500).send({ status: 'error', message: 'Database error' })
   }

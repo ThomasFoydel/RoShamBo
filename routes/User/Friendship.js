@@ -38,8 +38,8 @@ router.post('/', auth, async (req, res) => {
     }
 
     const receiverSocket = users[receiverId]
-    io.to(receiverSocket).emit('new-friendrequest', { user, friendRequest: existingFriendship })
     const newFriendRequest = await API.friendship.create(senderId, receiverId)
+    io.to(receiverSocket).emit('new-friendrequest', { user, friendRequest: newFriendRequest })
     return res
       .status(201)
       .send({ status: 'success', message: 'Friend request sent', newFriendRequest })
@@ -136,7 +136,7 @@ router.delete(
       const deletedFriendSocket = users[friendId]
       if (deletedFriendSocket) {
         const io = app.get('socketio')
-        const { friends, ...user } = (await API.user.findById(userId))._doc
+        const { friends, ...user } = await API.user.findById(userId)
         io.to(deletedFriendSocket).emit('friendship-deleted', user)
       }
 

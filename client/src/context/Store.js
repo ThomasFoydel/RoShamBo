@@ -6,13 +6,14 @@ export { CTX }
 
 export function reducer(state, action) {
   const { payload, type } = action
-  const { user, token, profilePic, message, update, remember } = payload || {}
+  const { user, token, profilePic, message, update, remember, friendRequests } = payload || {}
   switch (type) {
     case 'LOGIN':
       localStorage.setItem('roshambo-token', token)
       localStorage.setItem('remember', !!remember)
       return {
         ...state,
+        friendRequests,
         auth: { token },
         isLoggedIn: true,
         authModal: false,
@@ -66,6 +67,18 @@ export function reducer(state, action) {
         user: { ...state.user, friends: state.user.friends.filter((f) => f._id !== payload) },
       }
 
+    case 'ADD_FRIEND_REQUEST':
+      return {
+        ...state,
+        friendRequests: [...state.friendRequests, payload],
+      }
+
+    case 'REMOVE_FRIEND_REQUEST':
+      return {
+        ...state,
+        friendRequests: state.friendRequests.filter((fr) => fr._id !== payload._id),
+      }
+
     default:
       console.error(`REDUCER ERROR. TYPE: ${type}, PAYLOAD:${payload}`)
       return { ...state }
@@ -77,6 +90,7 @@ export default function Store(props) {
     messages: {},
     authModal: false,
     isLoggedIn: false,
+    friendRequests: [],
     currentThread: null,
     auth: { token: null },
     user: { name: '', displayEmail: '', id: null, friends: [] },
