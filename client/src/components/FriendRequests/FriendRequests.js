@@ -33,10 +33,10 @@ const FriendRequests = ({ props: { socketRef } }) => {
         { friendshipId, accept: true },
         { headers: { 'x-auth-token': token } }
       )
-      .then(({ data: { friendList } }) => {
+      .then(({ data: { newFriend } }) => {
         toast.success('Friend request accepted')
         updateState({ type: 'REMOVE_FRIEND_REQUEST', payload: { _id: friendshipId } })
-        updateState({ type: 'SET_FRIENDLIST', payload: friendList })
+        updateState({ type: 'ADD_FRIEND', payload: newFriend })
       })
       .catch(({ response }) => toast.error(response?.data?.message))
   }

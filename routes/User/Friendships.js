@@ -63,8 +63,7 @@ router.put('/', auth, async (req, res) => {
 
     await API.friendship[accept ? 'accept' : 'reject'](friendshipId)
 
-    const friendRequests = await API.friendship.findPending(userId)
-    const friendList = await API.friendship.findFriendlist(userId)
+    const sender = await API.user.findById(friendrequest.sender._id)
 
     if (accept) {
       const { users } = require('../..')
@@ -78,9 +77,8 @@ router.put('/', auth, async (req, res) => {
     }
 
     return res.status(200).send({
-      friendList,
-      friendRequests,
       status: 'success',
+      newFriend: sender,
       message: `Friend request ${accept ? 'accepted' : 'rejected'}`,
     })
   } catch (err) {
