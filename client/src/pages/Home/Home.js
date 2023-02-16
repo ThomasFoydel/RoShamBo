@@ -1,6 +1,6 @@
 import FriendRequests from 'components/FriendRequests/FriendRequests'
 import useClasses from 'customHooks/useClasses'
-import hands from 'imgs/hands.gif'
+import hands from 'assets/images/hands.gif'
 
 const styles = (theme) => ({
   hands: {

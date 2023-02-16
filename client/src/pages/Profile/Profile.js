@@ -3,10 +3,10 @@ import { toast } from 'react-toastify'
 import { Link, useParams } from 'react-router-dom'
 import React, { useState, useEffect, useContext } from 'react'
 import { Avatar, Card, Typography, Button } from '@mui/material'
+import loadingblue from 'assets/images/loadingblue.gif'
 import useClasses from 'customHooks/useClasses'
-import loadingblue from 'imgs/loadingblue.gif'
+import rps from 'assets/images/rps.jpeg'
 import { CTX } from 'context/Store'
-import rps from 'imgs/rps.jpeg'
 
 const styles = (theme) => ({
   profilePage: {
