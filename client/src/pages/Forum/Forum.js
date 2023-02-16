@@ -95,6 +95,21 @@ const styles = (theme) => ({
     top: 0,
     right: 0,
     position: 'absolute',
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      background: 'none',
+      color: theme.palette.secondary.light,
+    },
+  },
+  deleteCommentBtn: {
+    top: 0,
+    right: 0,
+    color: 'white',
+    position: 'absolute',
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      color: theme.palette.secondary.light,
+    },
   },
 })
 

@@ -33,7 +33,7 @@ const Post = ({
               className={classes.deleteBtn}
               aria-label="delete"
             >
-              <DeleteIcon />
+              <DeleteIcon sx={{ color: 'inherit' }} />
             </IconButton>
           )}
         </Grid>
