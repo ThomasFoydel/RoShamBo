@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import React, { useState } from 'react'
-import { Stack, Button, Input } from '@mui/material'
+import { Stack, Button, TextField } from '@mui/material'
 import useClasses from 'customHooks/useClasses'
 
 const styles = (theme) => ({
@@ -11,13 +11,11 @@ const styles = (theme) => ({
     padding: '2em',
     maxWidth: '400px',
     borderRadius: '4px',
-    background: 'linear-gradient(to bottom right, #bbb, #eee)',
+    backgroundColor: theme.palette.background.paper,
   },
   input: {
     width: '100%',
-    padding: '1em',
-    margin: '.5em 0',
-    background: 'white',
+    margin: '.2rem 0',
   },
   button: {
     color: 'white',
@@ -59,16 +57,20 @@ const PostForm = ({ props: { setPosts, token } }) => {
         justifyContent="center"
         className={classes.form}
       >
-        <Input
+        <TextField
           id="title"
+          label="title"
+          variant="standard"
           value={form.title}
           placeholder="title"
           onChange={handleChange}
           className={classes.input}
         />
 
-        <Input
+        <TextField
           id="content"
+          label="content"
+          variant="standard"
           value={form.content}
           placeholder="content"
           onChange={handleChange}
