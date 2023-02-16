@@ -132,8 +132,10 @@ const styles = (theme) => ({
     fontSize: '1rem',
     textAlign: 'center',
     [theme.breakpoints.down('md')]: {
-      paddingRight: '0.4rem',
+      paddingTop: '4px',
+      paddingBottom: '4px',
       paddingLeft: '0.6rem',
+      paddingRight: '0.4rem',
     },
     [theme.breakpoints.down('sm')]: {
       padding: '0',
@@ -160,7 +162,11 @@ const styles = (theme) => ({
     maxWidth: '100%',
     padding: '0 .2rem',
     fontSize: '1.2rem',
+    [theme.breakpoints.down('lg')]: {
+      fontSize: '1rem',
+    },
     [theme.breakpoints.down('md')]: {
+      fontSize: '1.2rem',
       marginTop: '1.5rem',
     },
   },
