@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-let Friendship;
+const mongoose = require('mongoose')
+
 const friendshipSchema = mongoose.Schema(
   {
     sender: {
@@ -28,12 +28,11 @@ const friendshipSchema = mongoose.Schema(
     },
   },
   { timestamps: true }
-);
+)
 
 friendshipSchema.pre('save', function (next) {
-  this.participants = [this.sender, this.receiver];
-  next();
-});
+  this.participants = [this.sender, this.receiver]
+  next()
+})
 
-Friendship = mongoose.model('Friendship', friendshipSchema);
-module.exports = Friendship;
+module.exports = mongoose.model('Friendship', friendshipSchema)

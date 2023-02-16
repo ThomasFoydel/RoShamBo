@@ -1,24 +1,42 @@
-const User = require('../models/User');
-const Message = require('../models/Message');
-const Friendship = require('../models/Friendship');
-const Post = require('../models/Post');
-const RandomBattle = require('../models/RandomBattle');
-const Comment = require('../models/Comment');
+const User = require('../models/User')
+const Post = require('../models/Post')
+const Comment = require('../models/Comment')
+const Message = require('../models/Message')
+const Friendship = require('../models/Friendship')
+const RandomBattle = require('../models/RandomBattle')
+
 const API = {
   user: {
     create: (user) => User.create(user),
-    findById: (id) => User.findById(id).populate('friends'),
-    findByEmail: (email) =>
+    findById: async (id) => {
+      const user = await User.findById(id)
+      if (user) {
+        const friendships = await Friendship.find({
+          $and: [{ status: 'accepted' }, { participants: { $in: [id] } }],
+        }).populate('sender receiver')
+        const friends = friendships.map((f) =>
+          f.sender._id.toString() === id ? f.receiver : f.sender
+        )
+        return { ...user._doc, friends }
+      }
+      return null
+    },
+    findByEmail: async (email) => {
       User.findOne({ email })
-        .select('password email displayEmail name bio profilePic friends exp')
-        .populate('friends'),
+      const user = await User.findOne({ email }).select('+password +email')
+      if (user) {
+        const friendships = await Friendship.find({
+          $and: [{ status: 'accepted' }, { participants: { $in: [user._id] } }],
+        }).populate('sender receiver')
+        const friends = friendships.map((f) =>
+          f.sender._id.toString() === id ? f.receiver : f.sender
+        )
+        return { ...user._doc, friends }
+      }
+      return null
+    },
     updateProfile: (id, update) =>
-      User.findByIdAndUpdate(
-        id,
-        { $set: update },
-        { new: true, useFindAndModify: false }
-      ),
-    withFriends: (id) => User.findById(id).populate('friends'),
+      User.findByIdAndUpdate(id, { $set: update }, { new: true, useFindAndModify: false }),
     incExp: (id, exp) => User.findByIdAndUpdate(id, { $inc: { exp } }),
   },
   message: {
@@ -27,23 +45,17 @@ const API = {
         Message.findById(message._id).populate('sender')
       ),
     findById: (id) => Message.findById(id),
-    findByUser: (userId) =>
-      Message.find({
-        participants: { $in: [userId] },
-      }),
+    findByUser: (userId) => Message.find({ participants: { $in: [userId] } }),
     findByUsers: (user1, user2) =>
       Message.find({
-        $and: [
-          { participants: { $in: [user2] } },
-          { participants: { $in: [user1] } },
-        ],
+        $and: [{ participants: { $in: [user2] } }, { participants: { $in: [user1] } }],
       }).populate('sender'),
   },
   post: {
     create: async (title, content, author) => {
-      let post = await Post.create({ author, title, content });
-      post = await post.populate('author').execPopulate();
-      return post;
+      const post = await Post.create({ author, title, content })
+      postWithAuthor = await post.populate('author').execPopulate()
+      return postWithAuthor
     },
     delete: (id) => Post.findByIdAndDelete(id, { useFindAndModify: false }),
     findById: (id) => Post.findById(id),
@@ -97,49 +109,34 @@ const API = {
       ]),
   },
   comment: {
-    create: (content, author, post) =>
-      Comment.create({ content, author, post }),
+    create: (content, author, post) => Comment.create({ content, author, post }),
     find: (id) => Comment.findById(id),
+    findByPostId: (postId) => Comment.find({ post: postId }),
     delete: (id) => Comment.findByIdAndDelete(id, { useFindAndModify: false }),
   },
   friendship: {
-    create: (sender, receiver) => Friendship.create({ sender, receiver }),
+    create: async (sender, receiver) => {
+      const newFriendship = await Friendship.create({ sender, receiver })
+      return Friendship.findById(newFriendship._id).populate('sender receiver')
+    },
     findById: (id) => Friendship.findById(id).populate('sender receiver'),
     findByReceiver: (id) => Friendship.find({ receiver: id }),
     findByUsers: (user1, user2) =>
       Friendship.findOne({
-        $and: [
-          { participants: { $in: [user2] } },
-          { participants: { $in: [user1] } },
-        ],
+        $and: [{ participants: { $in: [user1] } }, { participants: { $in: [user2] } }],
       }),
     findFriendlist: (id) =>
-      Friendship.find({
-        $and: [{ status: 'accepted' }, { participants: { $in: [id] } }],
-      }).populate('sender receiver'),
+      Friendship.find({ $and: [{ status: 'accepted' }, { participants: { $in: [id] } }] }).populate(
+        'sender receiver'
+      ),
     findPending: (id) =>
-      Friendship.find({
-        $and: [{ status: 'pending' }, { receiver: id }],
-      }).populate('sender'),
+      Friendship.find({ $and: [{ status: 'pending' }, { receiver: id }] }).populate('sender'),
+    delete: (id) => Friendship.findByIdAndDelete(id),
     accept: (id) =>
-      Friendship.findById(id).then(({ sender, receiver }) =>
-        User.findByIdAndUpdate(
-          sender,
-          { $addToSet: { friends: [receiver] } },
-          { useFindAndModify: false }
-        ).then(() =>
-          User.findByIdAndUpdate(
-            receiver,
-            { $addToSet: { friends: [sender] } },
-            { useFindAndModify: false }
-          ).then(() =>
-            Friendship.findByIdAndUpdate(
-              id,
-              { status: 'accepted' },
-              { new: true, useFindAndModify: false }
-            )
-          )
-        )
+      Friendship.findByIdAndUpdate(
+        id,
+        { status: 'accepted' },
+        { new: true, useFindAndModify: false }
       ),
     reject: (id) =>
       Friendship.findByIdAndUpdate(
@@ -175,28 +172,18 @@ const API = {
       throwChoice: (id, userId, userChoice, round) =>
         Friendship.findByIdAndUpdate(
           id,
-          {
-            $set: {
-              [`gameState.choices.${round}.${userId}`]: userChoice,
-            },
-          },
+          { $set: { [`gameState.choices.${round}.${userId}`]: userChoice } },
           { new: true, useFindAndModify: false }
         ),
       roundOutcome: (id, loser, health, round, gameOver) => {
-        const update = {
-          [`gameState.${loser}`]: health,
-          'gameState.round': round + 1,
-        };
-        if (gameOver) {
-          update['gameState.gameRunning'] = false;
-        }
+        const update = { [`gameState.${loser}`]: health, 'gameState.round': round + 1 }
+        if (gameOver) update['gameState.gameRunning'] = false
+
         return Friendship.findByIdAndUpdate(
           id,
-          {
-            $set: update,
-          },
+          { $set: update },
           { new: true, useFindAndModify: false }
-        );
+        )
       },
       roundTie: (id) =>
         Friendship.findByIdAndUpdate(
@@ -245,28 +232,18 @@ const API = {
     throwChoice: (roomId, userId, userChoice, round) =>
       RandomBattle.findOneAndUpdate(
         { roomId },
-        {
-          $set: {
-            [`gameState.choices.${round}.${userId}`]: userChoice,
-          },
-        },
+        { $set: { [`gameState.choices.${round}.${userId}`]: userChoice } },
         { new: true, useFindAndModify: false }
       ),
     roundOutcome: (roomId, loser, health, round, gameOver) => {
-      const update = {
-        [`gameState.${loser}`]: health,
-        'gameState.round': round + 1,
-      };
-      if (gameOver) {
-        update['gameState.gameRunning'] = false;
-      }
+      const update = { [`gameState.${loser}`]: health, 'gameState.round': round + 1 }
+      if (gameOver) update['gameState.gameRunning'] = false
+
       return RandomBattle.findOneAndUpdate(
         { roomId },
-        {
-          $set: update,
-        },
+        { $set: update },
         { new: true, useFindAndModify: false }
-      );
+      )
     },
     roundTie: (roomId) =>
       Friendship.findOneAndUpdate(
@@ -275,6 +252,6 @@ const API = {
         { new: true, useFindAndModify: false }
       ),
   },
-};
+}
 
-module.exports = API;
+module.exports = API

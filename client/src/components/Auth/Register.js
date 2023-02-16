@@ -1,147 +1,123 @@
-import React from 'react';
 import {
-  Typography,
   Grid,
   Paper,
   Avatar,
-  TextField,
-  FormControlLabel,
-  Checkbox,
   Button,
-  makeStyles,
-} from '@material-ui/core';
-import LockIcon from '@material-ui/icons/Lock';
+  Checkbox,
+  TextField,
+  Typography,
+  FormControlLabel,
+} from '@mui/material'
+import { useState } from 'react'
+import { Lock } from '@mui/icons-material'
 
-const useStyles = makeStyles((theme) => ({
-  register: {
-    maxWidth: '500px',
-    minWidth: '275px',
-    padding: '2rem 4rem',
-    [theme.breakpoints.down('xs')]: {
-      padding: '2rem 2rem',
-    },
-  },
-  avatar: {
-    backgroundColor: theme.palette.common.blue,
-  },
-  button: {
-    margin: '8px 0',
-  },
-  header: { fontFamily: 'OpenDyslexic' },
-  loginLink: {
-    color: theme.palette.primary.dark,
-    cursor: 'pointer',
-    '&:hover': {
-      color: theme.palette.primary.main,
-    },
-  },
-}));
+const Register = ({ props: { handleAuth, setAuthPage, formState, setFormState, classes } }) => {
+  const { name, email, password, confirmpassword } = formState.register
+  const [remember, setRemember] = useState(true)
 
-const Register = ({
-  props: { handleAuth, setAuthPage, formState, setFormState },
-}) => {
-  const classes = useStyles();
-  const { name, email, password, confirmpassword } = formState.register;
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    handleAuth('register', remember)
+  }
 
   const handleChange = ({ target: { value, id } }) => {
     setFormState((formState) => ({
       ...formState,
       register: { ...formState.register, [id]: value },
-    }));
-  };
+    }))
+  }
 
-  const handleKeyDown = ({ charCode }) => {
-    if (charCode === 13) {
-      handleAuth('register');
-    }
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleAuth('register');
-  };
+  const handleRemember = (e) => setRemember(e.target.checked)
 
   return (
-    <Paper elevation={10} className={classes.register}>
-      <Grid align='center'>
+    <Paper elevation={10} className={classes.authPaper}>
+      <Grid align="center">
         <Avatar className={classes.avatar}>
-          <LockIcon />
+          <Lock />
         </Avatar>
-        <h2 className={classes.header}>Register</h2>
+        <h2>Register</h2>
       </Grid>
       <form onSubmit={handleSubmit}>
         <TextField
-          label='Email'
-          placeholder='Enter email'
-          fullWidth
-          id='email'
           required
+          fullWidth
+          id="email"
           value={email}
+          label="Email"
+          variant="standard"
+          autoComplete="email"
           onChange={handleChange}
-          onKeyPress={handleKeyDown}
-          autoComplete='email'
+          placeholder="Enter email"
+          className={classes.input}
         />
         <TextField
-          label='Name'
-          placeholder='Enter name'
-          fullWidth
-          id='name'
           required
+          id="name"
+          fullWidth
           value={name}
+          label="Name"
+          variant="standard"
           onChange={handleChange}
-          onKeyPress={handleKeyDown}
-          autoComplete='username'
+          autoComplete="username"
+          placeholder="Enter name"
+          className={classes.input}
         />
         <TextField
-          label='Confirm password'
-          placeholder='Enter password'
-          id='confirmpassword'
-          type='password'
-          fullWidth
           required
+          fullWidth
+          type="password"
+          variant="standard"
+          id="confirmpassword"
           value={confirmpassword}
           onChange={handleChange}
-          onKeyPress={handleKeyDown}
-          autoComplete='new-password'
+          label="Confirm password"
+          className={classes.input}
+          autoComplete="new-password"
+          placeholder="Enter password"
         />
         <TextField
-          label='Password'
-          placeholder='Enter password'
-          id='password'
-          type='password'
-          fullWidth
           required
+          fullWidth
+          id="password"
+          type="password"
           value={password}
+          label="Password"
+          variant="standard"
           onChange={handleChange}
-          onKeyPress={handleKeyDown}
-          autoComplete='new-password'
+          className={classes.input}
+          autoComplete="new-password"
+          placeholder="Enter password"
         />
         <FormControlLabel
-          control={<Checkbox name='checkedB' color='primary' />}
-          label='Remember me'
+          label="Remember me"
+          control={
+            <Checkbox
+              name="Remember me"
+              color="primary"
+              checked={remember}
+              onChange={handleRemember}
+            />
+          }
         />
         <Button
-          className={classes.button}
-          type='submit'
-          color='primary'
-          variant='contained'
           fullWidth
+          type="submit"
+          color="primary"
+          variant="contained"
+          className={classes.button}
         >
           Sign up
         </Button>
 
         <Typography>
-          Already have an account?
-          <span
-            className={classes.loginLink}
-            onClick={() => setAuthPage('login')}
-          >
+          Already have an account?{' '}
+          <button className={classes.switch} onClick={() => setAuthPage('login')}>
             Sign In
-          </span>
+          </button>
         </Typography>
       </form>
     </Paper>
-  );
-};
+  )
+}
 
-export default Register;
+export default Register

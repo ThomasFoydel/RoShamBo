@@ -1,180 +1,139 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import PostForm from './components/PostForm';
-import CommentForm from './components/CommentForm';
-import { Link } from 'react-router-dom';
-import { CTX } from 'context/Store';
-import MessageNotification from 'components/MessageNotification/MessageNotification';
-import {
-  makeStyles,
-  Card,
-  Typography,
-  Avatar,
-  Grid,
-  IconButton,
-} from '@material-ui/core';
-import { Delete as DeleteIcon } from '@material-ui/icons';
-const useStyles = makeStyles((theme) => ({
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import React, { useState, useEffect, useContext } from 'react'
+import useClasses from 'customHooks/useClasses'
+import PostForm from './components/PostForm'
+import Post from './components/Post'
+import { CTX } from 'context/Store'
+
+const styles = (theme) => ({
   forum: {
     marginTop: '5rem',
     paddingBottom: '5rem',
   },
   post: {
-    position: 'relative',
-    background: '#eee',
     margin: '2em',
-    color: theme.palette.primary.dark,
     padding: '1em',
+    background: '#eee',
+    position: 'relative',
+    color: theme.palette.primary.dark,
     [theme.breakpoints.down('md')]: {
       margin: '2em 1em',
     },
-    [theme.breakpoints.down('xs')]: {
-      padding: '0.5em',
+    [theme.breakpoints.down('sm')]: {
+      padding: '0.75em',
     },
   },
   postAvatar: {
     background: theme.palette.primary.dark,
   },
   postContent: {
-    background: 'white',
-    padding: '1.5em .5em',
     margin: '.5em',
+    overFlowY: 'auto',
+    maxHeight: '40rem',
+    background: 'white',
     marginBottom: '2em',
     borderRadius: '10px',
-    maxHeight: '40rem',
-    overFlowY: 'auto',
+    padding: '1.5em .5em',
   },
   postTitle: {
-    textAlign: 'center',
-    fontSize: '3.4rem',
-    letterSpacing: '0.25rem',
     fontWeight: 'bold',
+    fontSize: '3.4rem',
+    textAlign: 'center',
+    letterSpacing: '0.25rem',
     [theme.breakpoints.down('sm')]: {
       fontSize: '1.8rem',
     },
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       fontSize: '1.5rem',
     },
   },
   authorName: {
-    color: theme.palette.primary.dark,
     fontSize: '1.2rem',
     marginLeft: '0.25em',
+    color: theme.palette.primary.dark,
   },
   comments: {
     padding: '1em',
     maxWidth: '100%',
-    [theme.breakpoints.down('xs')]: {
+    [theme.breakpoints.down('sm')]: {
       padding: '0',
     },
   },
   comment: {
-    background: '#111',
-    borderRadius: '10px',
-    padding: '.75em',
-    color: theme.palette.primary.light,
     margin: '.5em',
     maxWidth: '100%',
-    [theme.breakpoints.down('xs')]: {
+    padding: '.75em',
+    background: '#111',
+    borderRadius: '10px',
+    color: theme.palette.primary.light,
+    [theme.breakpoints.down('sm')]: {
       margin: '0.5em 0',
     },
   },
-  commentAvatar: { background: theme.palette.primary.light },
+  commentAvatar: {
+    background: theme.palette.primary.light,
+  },
   commentAuthor: {
-    color: theme.palette.primary.light,
-    marginLeft: '0.25em',
     fontSize: '1.2rem',
+    marginLeft: '0.25em',
+    color: theme.palette.primary.light,
   },
   commentContent: {
     ...theme.centerHorizontal,
-    background: 'rgba(255,255,255,0.08)',
-    padding: '1.5em .5em',
-    margin: '.5em',
-    borderRadius: '10px',
-    maxHeight: '20rem',
-    overFlowY: 'auto',
     width: '90%',
     maxWidth: '70vw',
+    overFlowY: 'auto',
+    marginTop: '.5em',
+    maxHeight: '20rem',
+    borderRadius: '10px',
+    padding: '1.5em .5em',
     overflowWrap: 'break-word',
+    background: 'rgba(255,255,255,0.08)',
   },
   deleteBtn: {
-    position: 'absolute',
     top: 0,
     right: 0,
+    position: 'absolute',
   },
-}));
-const initMessageNotification = { sender: null, content: null, senderId: null };
-const Forum = ({ props: { socketRef } }) => {
-  const [appState] = useContext(CTX);
-  const { token } = appState.auth;
-  const { isLoggedIn } = appState;
-  const userId = appState.user.id;
-  const [posts, setPosts] = useState([]);
-  const classes = useStyles();
-  const [messageNotification, setMessageNotification] = useState(
-    initMessageNotification
-  );
+})
+
+const Forum = () => {
+  const [appState] = useContext(CTX)
+  const { token } = appState.auth
+  const { isLoggedIn } = appState
+  const userId = appState.user.id
+  const classes = useClasses(styles)
+  const [posts, setPosts] = useState([])
 
   useEffect(() => {
     axios
       .get('/api/forum/posts')
-      .then(({ data }) => setPosts(data))
-      .catch((err) => console.log({ err }));
-  }, [token]);
-
-  useEffect(() => {
-    let subscribed = true;
-    if (socketRef && socketRef.current) {
-      socketRef.current.on('chat-message-notification', (message) => {
-        if (subscribed) {
-          setMessageNotification({
-            sender: message.sender.name,
-            content: message.content,
-            senderId: message.sender._id,
-          });
-        }
-      });
-    }
-    return () => {
-      subscribed = false;
-      if (socketRef && socketRef.current) {
-        setMessageNotification(initMessageNotification);
-        socketRef.current.off('chat-message-notification');
-      }
-    };
-  }, []);
+      .then(({ data }) => data?.posts && setPosts(data.posts))
+      .catch(({ response }) => toast.error(response?.data?.message))
+  }, [token])
 
   const deletePost = (id) => {
-    console.log({ id });
     axios
-      .delete(`/api/forum/post/${id}`, { headers: { 'x-auth-token': token } })
+      .delete(`/api/forum/posts/${id}`, { headers: { 'x-auth-token': token } })
       .then(
         ({ data }) =>
-          data && setPosts((posts) => posts.filter((p) => p._id !== data))
+          data?.postId && setPosts((posts) => posts.filter((p) => p._id !== data.postId))
       )
-      .catch((err) => console.log(err));
-  };
+      .catch(({ response }) => toast.error(response?.data?.message))
+  }
+
   const deleteComment = (id) => {
     axios
-      .delete(`/api/forum/comment/${id}`, {
-        headers: { 'x-auth-token': token },
+      .delete(`/api/forum/comments/${id}`, { headers: { 'x-auth-token': token } })
+      .then(({ data }) => {
+        const { updatedPost } = data
+        if (updatedPost) {
+          setPosts((posts) => posts.map((p) => (p._id === updatedPost._id ? updatedPost : p)))
+        }
       })
-      .then(
-        ({ data }) =>
-          data &&
-          data._id &&
-          setPosts((posts) => {
-            const copy = [...posts];
-            const post = copy.find((p) => p._id === data._id);
-            Object.assign(post, data);
-            return copy;
-          })
-      )
-      .catch((err) => console.log(err));
-  };
-
-  const closeMessageNotification = () =>
-    setMessageNotification(initMessageNotification);
+      .catch(({ response }) => toast.error(response?.data?.message))
+  }
 
   return (
     <div className={classes.forum}>
@@ -184,146 +143,18 @@ const Forum = ({ props: { socketRef } }) => {
           key={post._id}
           props={{
             post,
-            setPosts,
             token,
             userId,
+            classes,
+            setPosts,
+            isLoggedIn,
             deletePost,
             deleteComment,
-            isLoggedIn,
           }}
         />
       ))}
-      <MessageNotification
-        props={{
-          message: messageNotification,
-          severity: 'info',
-          close: closeMessageNotification,
-        }}
-      />
     </div>
-  );
-};
+  )
+}
 
-const Post = ({
-  props: {
-    post,
-    setPosts,
-    token,
-    userId,
-    deletePost,
-    deleteComment,
-    isLoggedIn,
-  },
-}) => {
-  const classes = useStyles();
-
-  return (
-    <Card className={classes.post}>
-      <Grid container direction='column'>
-        <Grid item>
-          <Grid container alignItems='center'>
-            <Grid item>
-              <Link to={`/profile/${post.author._id}`}>
-                <Avatar
-                  src={`/api/image/${post.author.profilePic}`}
-                  className={classes.postAvatar}
-                >
-                  {post.author.name && post.author.name[0].toUpperCase()}
-                </Avatar>
-              </Link>
-            </Grid>
-            <Grid item>
-              <Typography
-                component={Link}
-                to={`/profile/${post.author._id}`}
-                className={classes.authorName}
-              >
-                {post.author.name}
-              </Typography>
-            </Grid>
-            {post.author._id === userId && (
-              <IconButton
-                onClick={() => deletePost(post._id)}
-                className={classes.deleteBtn}
-                aria-label='delete'
-              >
-                <DeleteIcon />
-              </IconButton>
-            )}
-          </Grid>
-        </Grid>
-
-        <Grid item>
-          <Typography className={classes.postTitle}>{post.title}</Typography>
-        </Grid>
-        <Grid item>
-          <Typography className={classes.postContent}>
-            {post.content}
-          </Typography>
-        </Grid>
-        <Grid item className={classes.comments}>
-          {post.comments.map((comment) => (
-            <Comment
-              key={comment._id}
-              props={{ comment, userId, deleteComment }}
-            />
-          ))}
-        </Grid>
-        <Grid item>
-          {isLoggedIn && (
-            <CommentForm props={{ postId: post._id, setPosts, token }} />
-          )}
-        </Grid>
-      </Grid>
-    </Card>
-  );
-};
-
-const Comment = ({ props: { comment, userId, deleteComment } }) => {
-  const classes = useStyles();
-  return (
-    <div className={classes.comment}>
-      <Grid container direction='column'>
-        <Grid item style={{ position: 'relative' }}>
-          <Link to={`/profile/${comment.author._id}`}>
-            <Grid container alignItems='center'>
-              <Grid item>
-                <Link to={`/profile/${comment.author._id}`}>
-                  <Avatar
-                    src={`/api/image/${comment.author.profilePic}`}
-                    className={classes.commentAvatar}
-                  >
-                    {comment.author.name &&
-                      comment.author.name[0].toUpperCase()}
-                  </Avatar>
-                </Link>
-              </Grid>
-              <Grid item>
-                <Typography className={classes.commentAuthor}>
-                  {comment.author.name}
-                </Typography>
-              </Grid>
-            </Grid>
-          </Link>
-          {comment.author._id === userId && (
-            <IconButton
-              onClick={() => deleteComment(comment._id)}
-              className={classes.deleteBtn}
-              aria-label='delete'
-              style={{ color: 'white' }}
-            >
-              <DeleteIcon />
-            </IconButton>
-          )}
-        </Grid>
-        <Grid item>
-          <Typography className={classes.commentContent}>
-            {comment.content}
-          </Typography>
-        </Grid>
-      </Grid>
-    </div>
-  );
-};
-
-export default Forum;
+export default Forum

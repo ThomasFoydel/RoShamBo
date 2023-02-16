@@ -5,19 +5,35 @@
   padding: 0;
   box-sizing: border-box;
 }
+
 @font-face {
   font-family: 'OpenDyslexic';
   font-weight: normal;
-  src: local('OpenDyslexic'),
-    url(./fonts/OpenDyslexic-Regular.otf) format('opentype');
+  src: local('OpenDyslexic'), url(./fonts/OpenDyslexic-Regular.otf) format('opentype');
 }
+
 @font-face {
   font-family: 'OpenDyslexic';
   font-weight: bold;
-  src: local('OpenDyslexic'),
-    url(./fonts/OpenDyslexic-Bold.otf) format('opentype');
+  src: local('OpenDyslexic'), url(./fonts/OpenDyslexic-Bold.otf) format('opentype');
+}
+
+* {
+  font-family: 'OpenDyslexic';
 }
 
 a {
   text-decoration: none;
+}
+
+a,
+button,
+input {
+  cursor: pointer;
+}
+
+.Toastify__toast--info,
+.Toastify__toast--error,
+.Toastify__toast--success {
+  box-shadow: 0px 0px 30px #f1fbff30;
 }

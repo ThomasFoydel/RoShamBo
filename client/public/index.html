@@ -5,17 +5,41 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
+    <meta name="description" content="Web site created using create-react-app" />
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
 
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-
+    {/* Primary Meta Tags */}
     <title>RoShamBo</title>
+    <meta name="title" content="RoShamBo" />
+    <meta
+      name="description"
+      content="Rock paper scissors video chat game with AI gesture detection"
+    />
+
+    {/* Open Graph / Facebook */}
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://roshambo.xyz" />
+    <meta property="og:title" content="RoShamBo" />
+    <meta
+      property="og:description"
+      content="Rock paper scissors video chat game with AI gesture detection"
+    />
+    <meta property="og:image" content="https://roshambo.xyz/images/preview.jpg" />
+
+    {/* Twitter */}
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://roshambo.xyz" />
+    <meta property="twitter:title" content="RoShamBo" />
+    <meta
+      property="twitter:description"
+      content="Rock paper scissors video chat game with AI gesture detection"
+    />
+    <meta property="twitter:image" content="https://roshambo.xyz/images/preview.jpg" />
   </head>
   <body>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-backend-webgl"></script>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
   </body>

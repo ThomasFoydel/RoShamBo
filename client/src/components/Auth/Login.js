@@ -1,136 +1,101 @@
-import React from 'react';
 import {
-  Typography,
   Grid,
   Paper,
-  Avatar,
-  TextField,
-  FormControlLabel,
-  Checkbox,
   Button,
-  makeStyles,
-} from '@material-ui/core';
-import LockIcon from '@material-ui/icons/Lock';
-import { Link } from 'react-router-dom';
+  Avatar,
+  Checkbox,
+  TextField,
+  Typography,
+  FormControlLabel,
+} from '@mui/material'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Lock } from '@mui/icons-material'
 
-const useStyles = makeStyles((theme) => ({
-  login: {
-    maxWidth: '500px',
-    minWidth: '275px',
-    padding: '2rem 4rem',
-    [theme.breakpoints.down('xs')]: {
-      padding: '2rem 2rem',
-    },
-  },
-  avatar: {
-    backgroundColor: theme.palette.primary.main,
-  },
-  button: {
-    margin: '8px 0',
-  },
-  header: {
-    fontFamily: 'OpenDyslexic',
-  },
-  registerLink: {
-    color: theme.palette.primary.dark,
-    cursor: 'pointer',
-    '&:hover': {
-      color: theme.palette.primary.main,
-    },
-  },
-  forgotPw: {
-    color: theme.palette.primary.dark,
-    '&:hover': {
-      color: theme.palette.primary.main,
-    },
-  },
-}));
+const Login = ({ props: { handleAuth, setAuthPage, formState, setFormState, classes } }) => {
+  const { email, password } = formState.login
 
-const Login = ({
-  props: { handleAuth, setAuthPage, formState, setFormState },
-}) => {
-  const classes = useStyles();
-  const { email, password } = formState.login;
+  const [remember, setRemember] = useState(true)
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    handleAuth('login', remember)
+  }
 
   const handleChange = ({ target: { value, id } }) => {
-    setFormState((formState) => ({
-      ...formState,
-      login: { ...formState.login, [id]: value },
-    }));
-  };
+    setFormState((formState) => ({ ...formState, login: { ...formState.login, [id]: value } }))
+  }
 
-  const handleKeyDown = ({ charCode }) => {
-    if (charCode === 13) {
-      handleAuth('login');
-    }
-  };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    handleAuth('login');
-  };
+  const handleRemember = (e) => setRemember(e.target.checked)
 
   return (
-    <Paper elevation={10} className={classes.login}>
-      <Grid align='center'>
+    <Paper elevation={10} className={classes.authPaper}>
+      <Grid align="center">
         <Avatar className={classes.avatar}>
-          <LockIcon />
+          <Lock />
         </Avatar>
-        <h2 className={classes.header}>Sign In</h2>
+        <h2>Sign In</h2>
       </Grid>
       <form onSubmit={handleSubmit}>
         <TextField
-          label='Email'
-          placeholder='Enter email'
-          fullWidth
-          id='email'
           required
+          fullWidth
+          id="email"
           value={email}
+          label="Email"
+          variant="standard"
+          autoComplete="email"
           onChange={handleChange}
-          onKeyPress={handleKeyDown}
-          autoComplete='email'
+          className={classes.input}
+          placeholder="Enter email"
         />
         <TextField
-          label='Password'
-          placeholder='Enter password'
-          id='password'
-          type='password'
-          fullWidth
           required
+          fullWidth
+          id="password"
+          type="password"
           value={password}
+          label="Password"
+          variant="standard"
           onChange={handleChange}
-          onKeyPress={handleKeyDown}
-          autoComplete='current-password'
+          className={classes.input}
+          placeholder="Enter password"
+          autoComplete="current-password"
         />
         <FormControlLabel
-          control={<Checkbox name='checkedB' color='primary' />}
-          label='Remember me'
+          label="Remember me"
+          control={
+            <Checkbox
+              name="Remember me"
+              color="primary"
+              checked={remember}
+              onChange={handleRemember}
+            />
+          }
         />
         <Button
-          className={classes.button}
-          type='submit'
-          color='primary'
-          variant='contained'
           fullWidth
+          type="submit"
+          color="primary"
+          variant="contained"
+          className={classes.button}
         >
           Sign in
         </Button>
         <Typography>
-          <Link className={classes.forgotPw} to='/forgot-pw'>
+          <Link className={classes.forgotPw} to="/forgot-pw">
             Forgot password?
           </Link>
         </Typography>
         <Typography>
           Need an account?{' '}
-          <span
-            className={classes.registerLink}
-            onClick={() => setAuthPage('register')}
-          >
+          <button className={classes.switch} onClick={() => setAuthPage('register')}>
             Sign Up
-          </span>
+          </button>
         </Typography>
       </form>
     </Paper>
-  );
-};
+  )
+}
 
-export default Login;
+export default Login

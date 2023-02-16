@@ -1,98 +1,131 @@
-import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
-import { CTX } from 'context/Store';
-import { Link } from 'react-router-dom';
-import { makeStyles, Avatar, Typography, Grid } from '@material-ui/core';
+import axios from 'axios'
+import { toast } from 'react-toastify'
+import { Link } from 'react-router-dom'
+import { Avatar, Typography, Grid } from '@mui/material'
+import React, { useState, useEffect, useContext } from 'react'
+import useClasses from 'customHooks/useClasses'
+import { CTX } from 'context/Store'
 
-const useStyles = makeStyles((theme) => ({
+const styles = (theme) => ({
   battleFriends: {
-    background: 'linear-gradient(#ccc, #ddd)',
     padding: '2em',
+    background: 'linear-gradient(#ccc, #ddd)',
   },
   friend: {
     padding: '1em',
-    borderRadius: '4px',
-    background: '#111',
     margin: '.5em',
+    background: '#111',
+    borderRadius: '4px',
   },
   friendName: {
-    fontSize: '2rem',
     margin: '0 .5em',
-    [theme.breakpoints.down('xs')]: {
+    fontSize: '2rem',
+    [theme.breakpoints.down('sm')]: {
       fontSize: '1.2rem',
     },
   },
   link: {
-    fontSize: '2rem',
-    color: theme.palette.secondary.main,
-    fontWeight: 'bold',
-    '&:hover': {
-      color: theme.palette.secondary.light,
+    color: theme.palette.primary.main,
+    p: {
+      fontSize: '2rem',
+      fontWeight: 'bold',
+      color: theme.palette.secondary.main,
+      [theme.breakpoints.down('sm')]: {
+        fontSize: '1.2rem',
+      },
     },
-    [theme.breakpoints.down('xs')]: {
-      fontSize: '1rem',
+    '&:hover': {
+      color: theme.palette.primary.light,
+      p: {
+        color: theme.palette.secondary.light,
+      },
     },
   },
   friendPic: {
     background: theme.palette.primary.main,
   },
-}));
+  noFriends: {
+    width: '100%',
+    padding: '2rem',
+    background: 'black',
+    textAlign: 'center',
+    a: {
+      color: theme.palette.primary.main,
+      '&:hover': {
+        color: theme.palette.primary.light,
+      },
+    },
+  },
+})
+
 const BattleFriends = () => {
-  const classes = useStyles();
-  const [appState] = useContext(CTX);
-  const { token } = appState.auth;
-  const { id } = appState.user;
-  const [friendlist, setFriendlist] = useState([]);
+  const [fetchCompleted, setFetchCompleted] = useState(false)
+  const [friendlist, setFriendlist] = useState([])
+  const [{ auth, user }] = useContext(CTX)
+  const classes = useClasses(styles)
+  const { token } = auth
+  const { id } = user
 
   useEffect(() => {
-    if (!token) return;
-    axios
-      .get('/api/user/friendships', { headers: { 'x-auth-token': token } })
-      .then(({ data }) => setFriendlist(data))
-      .catch((err) => console.log({ err }));
-  }, [token]);
+    if (!token) return
+    const fetchFriends = async () => {
+      try {
+        const { data } = await axios.get('/api/user/friendships', {
+          headers: { 'x-auth-token': token },
+        })
+        setFriendlist(data.friendships)
+      } catch ({ response }) {
+        toast.error(response?.data?.message)
+      }
+      setFetchCompleted(true)
+    }
+
+    fetchFriends()
+  }, [token])
 
   return (
-    <Grid container justify='center' className={classes.battleFriends}>
+    <Grid container justify="center" className={classes.battleFriends}>
+      {fetchCompleted && friendlist.length === 0 && (
+        <div className={classes.noFriends}>
+          <Typography>No friends yet...</Typography>
+          <Typography>
+            Go meet some new friends in the <Link to="/forum">Forum</Link>
+          </Typography>
+          <Typography>
+            Or go battle <Link to="/battle/computer">the computer</Link>
+          </Typography>
+          <Typography>
+            or a <Link to="/battle/random">random user</Link>
+          </Typography>
+        </div>
+      )}
       {friendlist.map(({ _id, receiver, sender }) => (
-        <Friend
-          key={_id}
-          props={{ friend: sender._id === id ? receiver : sender, _id }}
-        />
+        <Friend key={_id} props={{ friend: sender._id === id ? receiver : sender, _id }} />
       ))}
     </Grid>
-  );
-};
+  )
+}
 
 const Friend = ({ props: { friend, _id } }) => {
-  const classes = useStyles();
+  const classes = useClasses(styles)
   return (
-    <Grid
-      container
-      alignItems='center'
-      justify='center'
-      className={classes.friend}
-    >
-      <Grid
-        item
-        className={classes.friendPic}
-        component={Avatar}
-        src={`/api/images/${friend.profilePic}`}
-      />
-
-      <Grid item={Typography} className={classes.friendName}>
-        {friend.name}
+    <Link to={`/friendbattle/${_id}`} className={classes.link}>
+      <Grid container alignItems="center" justify="center" className={classes.friend}>
+        <Grid
+          item
+          component={Avatar}
+          className={classes.friendPic}
+          src={`/api/images/${friend.profilePic}`}
+        />
+        <Grid item className={classes.friendName}>
+          {friend.name}
+        </Grid>
+        <Grid item component="p">
+          connect for battle
+        </Grid>
       </Grid>
-      <Grid
-        item
-        className={classes.link}
-        component={Link}
-        to={`/friendbattle/${_id}`}
-      >
-        connect for battle
-      </Grid>
-    </Grid>
-  );
-};
+    </Link>
+  )
+}
 
-export default BattleFriends;
+export default BattleFriends

@@ -1,10 +1,10 @@
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@mui/material/styles'
 
-const blue = '#0078FE';
+const blue = '#0078FE'
 // const magenta = '#CC0AC3';
-const magenta = '#cc0a6d';
+const magenta = '#cc0a6d'
 
-export default createMuiTheme({
+export default createTheme({
   palette: {
     common: {
       blue: `${blue}`,
@@ -18,9 +18,8 @@ export default createMuiTheme({
     },
   },
   typography: {
-    fontFamily: 'OpenDyslexic',
+    fontFamily: 'OpenDyslexic, sans-serif',
     tab: {
-      fontFamily: 'OpenDyslexic',
       textTransform: 'none',
       fontWeight: '700',
       fontSize: '1rem',
@@ -45,4 +44,4 @@ export default createMuiTheme({
     marginLeft: '50%',
     transform: 'translateX(-50%)',
   },
-});
+})

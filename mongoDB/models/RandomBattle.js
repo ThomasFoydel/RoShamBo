@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-let RandomBattle;
+const mongoose = require('mongoose')
+
 const randomBattleSchema = mongoose.Schema(
   {
     roomId: {
@@ -17,7 +17,6 @@ const randomBattleSchema = mongoose.Schema(
     },
   },
   { timestamps: true }
-);
+)
 
-RandomBattle = mongoose.model('RandomBattle', randomBattleSchema);
-module.exports = RandomBattle;
+module.exports = mongoose.model('RandomBattle', randomBattleSchema)

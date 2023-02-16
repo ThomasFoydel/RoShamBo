@@ -1,77 +1,109 @@
-import React, { useState, useEffect, useContext } from 'react';
 import {
-  AppBar,
-  Toolbar,
-  Tabs,
   Tab,
-  Button,
-  Menu,
-  MenuItem,
-  useMediaQuery,
-  useTheme,
-  makeStyles,
-  SwipeableDrawer,
-  IconButton,
+  Tabs,
   List,
+  Menu,
+  AppBar,
+  Button,
+  Toolbar,
+  MenuItem,
   ListItem,
+  useTheme,
+  IconButton,
   ListItemText,
-} from '@material-ui/core';
-import { Menu as MenuIcon } from '@material-ui/icons';
-import useScrollTrigger from '@material-ui/core/useScrollTrigger';
-import { Link } from 'react-router-dom';
-import logo from 'imgs/roshambo.svg';
-import { CTX } from 'context/Store';
+  useMediaQuery,
+  SwipeableDrawer,
+} from '@mui/material'
+import styled from '@emotion/styled'
+import { Link } from 'react-router-dom'
+import { Menu as MenuIcon } from '@mui/icons-material'
+import useScrollTrigger from '@mui/material/useScrollTrigger'
+import React, { useState, useEffect, useContext, useMemo } from 'react'
+import useClasses from 'customHooks/useClasses'
+import logo from 'imgs/roshambo.svg'
+import { CTX } from 'context/Store'
 
 function ElevationScroll({ children }) {
   const trigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 0,
-  });
+  })
   return React.cloneElement(children, {
     elevation: trigger ? 4 : 0,
-  });
+  })
 }
 
-const useStyles = makeStyles((theme) => ({
-  toolbarMargin: {
-    ...theme.mixins.toolbar,
-    marginBottom: '3em',
-    [theme.breakpoints.down('md')]: {
-      marginBottom: '2em',
-    },
-    [theme.breakpoints.down('xs')]: {
-      marginBottom: '1.25em',
-    },
-    [theme.breakpoints.down('xs')]: {
-      marginBottom: '.5em',
+const ToolBarMargin = styled('div')(({ theme }) => ({
+  ...theme.mixins.toolbar,
+  marginBottom: '3em',
+  [theme.breakpoints.down('lg')]: {
+    marginBottom: '1.5em',
+  },
+  [theme.breakpoints.down('md')]: {
+    marginBottom: '0.5em',
+  },
+}))
+
+const NavButton = styled(Button)(({ theme }) => ({
+  ...theme.typography.loginLink,
+  margin: '10px',
+  height: '45px',
+  whiteSpace: 'nowrap',
+  borderRadius: '50px',
+}))
+
+const NavBarTab = styled(Tab)(({ theme }) => ({
+  ...theme.typography.tab,
+  minWidth: 10,
+  opacity: 0.8,
+  color: 'white',
+  '&:hover': {
+    opacity: 1,
+  },
+}))
+
+const Logo = styled('img')(({ theme }) => ({
+  height: '7rem',
+  [theme.breakpoints.down('lg')]: {
+    height: '5.5rem',
+  },
+  [theme.breakpoints.down('md')]: {
+    height: '4.5rem',
+  },
+  [theme.breakpoints.down('sm')]: {
+    height: '4.1rem',
+  },
+}))
+
+const BattleMenu = styled(Menu)(({ theme }) => ({
+  '.MuiPaper-root.MuiMenu-paper': {
+    color: 'white',
+    borderRadius: 0,
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderTopWidth: '0px',
+    top: '111px !important',
+    borderColor: theme.palette.primary.dark,
+    backgroundColor: theme.palette.common.blue,
+    [theme.breakpoints.down('xl')]: {},
+    [theme.breakpoints.down('lg')]: {
+      top: '88px !important',
     },
   },
-  logo: {
-    height: '8em',
-    [theme.breakpoints.down('md')]: {
-      height: '7em',
-    },
-    [theme.breakpoints.down('xs')]: {
-      height: '5.5em',
-    },
-    [theme.breakpoints.down('xs')]: {
-      height: '4.5em',
-    },
-  },
+}))
+
+const styles = (theme) => ({
   tabContainer: {
     marginLeft: 'auto',
-  },
-  tab: {
-    ...theme.typography.tab,
-    minWidth: 10,
-    marginLeft: '25px',
+    '.Mui-selected': {
+      opacity: 1,
+      color: 'white',
+    },
   },
   button: {
     ...theme.typography.loginLink,
-    borderRadius: '50px',
-    marginLeft: '50px',
-    marginRight: '25px',
     height: '45px',
+    borderRadius: '50px',
   },
   authBtn: {
     background: theme.palette.secondary.main,
@@ -84,11 +116,6 @@ const useStyles = makeStyles((theme) => ({
     '&:hover': {
       backgroundColor: 'transparent',
     },
-  },
-  menu: {
-    backgroundColor: theme.palette.common.blue,
-    color: 'white',
-    borderRadius: 0,
   },
   menuItem: {
     ...theme.typography.tab,
@@ -104,29 +131,44 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   drawerIcon: {
-    height: '50px',
     width: '50px',
-    [theme.breakpoints.down('xs')]: {
-      height: '35px',
-      width: '35px',
+    height: '50px',
+    [theme.breakpoints.down('sm')]: {
+      width: '40px',
+      height: '40px',
     },
   },
   drawer: {
+    width: '200px',
     backgroundColor: theme.palette.common.blue,
   },
-  drawerItem: {
+
+  drawerItemText: {
     ...theme.typography.tab,
-    color: 'white',
-    padding: '0 1.5rem',
     opacity: 0.7,
+    color: 'white',
+    paddingLeft: '0',
+    textAlign: 'center',
+  },
+  drawerItem: {
+    '&:hover': {
+      '.MuiListItemText-root': {
+        opacity: 1,
+      },
+    },
   },
   drawerAuthLink: {
+    cursor: 'pointer',
     backgroundColor: theme.palette.secondary.main,
     '&:hover': {
       backgroundColor: theme.palette.secondary.dark,
+      '.MuiListItemText-root': {
+        opacity: 1,
+      },
     },
   },
   drawerItemSelected: {
+    background: theme.palette.primary.dark,
     '& .MuiListItemText-root': {
       opacity: 1,
     },
@@ -140,245 +182,223 @@ const useStyles = makeStyles((theme) => ({
       opacity: '1',
     },
   },
-}));
+})
 
 const menuOptions = [
   { name: 'Battle', link: '/battle', activeIndex: 1, selectedIndex: 0 },
   {
+    activeIndex: 1,
     name: 'Friends',
-    link: '/battle/friends',
-    activeIndex: 1,
     selectedIndex: 1,
+    link: '/battle/friends',
   },
   {
+    activeIndex: 1,
     name: 'Random',
-    link: '/battle/random',
-    activeIndex: 1,
     selectedIndex: 2,
+    link: '/battle/random',
   },
   {
-    name: 'Computer',
-    link: '/battle/computer',
     activeIndex: 1,
+    name: 'Computer',
     selectedIndex: 3,
+    link: '/battle/computer',
   },
-];
+]
 
 export default function Header() {
-  const classes = useStyles();
-  const theme = useTheme();
-  const [appState, updateState] = useContext(CTX);
-  const {
-    isLoggedIn,
-    user: { id },
-  } = appState;
+  const [{ isLoggedIn, user }, updateState] = useContext(CTX)
+  const { id } = user
+  const [anchorEl, setAnchorEl] = useState(null)
+  const [openMenu, setOpenMenu] = useState(false)
+  const [openDrawer, setOpenDrawer] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(0)
+  const [currentActiveIndex, setCurrentTabIndex] = useState(0)
 
-  const iOS = process.browser && /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const matches = useMediaQuery(theme.breakpoints.down('md'));
-  const [openDrawer, setOpenDrawer] = useState(false);
-  const [value, setValue] = useState(0);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [openMenu, setOpenMenu] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const theme = useTheme()
+  const classes = useClasses(styles)
+  const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+  const matches = useMediaQuery(theme.breakpoints.down('md'))
 
-  const routes = [
-    { name: 'Home', link: '/', activeIndex: 0 },
-    {
-      name: 'Battle',
-      link: '/battle',
-      activeIndex: 1,
-      ariaOwns: (anchorEl) => (anchorEl ? 'simple-menu' : undefined),
-      ariaPopup: (anchorEl) => (anchorEl ? true : undefined),
-      mouseOver: (event, handleClick) => handleClick(event),
-      auth: true,
-    },
+  useEffect(() => setOpenMenu(false), [matches])
 
-    { name: 'Profile', link: `/profile/${id}`, activeIndex: 2, auth: true },
-    { name: 'Messages', link: '/messages', activeIndex: 3, auth: true },
-    { name: 'Forum', link: '/forum', activeIndex: 4 },
-  ];
+  const routes = useMemo(
+    () => [
+      { name: 'Home', link: '/', activeIndex: 0 },
+      {
+        name: 'Battle',
+        link: '/battle',
+        activeIndex: 1,
+        ariaOwns: (anchorEl) => (anchorEl ? 'simple-menu' : undefined),
+        ariaPopup: (anchorEl) => (anchorEl ? true : undefined),
+        mouseOver: (event, handleClick) => handleClick(event),
+        auth: true,
+      },
+      { name: 'Profile', link: `/profile/${id}`, activeIndex: 2, auth: true },
+      { name: 'Messages', link: '/messages', activeIndex: 3, auth: true },
+      { name: 'Forum', link: '/forum', activeIndex: isLoggedIn ? 4 : 1 },
+    ],
+    [id, isLoggedIn]
+  )
 
-  const handleChange = (e, newValue) => {
-    setValue(newValue);
-  };
+  const handleChange = (_, newValue) => setCurrentTabIndex(newValue)
 
-  const openModal = () => {
-    updateState({ type: 'AUTH_MODAL', payload: true });
-  };
+  const openModal = () => updateState({ type: 'AUTH_MODAL', payload: true })
 
   useEffect(() => {
-    [...menuOptions, ...routes].forEach((route) => {
+    const routeOptions = [...menuOptions, ...routes]
+    routeOptions.forEach((route) => {
       if (window.location.pathname === route.link) {
-        if (value !== route.activeIndex) {
-          setValue(route.activeIndex);
+        if (currentActiveIndex !== route.activeIndex) {
+          setCurrentTabIndex(route.activeIndex)
           if (route.selectedIndex && route.selectedIndex !== selectedIndex) {
-            setSelectedIndex(route.selectedIndex);
+            setSelectedIndex(route.selectedIndex)
           }
         }
       }
-    });
-  }, [value, selectedIndex, routes]);
+    })
+  }, [currentActiveIndex, selectedIndex, routes])
 
   const handleClick = (e) => {
-    setAnchorEl(e.currentTarget);
-    setOpenMenu(true);
-  };
+    setOpenMenu(true)
+    setAnchorEl(e.currentTarget)
+  }
 
   const handleClose = () => {
-    setAnchorEl(null);
-    setOpenMenu(false);
-  };
+    setAnchorEl(null)
+    setOpenMenu(false)
+  }
 
   const handleMenuItemClick = (e, i) => {
-    setAnchorEl(null);
-    setOpenMenu(false);
-    setSelectedIndex(i);
-  };
+    setAnchorEl(null)
+    setOpenMenu(false)
+    setSelectedIndex(i)
+  }
+
+  const logout = () => updateState({ type: 'LOGOUT' })
 
   const tabs = (
     <>
       <Tabs
-        className={classes.tabContainer}
-        value={value}
+        indicatorColor="primary"
+        value={currentActiveIndex}
         onChange={handleChange}
-        indicatorColor='primary'
+        className={classes.tabContainer}
       >
         {routes.map((route, index) =>
           route.auth && !isLoggedIn ? null : (
-            <Tab
-              key={`${route}${index}`}
-              className={classes.tab}
-              component={Link}
+            <NavBarTab
               to={route.link}
+              component={Link}
               label={route.name}
+              key={`${route}${index}`}
+              tabIndex={route.activeIndex}
               aria-owns={route.ariaOwns && route.ariaOwns(anchorEl)}
               aria-haspopup={route.ariaPopup && route.ariaPopup(anchorEl)}
-              onMouseOver={(e) =>
-                route.mouseOver && route.mouseOver(e, handleClick)
-              }
+              onMouseOver={(e) => route.mouseOver && route.mouseOver(e, handleClick)}
             />
           )
         )}
       </Tabs>
       {isLoggedIn && (
-        <Button
-          variant='contained'
-          color='primary'
+        <NavButton
+          color="primary"
+          onClick={logout}
+          variant="contained"
+          classes={{ root: classes.button }}
           className={`${classes.button} ${classes.logout}`}
-          onClick={() => {
-            updateState({ type: 'LOGOUT' });
-          }}
         >
           Log out
-        </Button>
+        </NavButton>
       )}
       {!isLoggedIn && (
-        <Button
-          color='secondary'
-          variant='contained'
-          onClick={openModal}
-          className={classes.button}
-        >
+        <NavButton color="secondary" variant="contained" onClick={openModal}>
           Sign In
-        </Button>
+        </NavButton>
       )}
-      <Menu
-        id='simple-menu'
+      <BattleMenu
+        keepMounted
+        elevation={0}
+        id="simple-menu"
         anchorEl={anchorEl}
-        open={Boolean(openMenu)}
         onClose={handleClose}
+        style={{ zIndex: 1302 }}
+        open={Boolean(openMenu)}
         classes={{ paper: classes.menu }}
         MenuListProps={{ onMouseLeave: handleClose }}
-        elevation={0}
-        style={{ zIndex: 1302 }}
-        keepMounted
       >
         {menuOptions.map((option, i) => (
           <MenuItem
-            key={option.link}
             component={Link}
             to={option.link}
-            classes={{ root: classes.menuItem }}
+            key={option.link}
             onClick={(e) => {
-              handleMenuItemClick(e, i);
-              setValue(1);
-              handleClose();
+              handleClose()
+              setCurrentTabIndex(1)
+              handleMenuItemClick(e, i)
             }}
-            selected={i === selectedIndex && value === 1}
+            classes={{ root: classes.menuItem }}
+            selected={i === selectedIndex && currentActiveIndex === 1}
           >
             {option.name}
           </MenuItem>
         ))}
-      </Menu>
+      </BattleMenu>
     </>
-  );
+  )
 
   const drawer = (
     <>
       <SwipeableDrawer
-        disableBackdropTransition={!iOS}
         disableDiscovery={iOS}
         open={openDrawer}
-        onClose={() => setOpenDrawer(false)}
+        disableBackdropTransition={!iOS}
         onOpen={() => setOpenDrawer(true)}
         classes={{ paper: classes.drawer }}
+        onClose={() => setOpenDrawer(false)}
       >
-        <div className={classes.toolbarMargin} />
+        <ToolBarMargin />
         <List disablePadding>
           {routes.map((route) =>
             route.auth && !isLoggedIn ? null : (
               <ListItem
+                divider
+                to={route.link}
+                component={Link}
                 key={`${route}${route.activeIndex}`}
                 onClick={() => {
-                  setOpenDrawer(false);
-                  setValue(route.activeIndex);
+                  setOpenDrawer(false)
+                  setCurrentTabIndex(route.activeIndex)
                 }}
-                divider
-                button
-                component={Link}
-                to={route.link}
-                selected={value === route.activeIndex}
-                classes={{ selected: classes.drawerItemSelected }}
+                className={
+                  currentActiveIndex === route.activeIndex
+                    ? classes.drawerItemSelected
+                    : classes.drawerItem
+                }
               >
-                <ListItemText className={classes.drawerItem} disableTypography>
+                <ListItemText className={classes.drawerItemText} disableTypography>
                   {route.name}
                 </ListItemText>
               </ListItem>
             )
           )}
           {isLoggedIn ? (
-            <ListItem
-              divider
-              button
-              classes={{
-                root: classes.drawerAuthLink,
-              }}
-            >
-              <ListItemText
-                onClick={() => {
-                  updateState({ type: 'LOGOUT' });
-                }}
-                className={classes.drawerItem}
-                disableTypography
-              >
+            <ListItem divider classes={{ root: classes.drawerAuthLink }}>
+              <ListItemText disableTypography className={classes.drawerItemText} onClick={logout}>
                 Log out
               </ListItemText>
             </ListItem>
           ) : (
             <ListItem
-              onClick={() => {
-                setValue(5);
-                setOpenDrawer(false);
-                  openModal();
-              }}
               divider
-              button
+              onClick={() => {
+                openModal()
+                setOpenDrawer(false)
+                setCurrentTabIndex(5)
+              }}
               className={classes.drawerAuthLink}
             >
-                <ListItemText
-                className={classes.drawerItem}
-                disableTypography
-              >
+              <ListItemText className={classes.drawerItemText} disableTypography>
                 Sign In
               </ListItemText>
             </ListItem>
@@ -386,33 +406,34 @@ export default function Header() {
         </List>
       </SwipeableDrawer>
       <IconButton
+        disableRipple
         className={classes.drawerIconContainer}
         onClick={() => setOpenDrawer(!openDrawer)}
-        disableRipple
       >
         <MenuIcon className={classes.drawerIcon} />
       </IconButton>
     </>
-  );
+  )
+
   return (
     <>
       <ElevationScroll>
         <AppBar className={classes.appbar}>
           <Toolbar disableGutters>
             <Button
+              to="/"
               disableRipple
-              onClick={() => setValue(0)}
               component={Link}
-              to='/'
               className={classes.logoContainer}
+              onClick={() => setCurrentTabIndex(0)}
             >
-              <img className={classes.logo} src={logo} alt='three hands logo' />
+              <Logo src={logo} alt="three hands logo" />
             </Button>
             {matches ? drawer : tabs}
           </Toolbar>
         </AppBar>
       </ElevationScroll>
-      <div className={classes.toolbarMargin} />
+      <ToolBarMargin />
     </>
-  );
+  )
 }

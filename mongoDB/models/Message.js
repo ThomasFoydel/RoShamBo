@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const messageSchema = mongoose.Schema(
   {
@@ -18,17 +18,17 @@ const messageSchema = mongoose.Schema(
     content: {
       type: String,
       validate: {
-        validator: (c) => c.length < 500,
-        message: 'must be less than 500 characters',
+        validator: (c) => c.length <= 500,
+        message: 'Message cannot exceed 500 characters',
       },
     },
   },
   { timestamps: true }
-);
+)
 
 messageSchema.pre('save', function (next) {
-  this.participants = [this.sender, this.receiver];
-  next();
-});
+  this.participants = [this.sender, this.receiver]
+  next()
+})
 
-module.exports = mongoose.model('Message', messageSchema);
+module.exports = mongoose.model('Message', messageSchema)

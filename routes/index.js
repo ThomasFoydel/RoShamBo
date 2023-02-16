@@ -1,13 +1,17 @@
-const router = require('express').Router();
-const authRouts = require('./Auth');
-const userRouts = require('./User');
-const forumRoutes = require('./Forum');
-const battleRoutes = require('./Battle');
-const imageRoutes = require('./Image');
+const express = require('express')
 
-router.use('/auth', authRouts);
-router.use('/user', userRouts);
-router.use('/forum', forumRoutes);
-router.use('/battle', battleRoutes);
-router.use('/image', imageRoutes);
-module.exports = router;
+const router = express.Router()
+
+const userRouts = require('./User')
+const authRouts = require('./Auth')
+const forumRoutes = require('./Forum')
+const imageRoutes = require('./Images')
+const battleRoutes = require('./Battles')
+
+router.use('/user', userRouts)
+router.use('/auth', authRouts)
+router.use('/forum', forumRoutes)
+router.use('/images', imageRoutes)
+router.use('/battles', battleRoutes)
+
+module.exports = router

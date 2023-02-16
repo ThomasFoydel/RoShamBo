@@ -1,79 +1,100 @@
-import React from 'react';
+import { createContext, useReducer } from 'react'
 
-const CTX = React.createContext();
-export { CTX };
+const CTX = createContext()
+
+export { CTX }
 
 export function reducer(state, action) {
-  let { payload } = action;
-  let { user, token, profilePic, message, update } = payload || {};
-  switch (action.type) {
+  const { payload, type } = action
+  const { user, token, profilePic, message, update, remember, friendRequests } = payload || {}
+  switch (type) {
     case 'LOGIN':
-      localStorage.setItem('roshambo-token', token);
+      localStorage.setItem('roshambo-token', token)
+      localStorage.setItem('remember', !!remember)
       return {
         ...state,
-        isLoggedIn: true,
-        user: {
-          id: user._id,
-          name: user.name,
-          displayEmail: user.displayEmail,
-          profilePic: user.profilePic,
-          bio: user.bio,
-          friends: user.friends,
-        },
+        friendRequests,
         auth: { token },
-        messages: user.messages,
+        isLoggedIn: true,
         authModal: false,
-      };
+        messages: user.messages,
+        user: { ...user, id: user._id },
+      }
+
     case 'LOGOUT':
-      localStorage.removeItem('roshambo-token');
-      if (window.FB) window.FB.logout();
+      localStorage.removeItem('roshambo-token')
+      localStorage.removeItem('remember')
+      if (window.FB) window.FB.logout()
       return {
         ...state,
         isLoggedIn: false,
-        auth: {
-          token: null,
-        },
+        auth: { token: null },
         user: { name: '', displayEmail: '' },
-      };
+      }
+
     case 'AUTH_MODAL':
-      return { ...state, authModal: payload };
+      return { ...state, authModal: payload }
+
     case 'CHANGE_PROFILE_PIC':
       return {
         ...state,
         user: { ...state.user, profilePic },
-      };
+      }
+
     case 'UPDATE_USER_INFO':
+      return { ...state, user: { ...state.user, ...update } }
+
+    case 'NEW_MESSAGE':
+      const copy = { ...state.messages }
+      const other = message.participants.find((p) => p !== state.user.id)
+      const thread = copy[other]
+      const updatedThread = thread ? [...thread, message] : [message]
+      const updatedMessages = { ...copy, [other]: updatedThread }
+      return { ...state, messages: updatedMessages }
+
+    case 'CURRENT_THREAD':
+      return { ...state, currentThread: payload }
+
+    case 'SET_FRIENDLIST':
+      return { ...state, user: { ...state.user, friends: payload } }
+
+    case 'ADD_FRIEND':
+      return { ...state, user: { ...state.user, friends: [...state.user.friends, payload] } }
+
+    case 'REMOVE_FRIEND':
       return {
         ...state,
-        user: { ...state.user, ...update },
-      };
-    case 'NEW_MESSAGE':
-      let copy = { ...state.messages };
-      let other = message.participants.filter((p) => p !== state.user.id)[0];
-      let thread = copy[other];
-      let updatedThread = thread ? [...thread, message] : [message];
-      let updatedMessages = { ...copy, [other]: updatedThread };
-      return { ...state, messages: updatedMessages };
-    case 'CURRENT_THREAD':
-      return { ...state, currentThread: payload };
-    case 'SET_FRIENDLIST':
-      return { ...state, user: { ...state.user, friends: payload } };
+        user: { ...state.user, friends: state.user.friends.filter((f) => f._id !== payload) },
+      }
+
+    case 'ADD_FRIEND_REQUEST':
+      return {
+        ...state,
+        friendRequests: [...state.friendRequests, payload],
+      }
+
+    case 'REMOVE_FRIEND_REQUEST':
+      return {
+        ...state,
+        friendRequests: state.friendRequests.filter((fr) => fr._id !== payload._id),
+      }
+
     default:
-      console.log('REDUCER ERROR: action: ', action);
-      return { ...state };
+      console.error(`REDUCER ERROR. TYPE: ${type}, PAYLOAD:${payload}`)
+      return { ...state }
   }
 }
 
 export default function Store(props) {
-  const stateHook = React.useReducer(reducer, {
-    isLoggedIn: false,
-    auth: { token: null },
-    authModal: false,
-    user: { name: '', displayEmail: '', id: null, friends: [] },
+  const stateHook = useReducer(reducer, {
     messages: {},
-    messageNotification: { sender: null, content: null },
+    authModal: false,
+    isLoggedIn: false,
+    friendRequests: [],
     currentThread: null,
-  });
+    auth: { token: null },
+    user: { name: '', displayEmail: '', id: null, friends: [] },
+  })
 
-  return <CTX.Provider value={stateHook}>{props.children}</CTX.Provider>;
+  return <CTX.Provider value={stateHook}>{props.children}</CTX.Provider>
 }
