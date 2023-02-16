@@ -81,7 +81,7 @@ const styles = (theme) => ({
   robotImg: {
     ...theme.centerHorizontal,
     width: '70%',
-    maxHeight: '16rem',
+    height: '16rem',
   },
   robotSection: {
     width: '90%',
