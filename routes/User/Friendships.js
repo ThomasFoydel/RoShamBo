@@ -19,7 +19,7 @@ router.post('/', auth, async (req, res) => {
       return res.status(404).send({ status: 'error', message: 'Invalid ID(s)' })
     }
 
-    const { users } = require('../../')
+    const { users } = require('../..')
     const io = req.app.get('socketio')
     const user = await API.user.findById(sender)
 
@@ -67,7 +67,7 @@ router.put('/', auth, async (req, res) => {
     const friendList = await API.friendship.findFriendlist(userId)
 
     if (accept) {
-      const { users } = require('../../')
+      const { users } = require('../..')
       const newFriendId = friendrequest.participants.find((p) => p._id !== userId)._id
       const newFriendSocket = users[newFriendId]
       if (newFriendSocket) {
@@ -132,7 +132,7 @@ router.delete(
       }
       await API.friendship.delete(friendship._id)
 
-      const { users } = require('../../')
+      const { users } = require('../..')
       const deletedFriendSocket = users[friendId]
       if (deletedFriendSocket) {
         const io = app.get('socketio')

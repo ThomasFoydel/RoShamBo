@@ -1,6 +1,6 @@
 const express = require('express')
-const profileRoutes = require('./Profile')
-const friendshipRoutes = require('./Friendship')
+const profileRoutes = require('./Profiles')
+const friendshipRoutes = require('./Friendships')
 
 const router = express.Router()
 router.use('/profiles', profileRoutes)
