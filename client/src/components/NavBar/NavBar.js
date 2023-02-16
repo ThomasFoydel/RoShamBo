@@ -220,6 +220,8 @@ export default function Header() {
   const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
   const matches = useMediaQuery(theme.breakpoints.down('md'))
 
+  useEffect(() => setOpenMenu(false), [matches])
+
   const routes = useMemo(
     () => [
       { name: 'Home', link: '/', activeIndex: 0 },
