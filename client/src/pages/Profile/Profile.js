@@ -3,6 +3,7 @@ import { toast } from 'react-toastify'
 import { Link, useParams } from 'react-router-dom'
 import React, { useState, useEffect, useContext } from 'react'
 import { Avatar, Card, Typography, Button } from '@mui/material'
+import { PersonAdd, PersonRemove, SportsKabaddi } from '@mui/icons-material'
 import loadingblue from 'assets/images/loadingblue.gif'
 import useClasses from 'customHooks/useClasses'
 import rps from 'assets/images/rps.jpeg'
@@ -11,6 +12,28 @@ import { CTX } from 'context/Store'
 const styles = (theme) => ({
   profilePage: {
     padding: '5rem 0',
+    positon: 'relative',
+  },
+  avatarContainer: {
+    width: '15rem',
+    height: '15rem',
+    position: 'absolute !important',
+    transform: 'translateY(-15.5rem)',
+    [theme.breakpoints.down('sm')]: {
+      width: '12rem',
+      height: '12rem',
+      transform: 'translateY(-14rem)',
+    },
+  },
+  exp: {
+    width: '6rem',
+    right: '-1rem',
+    zIndex: '9999',
+    bottom: '1.5rem',
+    textAlign: 'center',
+    borderRadius: '4px',
+    position: 'absolute',
+    padding: '.25rem .5rem',
   },
   profilePic: {
     left: '50%',
@@ -18,15 +41,15 @@ const styles = (theme) => ({
     width: '15rem',
     height: '15rem',
     fontSize: '4.8rem',
-    border: '4px solid #ddd',
+    border: '8px solid #ddd',
+    transform: 'translateX(-50%)',
     position: 'absolute !important',
     backgroundColor: theme.palette.primary.light,
-    transform: 'translateX(-50%) translateY(-15.5rem)',
     transition: 'background 0.8s ease, color 0.8s ease',
     [theme.breakpoints.down('sm')]: {
       width: '12rem',
       height: '12rem',
-      transform: 'translateX(-50%) translateY(-14rem)',
+      transform: 'translateX(-50%)',
     },
   },
   background: {
@@ -53,9 +76,12 @@ const styles = (theme) => ({
     flexDirection: 'column',
   },
   infoSection: {
-    width: '100%',
+    width: '90%',
     display: 'flex',
+    padding: '1rem 0',
+    borderRadius: '8px',
     alignItems: 'center',
+    background: '#ffffff59',
     flexDirection: 'column',
     justifyContent: 'center',
     [theme.breakpoints.down('sm')]: {
@@ -64,10 +90,18 @@ const styles = (theme) => ({
   },
   username: {
     width: '100%',
-    fontSize: '3rem',
+    fontSize: '3.5rem',
     textAlign: 'center',
+    color: theme.palette.primary.dark,
     [theme.breakpoints.down('sm')]: {
       fontSize: '2rem',
+    },
+  },
+  email: {
+    fontSize: '1.2rem',
+    color: theme.palette.primary.dark,
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '1rem',
     },
   },
   editLink: {
@@ -80,18 +114,46 @@ const styles = (theme) => ({
     },
   },
   bio: {
+    padding: '.5rem',
+    fontSize: '1.2rem',
     marginBottom: '.5em',
+    color: theme.palette.primary.dark,
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '1rem',
+    },
+  },
+  battleButton: {
+    color: 'white',
+    fontSize: '1.6rem',
+    background: theme.palette.secondary.main,
+    '&:hover': {
+      background: theme.palette.secondary.dark,
+    },
+    [theme.breakpoints.down('sm')]: {
+      fontSize: '1.2rem',
+    },
+    p: {
+      marginLeft: '.5rem',
+    },
   },
   requestButton: {
+    top: '0.2rem',
     color: 'white',
+    right: '0.2rem',
+    width: '9.5rem',
+    textAlign: 'center',
+    position: 'absolute',
     background: theme.palette.primary.main,
     '&:hover': {
       background: theme.palette.primary.dark,
     },
-  },
-  exp: {
-    borderRadius: '4px',
-    padding: '.25rem .5rem',
+    p: {
+      marginLeft: '1rem',
+    },
+    [theme.breakpoints.down('sm')]: {
+      top: 'unset',
+      bottom: '0.2rem',
+    },
   },
 })
 
@@ -130,7 +192,7 @@ const Profile = () => {
   const classes = useClasses(styles)
 
   const isCurrentUser = id === user.id
-  const isFriend = !!user.friends.find((f) => f._id === id)
+  const isFriend = user.friends && !!user.friends.find((f) => f._id === id)
 
   useEffect(() => {
     setBackgroundPosition(['left', 'center', 'right'][Math.floor(Math.random() * 3)])
@@ -147,15 +209,18 @@ const Profile = () => {
       .get(`/api/user/profiles/${id}`, { headers: { userId: user.id } })
       .then(({ data }) => {
         const { user, friendship } = data
-        if (subscribed) {
-          setTimeout(() => {
-            setLoading(false)
+
+        setTimeout(() => {
+          if (user && subscribed) {
             setUserData(user)
-            setFetchComplete(true)
             setFriendship(friendship)
             setRank(getRank(user.exp))
-          }, 1200)
-        }
+          }
+          if (subscribed) {
+            setLoading(false)
+            setFetchComplete(true)
+          }
+        }, 1200)
       })
       .catch(() => {
         if (subscribed) {
@@ -198,36 +263,47 @@ const Profile = () => {
         />
       )}
       <Card className={`${classes.card} `}>
-        <Avatar
-          alt={userData.name || 'loading'}
-          classes={{ root: classes.profilePic }}
-          src={!fetchComplete ? loadingblue : `/api/images/${userData.profilePic}`}
-        >
-          {!userData.profilePic && userData.name && userData.name[0].toUpperCase()}
-        </Avatar>
+        <div className={classes.avatarContainer}>
+          <Avatar
+            alt={userData.name || 'loading'}
+            classes={{ root: classes.profilePic }}
+            src={!fetchComplete ? loadingblue : `/api/images/${userData.profilePic}`}
+          >
+            {!userData.profilePic && userData.name && userData.name[0].toUpperCase()}
+          </Avatar>
+          {rank && (
+            <Typography className={classes.exp} style={expStyles[rank]}>
+              exp: {userData.exp}
+            </Typography>
+          )}
+        </div>
         <div className={classes.infoSection}>
           <Typography className={classes.username}>{userData.name || 'loading'}</Typography>
 
           {fetchComplete && (
             <>
-              {userData.displayEmail && <Typography>{userData.displayEmail}</Typography>}
-              {userData.bio && <Typography className={classes.bio}>{userData.bio}</Typography>}
-              {rank && (
-                <Typography className={classes.exp} style={expStyles[rank]}>
-                  exp: {userData.exp}
-                </Typography>
+              {userData.displayEmail && (
+                <Typography className={classes.email}>{userData.displayEmail}</Typography>
               )}
+              {userData.bio && <Typography className={classes.bio}>{userData.bio}</Typography>}
               {!isCurrentUser && !friendship && isLoggedIn && (
                 <Button className={classes.requestButton} onClick={requestFriend}>
-                  request friendship
+                  <PersonAdd />
+                  <p>Add Friend</p>
                 </Button>
               )}
               {isFriend && friendship && (
                 <>
                   <Link to={`/friendbattle/${friendship._id}`}>
-                    <Button>BATTLE {userData.name}</Button>
+                    <Button className={classes.battleButton}>
+                      <SportsKabaddi />
+                      <p>BATTLE {userData.name}</p>
+                    </Button>
                   </Link>
-                  <Button onClick={removeFriend}>Remove Friend</Button>
+                  <Button className={classes.requestButton} onClick={removeFriend}>
+                    <PersonRemove />
+                    <p>Remove</p>
+                  </Button>
                 </>
               )}
               {isCurrentUser && !loading && (
