@@ -41,7 +41,7 @@ const MessageNotifications = ({ socketRef, socketLoaded }) => {
                 onClick={() => updateState({ type: 'CURRENT_THREAD', payload: message.sender._id })}
               >
                 <div className={classes.top}>
-                  <Email className={classes.icon} />
+                  <Email />
                   {message.sender.name}:{' '}
                 </div>
                 {message.content.length < 30
