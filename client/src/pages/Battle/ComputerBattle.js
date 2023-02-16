@@ -1,14 +1,14 @@
+import Webcam from 'react-webcam'
 import { Grid, Stack } from '@mui/material'
 import * as handpose from '@tensorflow-models/handpose'
 import React, { useRef, useState, useEffect } from 'react'
 import useClasses from 'customHooks/useClasses'
 import weaponImgs from 'assets/images/weapons'
-import robot from 'assets/images/robot.svg'
 import weaponAudio from 'assets/audio/weapons'
 import themeAudio from 'assets/audio/themes'
-import Webcam from 'react-webcam'
-import { detect } from './utils'
+import robot from 'assets/images/robot.svg'
 import soundFx from 'assets/audio/fx'
+import { detect } from './utils'
 
 const weapons = {
   paper: { beats: ['tree', 'rock'] },

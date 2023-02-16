@@ -9,11 +9,11 @@ import React, { useState, useEffect, useRef, useContext } from 'react'
 import blueCube from 'assets/videos/loadingblue.mp4'
 import useClasses from 'customHooks/useClasses'
 import weaponImgs from 'assets/images/weapons'
-import { playSound } from 'utils/utils'
 import weaponAudio from 'assets/audio/weapons'
+import { playSound } from 'utils/utils'
+import soundFx from 'assets/audio/fx'
 import { CTX } from 'context/Store'
 import { detect } from './utils'
-import soundFx from 'assets/audio/fx'
 import Video from './Video'
 
 const styles = (theme) => ({
