@@ -7,7 +7,7 @@ const auth = require('../middleware/auth')
 const router = express.Router()
 
 const sendUser = (res, user, token, message) => {
-  const { password, email, ...userInfo } = user._doc
+  const { password, email, ...userInfo } = user
   return res.status(200).send({ status: 'success', message, user: userInfo, token })
 }
 
@@ -60,9 +60,11 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    const user = await API.user.create({ email, name, password })
+    const salt = await bcrypt.genSalt(12)
+    const hasedPassword = await bcrypt.hash(password, salt)
+    const user = await API.user.create({ email, name, password: hasedPassword })
     const token = makeToken(user)
-    return sendUser(res, user, token, 'Registration successful')
+    return sendUser(res, user._doc, token, 'Registration successful')
   } catch (err) {
     return res
       .status(500)

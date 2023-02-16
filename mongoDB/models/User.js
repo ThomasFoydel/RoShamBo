@@ -52,10 +52,6 @@ const userSchema = mongoose.Schema({
     required: [true, 'password required'],
     select: false,
   },
-  friends: {
-    type: [mongoose.Schema.Types.ObjectId],
-    ref: 'User',
-  },
   exp: {
     type: Number,
     default: 0,

@@ -272,7 +272,6 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const getRoundInput = async () => {
     setRandoChoice(null)
     setDisplaySelectMessage(true)
-    console.log(blueCubeRef.current, blueCubeRef.current.captureStream())
     if (callState.current && blueCubeRef.current) {
       const blueCubeTrack = blueCubeRef.current.captureStream().getVideoTracks()[0]
       await changeStreamTrack(blueCubeTrack)

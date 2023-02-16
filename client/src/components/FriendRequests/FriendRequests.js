@@ -21,7 +21,7 @@ const styles = (theme) => ({
   },
 })
 
-const FriendRequests = () => {
+const FriendRequests = ({ props: { socketRef } }) => {
   const [appState, updateState] = useContext(CTX)
   const token = appState.auth.token
   const [friendRequests, setFriendRequests] = useState([])
@@ -33,7 +33,14 @@ const FriendRequests = () => {
       .get('/api/user/friendships/requests', { headers: { 'x-auth-token': token } })
       .then(({ data: { friendRequests } }) => subscribed && setFriendRequests(friendRequests))
       .catch(({ response }) => toast.error(response?.data?.message))
-    return () => (subscribed = false)
+
+    socketRef.current.on('new-friendrequest', ({ friendRequest }) => {
+      // setFriendRequests((f) => [...f, friendRequest])
+    })
+    return () => {
+      subscribed = false
+      socketRef.current.off('new-friendrequest')
+    }
   }, [])
 
   const accept = (id) => {

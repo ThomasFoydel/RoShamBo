@@ -8,11 +8,31 @@ const RandomBattle = require('../models/RandomBattle')
 const API = {
   user: {
     create: (user) => User.create(user),
-    findById: (id) => User.findById(id).populate('friends'),
-    findByEmail: (email) => User.findOne({ email }).select('+password +email').populate('friends'),
+    findById: async (id) => {
+      const user = await User.findById(id)
+      if (user) {
+        const friendships = await Friendship.find({
+          $and: [{ status: 'accepted' }, { participants: { $in: [id] } }],
+        }).populate('sender receiver')
+        const friends = friendships.map((f) => f.participants.find((p) => p !== id))
+        return { ...user._doc, friends }
+      }
+      return null
+    },
+    findByEmail: async (email) => {
+      User.findOne({ email })
+      const user = await User.findOne({ email }).select('+password +email')
+      if (user) {
+        const friendships = await Friendship.find({
+          $and: [{ status: 'accepted' }, { participants: { $in: [user._id] } }],
+        }).populate('sender receiver')
+        const friends = friendships.map((f) => f.participants.find((p) => p !== user._id))
+        return { ...user._doc, friends }
+      }
+      return null
+    },
     updateProfile: (id, update) =>
       User.findByIdAndUpdate(id, { $set: update }, { new: true, useFindAndModify: false }),
-    withFriends: (id) => User.findById(id).populate('friends'),
     incExp: (id, exp) => User.findByIdAndUpdate(id, { $inc: { exp } }),
   },
   message: {
@@ -104,45 +124,12 @@ const API = {
       ),
     findPending: (id) =>
       Friendship.find({ $and: [{ status: 'pending' }, { receiver: id }] }).populate('sender'),
-    delete: (id) =>
-      Friendship.findByIdAndDelete(id).then(({ sender, receiver }) =>
-        User.findByIdAndUpdate(
-          sender,
-          { $pull: { friends: [receiver] } },
-          { useFindAndModify: false }
-        ).then(() =>
-          User.findByIdAndUpdate(
-            receiver,
-            { $pull: { friends: [sender] } },
-            { useFindAndModify: false }
-          ).then(() =>
-            Friendship.findByIdAndUpdate(
-              id,
-              { status: 'accepted' },
-              { new: true, useFindAndModify: false }
-            )
-          )
-        )
-      ),
+    delete: (id) => Friendship.findByIdAndDelete(id),
     accept: (id) =>
-      Friendship.findById(id).then(({ sender, receiver }) =>
-        User.findByIdAndUpdate(
-          sender,
-          { $addToSet: { friends: [receiver] } },
-          { useFindAndModify: false }
-        ).then(() =>
-          User.findByIdAndUpdate(
-            receiver,
-            { $addToSet: { friends: [sender] } },
-            { useFindAndModify: false }
-          ).then(() =>
-            Friendship.findByIdAndUpdate(
-              id,
-              { status: 'accepted' },
-              { new: true, useFindAndModify: false }
-            )
-          )
-        )
+      Friendship.findByIdAndUpdate(
+        id,
+        { status: 'accepted' },
+        { new: true, useFindAndModify: false }
       ),
     reject: (id) =>
       Friendship.findByIdAndUpdate(

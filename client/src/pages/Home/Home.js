@@ -12,13 +12,13 @@ const styles = (theme) => ({
   },
 })
 
-const Home = () => {
+const Home = ({ props: { socketRef } }) => {
   const classes = useClasses(styles)
 
   return (
     <div className={classes.home}>
       <img src={hands} className={classes.hands} alt="two hands throwing scissors and paper" />
-      <FriendRequests />
+      <FriendRequests props={{ socketRef }} />
     </div>
   )
 }

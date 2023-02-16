@@ -18,11 +18,27 @@ router.post('/', auth, async (req, res) => {
     } catch (err) {
       return res.status(404).send({ status: 'error', message: 'Invalid ID(s)' })
     }
+
+    const { users } = require('../../')
+    const io = req.app.get('socketio')
+    const user = await API.user.findById(sender)
+
     const existingFriendship = await API.friendship.findByUsers(senderId, receiverId)
-    if (existingFriendship) {
-      return res.status(404).send({ status: 'error', message: 'Friendship not found' })
+    if (existingFriendship?.status === 'pending') {
+      await API.friendship.accept(friendship._id)
+      const newFriendId = existingFriendship.participants.find((p) => p._id !== userId)._id
+      const newFriendSocket = users[newFriendId]
+      if (newFriendSocket) {
+        io.to(newFriendSocket).emit('friendrequest-accepted', user)
+      }
+      return res.status(200).send({ status: 'success', message: 'Friend request accepted' })
+    }
+    if (existingFriendship?.status === 'accepted') {
+      return res.status(404).send({ status: 'error', message: 'Already friends' })
     }
 
+    const receiverSocket = users[receiverId]
+    io.to(receiverSocket).emit('new-friendrequest', { user, friendRequest: existingFriendship })
     const newFriendRequest = await API.friendship.create(senderId, receiverId)
     return res
       .status(201)

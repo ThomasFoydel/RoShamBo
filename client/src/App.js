@@ -77,6 +77,9 @@ const App = () => {
       socketRef.current.on('friendship-deleted', (user) => {
         updateState({ type: 'REMOVE_FRIEND', payload: user._id })
       })
+      socketRef.current.on('new-friendrequest', ({ user }) =>
+        toast.info(`New friend request from ${user?.name}`)
+      )
     }
 
     return () => {
@@ -105,7 +108,11 @@ const App = () => {
           >
             <NavBar />
             <Routes>
-              <Route exact path="/" element={loggedAndLoaded ? <Home /> : <Landing />} />
+              <Route
+                exact
+                path="/"
+                element={loggedAndLoaded ? <Home props={{ socketRef }} /> : <Landing />}
+              />
               <Route
                 exact
                 path="/profile/edit"
