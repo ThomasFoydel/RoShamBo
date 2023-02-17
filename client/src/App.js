@@ -2,8 +2,9 @@ import axios from 'axios'
 import io from 'socket.io-client'
 import 'react-toastify/dist/ReactToastify.css'
 import { ThemeProvider } from '@emotion/react'
+import { PersonAdd } from '@mui/icons-material'
 import { toast, ToastContainer } from 'react-toastify'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Link } from 'react-router-dom'
 import { StyledEngineProvider } from '@mui/material/styles'
 import React, { useState, useEffect, useContext, useRef } from 'react'
 import MessageNotifications from 'components/MessageNotifications/MessageNotifications'
@@ -12,6 +13,7 @@ import EditProfile from 'pages/EditProfile/EditProfile'
 import BattleFriends from 'pages/Battle/BattleFriends'
 import FriendBattle from 'pages/Battle/FriendBattle'
 import RandomBattle from 'pages/Battle/RandomBattle'
+import useClasses from 'customHooks/useClasses'
 import Messages from 'pages/Messages/Messages'
 import NavBar from 'components/NavBar/NavBar'
 import Landing from 'pages/Landing/Landing'
@@ -26,9 +28,25 @@ import Home from 'pages/Home/Home'
 import theme from 'theme/Theme'
 import './global.css'
 
+const styles = (theme) => ({
+  link: {
+    width: '100%',
+    display: 'block',
+    color: theme.palette.primary.main,
+    '&:hover': {
+      color: theme.palette.primary.light,
+    },
+  },
+  personAddIcon: {
+    marginRight: '.5rem',
+    transform: 'translateY(5px)',
+  },
+})
+
 const App = () => {
   const [{ isLoggedIn, auth }, updateState] = useContext(CTX)
   const { token } = auth
+  const classes = useClasses(styles)
 
   const [authFetchComplete, setAuthFetchComplete] = useState(false)
   const [socketLoaded, setSocketLoaded] = useState(false)
@@ -68,15 +86,26 @@ const App = () => {
       const ENDPOINT = `${urlBase}?token=${token}`
       socketRef.current = io(ENDPOINT, { transports: ['websocket', 'polling', 'flashsocket'] })
       setSocketLoaded(true)
+
       socketRef.current.on('friendrequest-accepted', (user) => {
         toast.success(`${user.name} accepted your friend request`)
         updateState({ type: 'ADD_FRIEND', payload: user })
       })
+
       socketRef.current.on('friendship-deleted', (user) => {
         updateState({ type: 'REMOVE_FRIEND', payload: user._id })
       })
+
       socketRef.current.on('new-friendrequest', ({ user, friendRequest }) => {
-        toast.info(`New friend request from ${user?.name}`)
+        toast.info(
+          <div>
+            <Link className={classes.link} to="/">
+              <PersonAdd className={classes.personAddIcon} />
+              <span>New friend request from {user?.name}</span>
+            </Link>
+          </div>,
+          { icon: false }
+        )
         updateState({ type: 'ADD_FRIEND_REQUEST', payload: friendRequest })
       })
     }
@@ -107,11 +136,7 @@ const App = () => {
           >
             <NavBar />
             <Routes>
-              <Route
-                exact
-                path="/"
-                element={loggedAndLoaded ? <Home props={{ socketRef }} /> : <Landing />}
-              />
+              <Route exact path="/" element={loggedAndLoaded ? <Home /> : <Landing />} />
               <Route
                 exact
                 path="/profile/edit"

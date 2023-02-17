@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
+import loadingblue from 'assets/images/loadingblue.gif'
 import useClasses from 'customHooks/useClasses'
-import loadingblue from 'imgs/loadingblue.gif'
 
 const styles = () => ({
   video: {

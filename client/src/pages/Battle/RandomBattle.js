@@ -6,19 +6,26 @@ import { Grid, Stack, Typography } from '@mui/material'
 import * as handpose from '@tensorflow-models/handpose'
 import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
 import React, { useState, useEffect, useRef, useContext } from 'react'
+import blueCube from 'assets/videos/loadingblue.mp4'
 import useClasses from 'customHooks/useClasses'
-import blueCube from 'imgs/loadingblue.mp4'
+import weaponImgs from 'assets/images/weapons'
+import weaponAudio from 'assets/audio/weapons'
 import { playSound } from 'utils/utils'
-import weaponAudio from 'audio/weapons'
-import weaponImgs from 'imgs/weapons'
+import soundFx from 'assets/audio/fx'
 import { CTX } from 'context/Store'
 import { detect } from './utils'
-import soundFx from 'audio/fx'
 import Video from './Video'
 
 const styles = (theme) => ({
+  opponentContainer: {
+    [theme.breakpoints.down('md')]: {
+      marginBottom: '1rem',
+    },
+    [theme.breakpoints.down('sm')]: {
+      marginBottom: '0',
+    },
+  },
   playerContainer: {
-    height: '100%',
     display: 'flex',
     maxHeight: '100%',
     minHeight: '100%',
@@ -132,8 +139,10 @@ const styles = (theme) => ({
     fontSize: '1rem',
     textAlign: 'center',
     [theme.breakpoints.down('md')]: {
-      paddingRight: '0.4rem',
+      paddingTop: '3px',
+      paddingBottom: '1px',
       paddingLeft: '0.6rem',
+      paddingRight: '0.4rem',
     },
     [theme.breakpoints.down('sm')]: {
       padding: '0',
@@ -160,7 +169,11 @@ const styles = (theme) => ({
     maxWidth: '100%',
     padding: '0 .2rem',
     fontSize: '1.2rem',
+    [theme.breakpoints.down('lg')]: {
+      fontSize: '1rem',
+    },
     [theme.breakpoints.down('md')]: {
+      fontSize: '1.2rem',
       marginTop: '1.5rem',
     },
   },
@@ -451,11 +464,13 @@ const RandomBattle = ({ props: { socketRef } }) => {
   const handleChatInput = ({ target }) => setChatInput(target.value)
 
   function scrollToBottom() {
-    scrollRef.current.scrollIntoView({
-      inline: 'start',
-      block: 'nearest',
-      behavior: 'smooth',
-    })
+    const ulElement = scrollRef.current
+    const lastMessage = scrollRef.current.querySelector('li:last-child')
+    if (!ulElement || !lastMessage) return
+    const messageRect = lastMessage.getBoundingClientRect()
+    const ulRect = ulElement.getBoundingClientRect()
+    const scrollTop = messageRect.top - ulRect.top + ulElement.scrollTop
+    ulElement.scrollTop = scrollTop
   }
 
   useEffect(() => {
@@ -532,10 +547,9 @@ const RandomBattle = ({ props: { socketRef } }) => {
         <Grid item>
           <Grid container alignContent="stretch" direction="row">
             <Grid item xs={12} sm={12} md={5} lg={5}>
-              <Stack direction="column" className={classes.playerContainer}>
+              <Stack className={`${classes.playerContainer} ${classes.opponentContainer}`}>
                 <div className={classes.videoContainer}>
                   <Video stream={randoStream} />
-
                   <div
                     className={classes.iconLayer}
                     style={{
@@ -586,18 +600,15 @@ const RandomBattle = ({ props: { socketRef } }) => {
                     </>
                   )}
                 </div>
-
                 <div className={classes.messenger}>
-                  <ul className={classes.messages}>
+                  <ul className={classes.messages} ref={scrollRef}>
                     {messages &&
                       messages.map((message, i) => (
                         <li key={i} className={classes.message}>
                           <strong>{message.name}</strong>: {message.content}
                         </li>
                       ))}
-                    <div ref={scrollRef} />
                   </ul>
-
                   {randoStream && roomId && (
                     <form onSubmit={handleSubmit}>
                       <input
@@ -615,9 +626,10 @@ const RandomBattle = ({ props: { socketRef } }) => {
             <Grid item xs={12} sm={6} md={5} lg={5}>
               <Stack className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
+                  {!userMediaLoaded && <Video />}
                   <Webcam
-                    muted
                     audio
+                    muted
                     ref={myCamRef}
                     className={classes.myVideo}
                     onUserMedia={handleUserMedia}
@@ -645,7 +657,6 @@ const RandomBattle = ({ props: { socketRef } }) => {
                     </button>
                   </div>
                 </div>
-
                 <div className={classes.healthbarContainer}>
                   <div className={classes.healthbar} style={{ width: `${myHealth}%` }}></div>
                   <div className={classes.playerName}>{name}</div>
@@ -659,7 +670,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
         loop
         autoPlay
         ref={blueCubeRef}
-        style={{ visibility: 'hidden', zIndex: '-1', position: 'absolute' }}
+        style={{ height: '0', zIndex: '-1', position: 'absolute' }}
       >
         <source src={blueCube} type="video/mp4" />
       </video>

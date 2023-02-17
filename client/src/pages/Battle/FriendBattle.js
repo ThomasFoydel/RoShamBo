@@ -7,22 +7,29 @@ import * as handpose from '@tensorflow-models/handpose'
 import { Grid, Stack, Typography } from '@mui/material'
 import { Stop, PlayArrow, Mic, MicOff } from '@mui/icons-material'
 import React, { useState, useEffect, useRef, useContext } from 'react'
+import blueCube from 'assets/videos/loadingblue.mp4'
 import useClasses from 'customHooks/useClasses'
-import blueCube from 'imgs/loadingblue.mp4'
+import weaponImgs from 'assets/images/weapons'
+import weaponAudio from 'assets/audio/weapons'
 import { playSound } from 'utils/utils'
-import weaponAudio from 'audio/weapons'
-import weaponImgs from 'imgs/weapons'
+import soundFx from 'assets/audio/fx'
 import { CTX } from 'context/Store'
 import { detect } from './utils'
-import soundFx from 'audio/fx'
 import Video from './Video'
 
 const styles = (theme) => ({
+  opponentContainer: {
+    [theme.breakpoints.down('md')]: {
+      marginBottom: '1rem',
+    },
+    [theme.breakpoints.down('sm')]: {
+      marginBottom: '0',
+    },
+  },
   playerContainer: {
-    height: '100%',
     display: 'flex',
-    minHeight: '100%',
     maxHeight: '100%',
+    minHeight: '100%',
     padding: '0 .4rem',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -63,8 +70,8 @@ const styles = (theme) => ({
   friendChoiceIcon: {
     width: '70%',
     opacity: '0.6',
-    minHeight: '0%',
     minWidth: '70%',
+    minHeight: '0%',
   },
   myChoiceIcon: {
     width: '70%',
@@ -72,7 +79,6 @@ const styles = (theme) => ({
     minHeight: '0%',
     transform: 'scaleX(-1)',
   },
-
   healthbarContainer: {
     ...theme.healthbarContainer,
     width: '100%',
@@ -90,8 +96,8 @@ const styles = (theme) => ({
     fontSize: '2rem',
     fontWeight: 'bold',
     textAlign: 'center',
-    whiteSpace: 'nowrap',
     position: 'absolute',
+    whiteSpace: 'nowrap',
     letterSpacing: '.2rem',
     transform: 'translateX(-50%) translateY(-50%)',
   },
@@ -117,11 +123,12 @@ const styles = (theme) => ({
   },
   messages: {
     maxWidth: '100%',
+    height: '11rem',
     overflowY: 'auto',
     textAlign: 'left',
-    minHeight: '11rem',
     paddingTop: '.4rem',
     background: '#9a3a9b',
+    scrollBehavior: 'smooth',
   },
   message: {
     lineHeight: '1.3rem',
@@ -134,8 +141,10 @@ const styles = (theme) => ({
     fontSize: '1rem',
     textAlign: 'center',
     [theme.breakpoints.down('md')]: {
-      paddingRight: '0.4rem',
+      paddingTop: '3px',
+      paddingBottom: '1px',
       paddingLeft: '0.6rem',
+      paddingRight: '0.4rem',
     },
     [theme.breakpoints.down('sm')]: {
       padding: '0',
@@ -152,18 +161,15 @@ const styles = (theme) => ({
       borderRadius: '3rem',
     },
   },
-  dialogTop: {
-    height: '9rem',
-    [theme.breakpoints.down('md')]: {
-      height: '6rem',
-    },
-  },
   dialogTitle: {
     maxWidth: '100%',
     padding: '0 .2rem',
     fontSize: '1.2rem',
+    [theme.breakpoints.down('lg')]: {
+      fontSize: '1rem',
+    },
     [theme.breakpoints.down('md')]: {
-      marginTop: '1.5rem',
+      fontSize: '1.2rem',
     },
   },
   chooseMessage: {
@@ -181,8 +187,8 @@ const styles = (theme) => ({
     paddingLeft: '1.8rem',
     padding: '.5rem .2rem',
     [theme.breakpoints.down('md')]: {
-      paddingLeft: '2rem',
       height: '4rem',
+      paddingLeft: '2rem',
     },
   },
   friendBattle: {
@@ -229,14 +235,15 @@ const FriendBattle = ({ props: { socketRef } }) => {
 
   const myPeer = useRef()
   const myCamRef = useRef()
-  const blueCubeRef = useRef()
   const scrollRef = useRef()
   const callState = useRef()
+  const blueCubeRef = useRef()
   const myStreamRef = useRef()
   const friendVideoRef = useRef()
   const [friendData, setFriendData] = useState({})
   const [friendStream, setFriendStream] = useState(null)
   const [friendNotFound, setFriendNotFound] = useState(false)
+  const [userMediaLoaded, setUserMediaLoaded] = useState(false)
   const [displaySelectMessage, setDisplaySelectMessage] = useState(false)
 
   const [count, setCount] = useState(null)
@@ -349,11 +356,13 @@ const FriendBattle = ({ props: { socketRef } }) => {
   const handleChatInput = ({ target }) => setChatInput(target.value)
 
   function scrollToBottom() {
-    scrollRef.current.scrollIntoView({
-      inline: 'start',
-      block: 'nearest',
-      behavior: 'smooth',
-    })
+    const ulElement = scrollRef.current
+    const lastMessage = scrollRef.current.querySelector('li:last-child')
+    if (!ulElement || !lastMessage) return
+    const messageRect = lastMessage.getBoundingClientRect()
+    const ulRect = ulElement.getBoundingClientRect()
+    const scrollTop = messageRect.top - ulRect.top + ulElement.scrollTop
+    ulElement.scrollTop = scrollTop
   }
 
   useEffect(() => {
@@ -502,6 +511,8 @@ const FriendBattle = ({ props: { socketRef } }) => {
         toast.error(response?.data?.message)
         setFriendNotFound(true)
       })
+
+    setUserMediaLoaded(true)
   }
 
   const playAgain = () => {
@@ -524,7 +535,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
         <Grid item>
           <Grid container alignContent="stretch" direction="row">
             <Grid item xs={12} sm={12} md={5} lg={5}>
-              <Stack direction="column" className={classes.playerContainer}>
+              <Stack className={`${classes.playerContainer} ${classes.opponentContainer}`}>
                 <div className={classes.videoContainer}>
                   <Video stream={friendStream} />
                   <div
@@ -550,27 +561,24 @@ const FriendBattle = ({ props: { socketRef } }) => {
               </Stack>
             </Grid>
             <Grid item xs={12} md={2} sm={6} lg={2} className={classes.dialogSection}>
-              <Stack direction="column" className={classes.dialog} justifyContent="space-between">
+              <Stack direction="column" justifyContent="space-between" className={classes.dialog}>
                 <p className={classes.dialogTitle}>FRIEND BATTLE</p>
-                <div className={classes.results}>
-                  {winner && (
-                    <>
-                      <div>winner: {winner === id ? name : friendData.name}</div>
-                      <button className={classes.playAgainBtn} onClick={playAgain}>
-                        play again
-                      </button>
-                    </>
-                  )}
-                </div>
+                {winner && (
+                  <div className={classes.results}>
+                    <div>winner: {winner === id ? name : friendData.name}</div>
+                    <button className={classes.playAgainBtn} onClick={playAgain}>
+                      play again
+                    </button>
+                  </div>
+                )}
                 <div className={classes.messenger}>
-                  <ul className={classes.messages}>
+                  <ul className={classes.messages} ref={scrollRef}>
                     {messages &&
                       messages.map((message, i) => (
                         <li key={i} className={classes.message}>
                           <strong>{message.name}</strong>: {message.content}
                         </li>
                       ))}
-                    <div ref={scrollRef} />
                   </ul>
                   <form onSubmit={handleSubmit}>
                     <input
@@ -584,10 +592,10 @@ const FriendBattle = ({ props: { socketRef } }) => {
                 </div>
               </Stack>
             </Grid>
-
             <Grid item xs={12} sm={6} md={5} lg={5}>
-              <Stack direction="column" className={classes.playerContainer}>
+              <Stack className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
+                  {!userMediaLoaded && <Video />}
                   <Webcam
                     audio
                     muted

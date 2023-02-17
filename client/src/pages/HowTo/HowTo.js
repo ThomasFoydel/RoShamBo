@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import useClasses from 'customHooks/useClasses'
-import hands from 'imgs/instructions.gif'
+import hands from 'assets/images/instructions.gif'
 
 const styles = (theme) => ({
   container: {

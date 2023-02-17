@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { Typography, Button } from '@mui/material'
-import weaponSystem from 'imgs/weaponsystem.png'
+import weaponSystem from 'assets/images/weaponsystem.png'
 import useClasses from 'customHooks/useClasses'
 import { CTX } from 'context/Store'
 

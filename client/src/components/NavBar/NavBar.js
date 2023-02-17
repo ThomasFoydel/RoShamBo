@@ -20,7 +20,7 @@ import { Menu as MenuIcon } from '@mui/icons-material'
 import useScrollTrigger from '@mui/material/useScrollTrigger'
 import React, { useState, useEffect, useContext, useMemo } from 'react'
 import useClasses from 'customHooks/useClasses'
-import logo from 'imgs/roshambo.svg'
+import logo from 'assets/images/roshambo.svg'
 import { CTX } from 'context/Store'
 
 function ElevationScroll({ children }) {

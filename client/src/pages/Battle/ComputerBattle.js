@@ -1,14 +1,14 @@
+import Webcam from 'react-webcam'
 import { Grid, Stack } from '@mui/material'
 import * as handpose from '@tensorflow-models/handpose'
 import React, { useRef, useState, useEffect } from 'react'
 import useClasses from 'customHooks/useClasses'
-import weaponAudio from 'audio/weapons'
-import weaponImgs from 'imgs/weapons'
-import themeAudio from 'audio/themes'
-import robot from 'imgs/robot.svg'
-import Webcam from 'react-webcam'
+import weaponImgs from 'assets/images/weapons'
+import weaponAudio from 'assets/audio/weapons'
+import themeAudio from 'assets/audio/themes'
+import robot from 'assets/images/robot.svg'
+import soundFx from 'assets/audio/fx'
 import { detect } from './utils'
-import soundFx from 'audio/fx'
 
 const weapons = {
   paper: { beats: ['tree', 'rock'] },
@@ -81,7 +81,7 @@ const styles = (theme) => ({
   robotImg: {
     ...theme.centerHorizontal,
     width: '70%',
-    maxHeight: '16rem',
+    height: '16rem',
   },
   robotSection: {
     width: '90%',

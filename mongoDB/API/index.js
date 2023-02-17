@@ -29,7 +29,7 @@ const API = {
           $and: [{ status: 'accepted' }, { participants: { $in: [user._id] } }],
         }).populate('sender receiver')
         const friends = friendships.map((f) =>
-          f.sender._id.toString() === id ? f.receiver : f.sender
+          f.sender._id.toString() === user._id.toString() ? f.receiver : f.sender
         )
         return { ...user._doc, friends }
       }

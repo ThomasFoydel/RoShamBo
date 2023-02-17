@@ -24,11 +24,10 @@ const Comment = ({ props: { comment, userId, deleteComment, classes } }) => (
         {comment.author._id === userId && (
           <IconButton
             aria-label="delete"
-            style={{ color: 'white' }}
-            className={classes.deleteBtn}
+            className={classes.deleteCommentBtn}
             onClick={() => deleteComment(comment._id)}
           >
-            <DeleteIcon />
+            <DeleteIcon sx={{ color: 'inherit' }} />
           </IconButton>
         )}
       </Grid>

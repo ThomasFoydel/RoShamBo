@@ -1,10 +1,11 @@
-import { Grid } from '@mui/material'
+import { Grid, Stack, Typography } from '@mui/material'
 import React, { useContext } from 'react'
 import useClasses from 'customHooks/useClasses'
 import MessageBox from './components/MessageBox'
 import ChatBox from './components/ChatBox'
 import Friend from './components/Friend'
 import { CTX } from 'context/Store'
+import { Link } from 'react-router-dom'
 
 const styles = (theme) => ({
   messages: {
@@ -25,6 +26,16 @@ const styles = (theme) => ({
     paddingRight: '1rem',
     background: '#aaaaaaaa',
   },
+  noFriends: {
+    color: theme.palette.primary.main,
+    a: {
+      transition: 'all 0.2s ease',
+      color: theme.palette.secondary.main,
+      '&:hover': {
+        color: theme.palette.secondary.dark,
+      },
+    },
+  },
 })
 
 const Messages = ({ props: { socketRef } }) => {
@@ -42,14 +53,25 @@ const Messages = ({ props: { socketRef } }) => {
   return (
     <Grid container justify="space-around" spacing={2} wrap="nowrap" className={classes.messages}>
       <Grid item className={classes.friendList} xs={4}>
-        {friends.map((friend) => (
-          <Friend
-            key={friend._id}
-            props={{ friend, className: classes.friend, handleSelectFriend }}
-          />
-        ))}
+        {friends &&
+          friends.map((friend) => (
+            <Friend
+              key={friend._id}
+              props={{ friend, className: classes.friend, handleSelectFriend }}
+            />
+          ))}
       </Grid>
       <Grid item xs={8}>
+        {!friends ||
+          (friends.length === 0 && (
+            <Stack className={classes.noFriends}>
+              <Typography>No friends yet!</Typography>
+              <Typography>
+                Go make some new friends by posting in the <Link to="/forum">forum</Link> or by{' '}
+                <Link to="/battle/random">battling random people</Link>
+              </Typography>
+            </Stack>
+          ))}
         <MessageBox props={{ currentThread, token, socket, userId }} />
         {currentThread && <ChatBox props={{ token, currentThread }} />}
       </Grid>

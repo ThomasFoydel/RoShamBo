@@ -193,10 +193,8 @@ mongoose
 
                   API.randomBattle
                     .roundOutcome(roomId, loser, losersNewHealth, Number(gameState.round), gameOver)
-                    .then((updated) => {
-                      if (updated.gameState.gameOver) {
-                        API.user.incExp(winner, 5)
-                      }
+                    .then(async (updated) => {
+                      if (updated.gameState.gameOver) await API.user.incExp(winner, 5)
 
                       io.to(roomId).emit('randombattle-roundoutcome', {
                         winner,
@@ -323,10 +321,9 @@ mongoose
                         Number(gameState.round),
                         gameOver
                       )
-                      .then((updated) => {
-                        if (updated.gameState.gameOver) {
-                          API.user.incExp(winner, 10)
-                        }
+                      .then(async (updated) => {
+                        if (updated.gameState.gameOver) await API.user.incExp(winner, 10)
+
                         io.to(roomId).emit('round-outcome', {
                           winner,
                           loser,

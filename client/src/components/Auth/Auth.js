@@ -41,7 +41,9 @@ const styles = (theme) => ({
   },
   forgotPw: {
     color: theme.palette.primary.dark,
-    '&:hover': { color: theme.palette.primary.main },
+    '&:hover': {
+      color: theme.palette.primary.main,
+    },
   },
   input: {
     margin: '.2rem 0',
