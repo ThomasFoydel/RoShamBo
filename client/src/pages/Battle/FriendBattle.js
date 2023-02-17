@@ -18,11 +18,18 @@ import { detect } from './utils'
 import Video from './Video'
 
 const styles = (theme) => ({
+  opponentContainer: {
+    [theme.breakpoints.down('md')]: {
+      marginBottom: '1rem',
+    },
+    [theme.breakpoints.down('sm')]: {
+      marginBottom: '0',
+    },
+  },
   playerContainer: {
-    height: '100%',
     display: 'flex',
-    minHeight: '100%',
     maxHeight: '100%',
+    minHeight: '100%',
     padding: '0 .4rem',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -63,8 +70,8 @@ const styles = (theme) => ({
   friendChoiceIcon: {
     width: '70%',
     opacity: '0.6',
-    minHeight: '0%',
     minWidth: '70%',
+    minHeight: '0%',
   },
   myChoiceIcon: {
     width: '70%',
@@ -72,7 +79,6 @@ const styles = (theme) => ({
     minHeight: '0%',
     transform: 'scaleX(-1)',
   },
-
   healthbarContainer: {
     ...theme.healthbarContainer,
     width: '100%',
@@ -90,8 +96,8 @@ const styles = (theme) => ({
     fontSize: '2rem',
     fontWeight: 'bold',
     textAlign: 'center',
-    whiteSpace: 'nowrap',
     position: 'absolute',
+    whiteSpace: 'nowrap',
     letterSpacing: '.2rem',
     transform: 'translateX(-50%) translateY(-50%)',
   },
@@ -134,7 +140,7 @@ const styles = (theme) => ({
     fontSize: '1rem',
     textAlign: 'center',
     [theme.breakpoints.down('md')]: {
-      paddingTop: '2px',
+      paddingTop: '3px',
       paddingBottom: '1px',
       paddingLeft: '0.6rem',
       paddingRight: '0.4rem',
@@ -154,18 +160,15 @@ const styles = (theme) => ({
       borderRadius: '3rem',
     },
   },
-  dialogTop: {
-    height: '9rem',
-    [theme.breakpoints.down('md')]: {
-      height: '6rem',
-    },
-  },
   dialogTitle: {
     maxWidth: '100%',
     padding: '0 .2rem',
     fontSize: '1.2rem',
+    [theme.breakpoints.down('lg')]: {
+      fontSize: '1rem',
+    },
     [theme.breakpoints.down('md')]: {
-      marginTop: '1.5rem',
+      fontSize: '1.2rem',
     },
   },
   chooseMessage: {
@@ -183,8 +186,8 @@ const styles = (theme) => ({
     paddingLeft: '1.8rem',
     padding: '.5rem .2rem',
     [theme.breakpoints.down('md')]: {
-      paddingLeft: '2rem',
       height: '4rem',
+      paddingLeft: '2rem',
     },
   },
   friendBattle: {
@@ -529,7 +532,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
         <Grid item>
           <Grid container alignContent="stretch" direction="row">
             <Grid item xs={12} sm={12} md={5} lg={5}>
-              <Stack direction="column" className={classes.playerContainer}>
+              <Stack className={`${classes.playerContainer} ${classes.opponentContainer}`}>
                 <div className={classes.videoContainer}>
                   <Video stream={friendStream} />
                   <div
@@ -555,18 +558,16 @@ const FriendBattle = ({ props: { socketRef } }) => {
               </Stack>
             </Grid>
             <Grid item xs={12} md={2} sm={6} lg={2} className={classes.dialogSection}>
-              <Stack direction="column" className={classes.dialog} justifyContent="space-between">
+              <Stack direction="column" justifyContent="space-between" className={classes.dialog}>
                 <p className={classes.dialogTitle}>FRIEND BATTLE</p>
-                <div className={classes.results}>
-                  {winner && (
-                    <>
-                      <div>winner: {winner === id ? name : friendData.name}</div>
-                      <button className={classes.playAgainBtn} onClick={playAgain}>
-                        play again
-                      </button>
-                    </>
-                  )}
-                </div>
+                {winner && (
+                  <div className={classes.results}>
+                    <div>winner: {winner === id ? name : friendData.name}</div>
+                    <button className={classes.playAgainBtn} onClick={playAgain}>
+                      play again
+                    </button>
+                  </div>
+                )}
                 <div className={classes.messenger}>
                   <ul className={classes.messages}>
                     {messages &&
@@ -589,9 +590,8 @@ const FriendBattle = ({ props: { socketRef } }) => {
                 </div>
               </Stack>
             </Grid>
-
             <Grid item xs={12} sm={6} md={5} lg={5}>
-              <Stack direction="column" className={classes.playerContainer}>
+              <Stack className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
                   {!userMediaLoaded && <Video />}
                   <Webcam

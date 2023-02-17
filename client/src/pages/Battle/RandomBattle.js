@@ -545,13 +545,9 @@ const RandomBattle = ({ props: { socketRef } }) => {
         <Grid item>
           <Grid container alignContent="stretch" direction="row">
             <Grid item xs={12} sm={12} md={5} lg={5}>
-              <Stack
-                direction="column"
-                className={`${classes.playerContainer} ${classes.opponentContainer}`}
-              >
+              <Stack className={`${classes.playerContainer} ${classes.opponentContainer}`}>
                 <div className={classes.videoContainer}>
                   <Video stream={randoStream} />
-
                   <div
                     className={classes.iconLayer}
                     style={{
@@ -602,7 +598,6 @@ const RandomBattle = ({ props: { socketRef } }) => {
                     </>
                   )}
                 </div>
-
                 <div className={classes.messenger}>
                   <ul className={classes.messages}>
                     {messages &&
@@ -613,7 +608,6 @@ const RandomBattle = ({ props: { socketRef } }) => {
                       ))}
                     <div ref={scrollRef} />
                   </ul>
-
                   {randoStream && roomId && (
                     <form onSubmit={handleSubmit}>
                       <input
@@ -633,8 +627,8 @@ const RandomBattle = ({ props: { socketRef } }) => {
                 <div className={classes.videoContainer}>
                   {!userMediaLoaded && <Video />}
                   <Webcam
-                    muted
                     audio
+                    muted
                     ref={myCamRef}
                     className={classes.myVideo}
                     onUserMedia={handleUserMedia}
@@ -662,7 +656,6 @@ const RandomBattle = ({ props: { socketRef } }) => {
                     </button>
                   </div>
                 </div>
-
                 <div className={classes.healthbarContainer}>
                   <div className={classes.healthbar} style={{ width: `${myHealth}%` }}></div>
                   <div className={classes.playerName}>{name}</div>
