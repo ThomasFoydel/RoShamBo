@@ -123,11 +123,12 @@ const styles = (theme) => ({
   },
   messages: {
     maxWidth: '100%',
+    height: '11rem',
     overflowY: 'auto',
     textAlign: 'left',
-    minHeight: '11rem',
     paddingTop: '.4rem',
     background: '#9a3a9b',
+    scrollBehavior: 'smooth',
   },
   message: {
     lineHeight: '1.3rem',
@@ -355,11 +356,13 @@ const FriendBattle = ({ props: { socketRef } }) => {
   const handleChatInput = ({ target }) => setChatInput(target.value)
 
   function scrollToBottom() {
-    scrollRef.current.scrollIntoView({
-      inline: 'start',
-      block: 'nearest',
-      behavior: 'smooth',
-    })
+    const ulElement = scrollRef.current
+    const lastMessage = scrollRef.current.querySelector('li:last-child')
+    if (!ulElement || !lastMessage) return
+    const messageRect = lastMessage.getBoundingClientRect()
+    const ulRect = ulElement.getBoundingClientRect()
+    const scrollTop = messageRect.top - ulRect.top + ulElement.scrollTop
+    ulElement.scrollTop = scrollTop
   }
 
   useEffect(() => {
@@ -569,14 +572,13 @@ const FriendBattle = ({ props: { socketRef } }) => {
                   </div>
                 )}
                 <div className={classes.messenger}>
-                  <ul className={classes.messages}>
+                  <ul className={classes.messages} ref={scrollRef}>
                     {messages &&
                       messages.map((message, i) => (
                         <li key={i} className={classes.message}>
                           <strong>{message.name}</strong>: {message.content}
                         </li>
                       ))}
-                    <div ref={scrollRef} />
                   </ul>
                   <form onSubmit={handleSubmit}>
                     <input
