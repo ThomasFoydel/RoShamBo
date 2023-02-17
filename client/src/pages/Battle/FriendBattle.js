@@ -134,8 +134,10 @@ const styles = (theme) => ({
     fontSize: '1rem',
     textAlign: 'center',
     [theme.breakpoints.down('md')]: {
-      paddingRight: '0.4rem',
+      paddingTop: '2px',
+      paddingBottom: '1px',
       paddingLeft: '0.6rem',
+      paddingRight: '0.4rem',
     },
     [theme.breakpoints.down('sm')]: {
       padding: '0',
@@ -229,14 +231,15 @@ const FriendBattle = ({ props: { socketRef } }) => {
 
   const myPeer = useRef()
   const myCamRef = useRef()
-  const blueCubeRef = useRef()
   const scrollRef = useRef()
   const callState = useRef()
+  const blueCubeRef = useRef()
   const myStreamRef = useRef()
   const friendVideoRef = useRef()
   const [friendData, setFriendData] = useState({})
   const [friendStream, setFriendStream] = useState(null)
   const [friendNotFound, setFriendNotFound] = useState(false)
+  const [userMediaLoaded, setUserMediaLoaded] = useState(false)
   const [displaySelectMessage, setDisplaySelectMessage] = useState(false)
 
   const [count, setCount] = useState(null)
@@ -502,6 +505,8 @@ const FriendBattle = ({ props: { socketRef } }) => {
         toast.error(response?.data?.message)
         setFriendNotFound(true)
       })
+
+    setUserMediaLoaded(true)
   }
 
   const playAgain = () => {
@@ -588,6 +593,7 @@ const FriendBattle = ({ props: { socketRef } }) => {
             <Grid item xs={12} sm={6} md={5} lg={5}>
               <Stack direction="column" className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
+                  {!userMediaLoaded && <Video />}
                   <Webcam
                     audio
                     muted

@@ -17,8 +17,15 @@ import { detect } from './utils'
 import Video from './Video'
 
 const styles = (theme) => ({
+  opponentContainer: {
+    [theme.breakpoints.down('md')]: {
+      marginBottom: '1rem',
+    },
+    [theme.breakpoints.down('sm')]: {
+      marginBottom: '0',
+    },
+  },
   playerContainer: {
-    height: '100%',
     display: 'flex',
     maxHeight: '100%',
     minHeight: '100%',
@@ -132,8 +139,8 @@ const styles = (theme) => ({
     fontSize: '1rem',
     textAlign: 'center',
     [theme.breakpoints.down('md')]: {
-      paddingTop: '4px',
-      paddingBottom: '4px',
+      paddingTop: '3px',
+      paddingBottom: '1px',
       paddingLeft: '0.6rem',
       paddingRight: '0.4rem',
     },
@@ -538,7 +545,10 @@ const RandomBattle = ({ props: { socketRef } }) => {
         <Grid item>
           <Grid container alignContent="stretch" direction="row">
             <Grid item xs={12} sm={12} md={5} lg={5}>
-              <Stack direction="column" className={classes.playerContainer}>
+              <Stack
+                direction="column"
+                className={`${classes.playerContainer} ${classes.opponentContainer}`}
+              >
                 <div className={classes.videoContainer}>
                   <Video stream={randoStream} />
 
@@ -621,6 +631,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
             <Grid item xs={12} sm={6} md={5} lg={5}>
               <Stack className={classes.playerContainer}>
                 <div className={classes.videoContainer}>
+                  {!userMediaLoaded && <Video />}
                   <Webcam
                     muted
                     audio
@@ -665,7 +676,7 @@ const RandomBattle = ({ props: { socketRef } }) => {
         loop
         autoPlay
         ref={blueCubeRef}
-        style={{ visibility: 'hidden', zIndex: '-1', position: 'absolute' }}
+        style={{ height: '0', zIndex: '-1', position: 'absolute' }}
       >
         <source src={blueCube} type="video/mp4" />
       </video>
